@@ -1,0 +1,82 @@
+import UserPreference from "../models/preference.model.js";
+import mongoose from "mongoose";
+
+export const getPreference = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID format." });
+    }
+
+    try {
+        const preference = await UserPreference.findOne({ userId: id });
+        if (!preference) {
+            return res.status(404).json({ success: false, message: "User preference not found." });
+        }
+        res.status(200).json({ success: true, message: "Preference retrieved successfully.", data: preference });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Cannot get user preference." });
+    }
+};
+
+export const createPreference = async (req, res) => {
+    const { userId, preferredName, preferredTone } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID format." });
+    }
+
+    const checkExists = await UserPreference.findOne({ userId: userId });
+    if(checkExists) {
+        return res.status(400).json({ success: false, message: "User already have an existing preference." });
+    }
+
+    const validTones = ["formal", "casual", "soft spoken", "strict"];
+    if (!validTones.includes(preferredTone)) {
+        return res.status(400).json({ success: false, message: "Invalid preferred tone." });
+    }
+
+    try {
+        const preference = await UserPreference.create({ userId: userId,preferredName: preferredName,preferredTone: preferredTone });
+        res.status(201).json({ success: true, message: "User preference created successfully.", data: preference });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Cannot create user preference." });
+    }
+};
+
+export const updatePreference = async (req, res) => {
+    const { id } = req.params;
+    const { preferredName, preferredTone, previousPrompts } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID format." });
+    }
+
+    const validTones = ["formal", "casual", "soft spoken", "strict"];
+    if (preferredTone && !validTones.includes(preferredTone)) {
+        return res.status(400).json({ success: false, message: `Invalid preferred tone, choose between: ${validTones}` });
+    }
+
+    try {
+        const preference = await UserPreference.findOne({ userId: id });
+        if (!preference) {
+            return res.status(404).json({ success: false, message: "User preference not found." });
+        }
+
+        if (preferredName) preference.preferredName = preferredName;
+        if (preferredTone) preference.preferredTone = preferredTone;
+        if (Array.isArray(previousPrompts) && previousPrompts.length > 0) {
+            preference.previousPrompts.push(...previousPrompts);
+        }
+
+        await preference.save();
+
+        res.status(200).json({success: true, message: "User preference updated successfully.", data: preference});
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Cannot update user preference." });
+    }
+};
