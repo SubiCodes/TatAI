@@ -6,6 +6,10 @@ import { JWT_SECRET } from '../config/env.js';
 export const signUp = async (req, res) => {
     const {name, email, password} = req.body;
 
+    if (password.length < 6) {
+        return res.status(400).json({success: false, message: "Password should be at least 6 character"});
+    }
+
     const checkExists = await User.findOne({email: email});
     
     if (checkExists) {
@@ -26,21 +30,69 @@ export const signUp = async (req, res) => {
 export const signIn = async (req, res) => {
     const {email, password} = req.body;
 
-    const existingUser = await User.findOne({email: email});
+    try {
+        
+        const existingUser = await User.findOne({email: email});
 
-    if (!existingUser) {
-        return res.status(404).json({success: false, message: "User not found."});
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: "Invalid Email."});
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+        if (!isPasswordValid) {
+            return res.status(400).json({success: false, message: "Invalid Password."});
+        }
+
+        const token = JWT.sign({ email: existingUser._id }, JWT_SECRET);
+        res.status(200).json({success: true, message: "User logged in successfully.", token: token});
+
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot login user: ${error.message}`});
     }
+};
 
-    if (await bcrypt.compare(password, existingUser.password)) {
-        const token = JWT.sign({ email: existingUser.email }, JWT_SECRET);
+export const forgotPassword = async (req, res) => {
+    const {email} = req.body;
 
-        if (res.status(201)){
-            return res.send({success: true, message: "User logged in successfully.", data: token});
+    try {
+        const existingUser = await User.findOne({email: email});
+
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: "User does not exist."});
         }
-        else{
-            return res.status(401).json({success: false, message: "Invalid User Credentials."});
+    
+        const resetToken = Math.random().toString(36).substr(2, 6).toUpperCase();
+    
+        existingUser.resetPasswordToken = resetToken;
+        await existingUser.save();
+
+        //send email here
+    
+        return res.status(200).json({success: true, message: "Reset password token sent to email."});
+
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot create reset token: ${error.message}`});
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const {email, resetToken, newPassword} = req.body;
+
+    try {
+        const existingUser = await User.findOne({email: email, resetPasswordToken: resetToken.toUpperCase()});
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: `No reset token found for ${email} or invalid token.`});
         }
+        if (newPassword.length < 6) {
+            return res.status(400).json({success: false, message: "Password should be at least 6 character"});
+        }
+        existingUser.password = await bcrypt.hash(newPassword, 10);
+        existingUser.resetPasswordToken = null;
+        await existingUser.save();
+        return res.status(200).json({success: true, message: "Password reset successfully."});
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot reset password: ${error.message}`});
     }
 };
 
