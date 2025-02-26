@@ -3,6 +3,7 @@ import { PORT } from './config/env.js';
 import connectToDatabase from './database/mongodb.js';
 import authRouter from './routes/auth.routes.js';
 import preferenceRouter from './routes/preference.routes.js';
+import userRouter from './routes/user.routes.js';
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/preference', preferenceRouter);
+app.use('/api/v1/user', userRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World!!!');

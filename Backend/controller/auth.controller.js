@@ -18,12 +18,46 @@ export const signUp = async (req, res) => {
 
     const encryptedPassword = await bcrypt.hash(password, 10);
 
+    const verificationToken = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    //send verificationToken to user via email
+
     try {
-        const user = await User.create({name: name,email: email, password: encryptedPassword});
+        const user = await User.create({name: name,email: email, password: encryptedPassword, verificationToken: verificationToken});
         res.status(201).json({success: true, message: "User created successfully.", data: user});
     } catch (error) {
         console.log(error);
-        res.status(500).json({success: false, message: "Cannot create user."});
+        res.status(500).json({success: false, message: "Cannot create user.", error: error.message});
+    }
+};
+
+export const verifyUser = async (req, res) => {
+    const { email, token } = req.body;
+
+    try {
+        const existingUser = await User.findOne({ email });
+
+        if (!existingUser) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        if (existingUser.verified === true) {
+            return res.status(400).json({ success: false, message: "User already verified." });
+        }
+
+        if (existingUser.verificationToken !== token) {
+            return res.status(400).json({ success: false, message: "Invalid verification token." });
+        }
+
+        existingUser.verified = true;
+        existingUser.verificationToken = undefined;
+        await existingUser.save();
+
+        return res.status(200).json({ success: true, message: "User verified." });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Cannot verify user.", error: error.message });
     }
 };
 
@@ -62,7 +96,7 @@ export const forgotPassword = async (req, res) => {
             return res.status(404).json({success: false, message: "User does not exist."});
         }
     
-        const resetToken = Math.random().toString(36).substr(2, 6).toUpperCase();
+        const resetToken = Math.random().toString(36).substring(2, 6).toUpperCase();
     
         existingUser.resetPasswordToken = resetToken;
         await existingUser.save();
@@ -88,7 +122,7 @@ export const resetPassword = async (req, res) => {
             return res.status(400).json({success: false, message: "Password should be at least 6 character"});
         }
         existingUser.password = await bcrypt.hash(newPassword, 10);
-        existingUser.resetPasswordToken = null;
+        existingUser.resetPasswordToken = undefined;
         await existingUser.save();
         return res.status(200).json({success: true, message: "Password reset successfully."});
     } catch (error) {

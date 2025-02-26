@@ -14,9 +14,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    verified: {
+        type: Boolean,
+        default: false
+    },
     resetPasswordToken: {
-        type: String
-    }
+        type: String,
+        default: undefined
+    },
+    verificationToken: {
+        type: String,
+        default: undefined
+    },
 }, {
     collection: 'UserInfo',
     timestamps: true
