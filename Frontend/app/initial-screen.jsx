@@ -6,7 +6,7 @@ const InitialScreen = () => {
   return (
     <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
       <Text>InitialScreen</Text>
-      <Link href={'/signin'}
+      <Link href={'/signin-landing'}
       style={{backgroundColor: 'lightgreen', paddingVertical: 4, paddingHorizontal: 8, marginBottom: 12}}
       >Create an account.</Link>
     </View>

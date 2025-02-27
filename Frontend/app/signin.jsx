@@ -1,55 +1,71 @@
-import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useCallback, useState } from 'react'
-import { Link, useFocusEffect } from 'expo-router';
-import { useExpoRouter } from 'expo-router/build/global-state/router-store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, StyleSheet, useColorScheme, StatusBar, TextInput, Dimensions } from 'react-native'
+import React from 'react'
+import { Link } from 'expo-router'
+
+import { Colors } from '@/constants/Color'
 
 const SignIn = () => {
 
-    const router = useExpoRouter();
+  const colorScheme = useColorScheme();
+  const themeColors = Colors['light']
 
-    const [error, setError] = useState('');
+  const styles = StyleSheet.create({
+    container: {
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height,
+      alignItems: 'center',
+      backgroundColor: themeColors.background,
+      paddingTop: 48,
+    },
+    imageContainer: {
+      width: '100%',
+      height: '32%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 12,
+    },
+    image: {
+      width: '84%',
+      height: '100%',
+      backgroundColor: 'lightgray'
+    },
+    inputsContainer: {
+      width: '84%',
+      height: '30%',
+      borderWidth: 2,
+      alignItems: 'flex-start',
+      paddingHorizontal: 0,
+      gap: 12
+    },
+    welcomeText: {
+      fontSize: 26,
+      fontWeight: 'bold',
+      alignSelf: 'flex-start'
+    },
+    inputs: {
+      width: '100%',
+      height: 48,
+      borderWidth: 1,
+      borderRadius: 8,
+      fontSize: 14,
+      paddingHorizontal: 12
+    },
+  });
 
-    const checkLogin = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (token) {
-                router.replace('(tabs)/(home)');
-            }
-        } catch (error) {
-            console.log(error);
-            setError(error.message);
-        }
-    };
 
-    const handleSignIn = async() => {
-        try {
-            await AsyncStorage.setItem('token', 'sample token');
-            checkLogin();
-        } catch (error) {
-            console.log(error);
-            setError(error.message);
-        }
-    }
-
-    useFocusEffect(
-        useCallback(() => {
-            checkLogin();
-        }, [])
-    )
-    
-    return (
-        <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-            <TouchableOpacity style={{backgroundColor: 'lightgreen', paddingVertical: 4, paddingHorizontal: 8, marginBottom: 12}}
-            onPress={handleSignIn}>
-                <Text>Sign In</Text>
-            </TouchableOpacity>
-            <Link href={'/signup'} style={{backgroundColor: 'lightblue', paddingVertical: 4, paddingHorizontal: 8, marginBottom: 12}}>
-                <Text>Create an Account</Text>
-            </Link>
-            {error && <Text>{error}</Text>}
-        </View>
-    )
+  return (
+    <View style={styles.container}>
+      <StatusBar backgroundColor={themeColors.background}/>
+      <View style={styles.imageContainer}>
+        <View style={styles.image}><Text>Image Here</Text></View>
+      </View>
+      <View style={styles.inputsContainer}>
+        <Text style={styles.welcomeText}>Welcome!</Text>
+        <TextInput style={styles.inputs} placeholder='Email Address'/>
+        <TextInput style={styles.inputs} placeholder='Password' secureTextEntry={true}/>
+      </View>
+    </View>
+  )
 }
 
 export default SignIn
