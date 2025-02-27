@@ -11,7 +11,7 @@ export default function Index() {
     try {
         const token = await AsyncStorage.getItem('token');
         if (!token) {
-            router.replace('/signin');
+            router.replace('/signin-landing');
         }
     } catch (error) {
         console.log(error);
