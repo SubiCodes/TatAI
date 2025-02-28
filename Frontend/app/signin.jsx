@@ -18,7 +18,7 @@ const SignIn = () => {
             }
         } catch (error) {
             console.log(error);
-            setError(error.message);
+            setError(error.message);    
         }
     };
 
@@ -32,12 +32,6 @@ const SignIn = () => {
         }
     }
 
-    useFocusEffect(
-        useCallback(() => {
-            checkLogin();
-        }, [])
-    )
-    
     return (
         <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
             <TouchableOpacity style={{backgroundColor: 'lightgreen', paddingVertical: 4, paddingHorizontal: 8, marginBottom: 12}}
