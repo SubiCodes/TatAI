@@ -82,10 +82,10 @@ const SignIn = () => {
     <>
       <StatusBar translucent={true} backgroundColor="transparent"/>
       {splashScreen ? (<SplashScreen/>) : (
-      <SafeAreaView className='min-h-screen-safe h-full w-screen flex justify-center items-center flex-col bg-background'>
+      <SafeAreaView className='min-h-screen h-full w-screen flex justify-center items-center flex-col bg-background'>
         <View className='flex-1 justify-center items-center gap-4 w-80'>
           <View className='w-80 h-48 items-center justify-center mb-8'>
-            <Image source={illustration} resizeMode="contain" className='w-full h-auto '/>
+            <Image source={illustration} resizeMode="contain" style={{maxWidth: '100%'}}/>
           </View>
           <TextInput placeholder='Enter Email' value={email} onChangeText={(text) => setEmail(text)}
           className='w-80 h-12 px-4 border border-gray-300 rounded-lg bg-white text-base'/>
@@ -101,16 +101,16 @@ const SignIn = () => {
               <Text className='font-bold text-lg text-white'>Login</Text>
             )}
           </TouchableOpacity>
-          {!errors ? (<Text></Text>) : (<Text className='text-red-500'>{`⚠️ ${errors}`}</Text>)}
+          {!errors ? (null) : (<Text className='text-red-500'>{`⚠️ ${errors}`}</Text>)}
           <View className="flex-row items-center w-80 mt-2 mb-4">
             <View className="flex-1 h-[1px] bg-gray-300" />
             <Text className="px-4 text-gray-500 text-base">or</Text>
             <View className="flex-1 h-[1px] bg-gray-300" />
           </View>
           <TouchableOpacity className='flex-row gap-2 w-80 h-12 bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
-          onPress={test}
+           onPress={() => test()}
           >
-            <Image source={googleIcon} resizeMode="contain" className='w-6 h-auto'/>
+            <Image source={googleIcon} resizeMode="contain" style={{maxWidth: '8%'}}/>
             <Text className='font-bold text-lg text-black'>Continue With Google</Text>
           </TouchableOpacity>
         </View>
