@@ -78,7 +78,7 @@ export const signIn = async (req, res) => {
             return res.status(400).json({success: false, message: "Invalid Password."});
         }
 
-        const token = JWT.sign({ email: existingUser._id }, JWT_SECRET);
+        const token = JWT.sign({ userID: existingUser._id }, JWT_SECRET);
         res.status(200).json({success: true, message: "User logged in successfully.", token: token});
 
     } catch (error) {
