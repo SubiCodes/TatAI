@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const BrokenFaucet = () => {
+const ChatBot = () => {
   return (
     <View>
-      <Text>BrokenFaucet</Text>
+      <Text>ChatBot</Text>
     </View>
   )
 }
 
-export default BrokenFaucet
+export default ChatBot
