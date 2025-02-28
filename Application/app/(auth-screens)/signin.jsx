@@ -96,7 +96,8 @@ const SignIn = () => {
               onValueChange={(newValue) => setHidePassword(!newValue)} /> 
             <Text className='text-m'>Show password</Text>
           </View>
-          <TouchableOpacity className='bg-blue-600 w-80 h-10 rounded items-center justify-center' onPress={handleEmailLogin}>
+          <TouchableOpacity className='flex-row gap-2 w-80 h-10 bg-blue-600 justify-center items-center rounded-xl shadow-lg  shadow-gray-400 elevation-4'
+           onPress={handleEmailLogin}>
             {loading ? (<ActivityIndicator size="small" color="white"/>) : (
               <Text className='font-bold text-lg text-white'>Login</Text>
             )}
@@ -107,15 +108,15 @@ const SignIn = () => {
             <Text className="px-4 text-gray-500 text-base">or</Text>
             <View className="flex-1 h-[1px] bg-gray-300" />
           </View>
-          <TouchableOpacity className='flex-row gap-2 w-80 h-12 bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
+          <TouchableOpacity className='flex-row gap-2 w-80 h-10 bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
            onPress={() => test()}
           >
             <Image source={googleIcon} resizeMode="contain" style={{maxWidth: '8%'}}/>
-            <Text className='font-bold text-lg text-black'>Continue With Google</Text>
+            <Text className='font-bold text-base text-black'>Continue With Google</Text>
           </TouchableOpacity>
         </View>
         <View className='pb-8 items-center'>
-          <Link href={'/signin'} className='text-blue-500'>Create an Account.</Link>
+          <Link href={'/signin'} className='text-blue-500'>Dont have an Account? Signup here!</Link>
         </View>
       </SafeAreaView>
       )}
