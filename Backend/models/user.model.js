@@ -1,8 +1,21 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    name: {
+    firstName: {
         type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
+    gender: {
+        type: String,
+        enum: ["Male", "Female", "Non-Binary", "Prefer not to say"],
+        required: true
+    },
+    birthday: {
+        type: Date,
         required: true
     },
     email: {
@@ -14,15 +27,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    verified: {
-        type: Boolean,
-        default: false
-    },
     resetPasswordToken: {
-        type: String,
-        default: undefined
-    },
-    verificationToken: {
         type: String,
         default: undefined
     },
