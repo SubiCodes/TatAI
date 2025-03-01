@@ -6,6 +6,18 @@ export default function RootLayout() {
   <Stack>
     <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
     <Stack.Screen name="signin" options={{headerShown: false}}/>
+    <Stack.Screen name="forgot-password" options={{ 
+        headerShown: true,
+        headerTransparent: true,
+        headerTitle: ''}}/>
+    <Stack.Screen name="reset-token" options={{ 
+      headerShown: true,
+        headerTransparent: true,
+        headerTitle: ''}}/>
+    <Stack.Screen name="reset-password" options={{ 
+      headerShown: false,
+        headerTransparent: true,
+        headerTitle: ''}}/>
     <Stack.Screen name="signup" options={{headerShown: false}}/>
   </Stack>
   )

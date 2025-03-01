@@ -15,7 +15,7 @@ export default function Index() {
     try {
       const isOpened = await AsyncStorage.getItem('opened');
       if (isOpened === 'true') {
-        router.push('(auth-screens)/signin');
+        router.replace('(auth-screens)/signin');
       } else {
         setIsLoading(false); 
       }
