@@ -76,8 +76,6 @@ const SignIn = () => {
       }, [])
   );
 
-
-
   return (
     <>
       <StatusBar translucent={true} backgroundColor="transparent"/>
@@ -91,10 +89,17 @@ const SignIn = () => {
           className='w-80 h-12 px-4 border border-gray-300 rounded-lg bg-white text-base'/>
           <TextInput secureTextEntry={hidePassword} placeholder='Enter Password' value={password} onChangeText={(pass) => setPassword(pass)}
           className='w-80 h-12 px-4 border border-gray-300 rounded-lg bg-white text-base' />
-          <View className='flex-row justify-start items-center gap-2 w-80 self-start px-2'>
-            <CheckBox value={!hidePassword} 
-              onValueChange={(newValue) => setHidePassword(!newValue)} /> 
-            <Text className='text-m'>Show password</Text>
+          <View className='flex-row justify-between items-center gap-2 w-80 self-start px-2'>
+            <View className='flex-row items-center gap-2'>
+              <CheckBox 
+                value={!hidePassword} 
+                onValueChange={(newValue) => setHidePassword(!newValue)} 
+                color={'blue'}
+                className='border-blue-300'
+              />
+              <Text className='text-m'>Show password</Text>
+            </View>
+            <Text className="text-black underline text-m">Forgot Password?</Text>
           </View>
           <TouchableOpacity className='flex-row gap-2 w-80 h-10 bg-blue-600 justify-center items-center rounded-xl shadow-lg  shadow-gray-400 elevation-4'
            onPress={handleEmailLogin}>
