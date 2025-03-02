@@ -44,6 +44,7 @@ const SignIn = () => {
           validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
         }
       );
+
       if(res.data.success){
         await AsyncStorage.setItem('token', res.data.token);
         router.replace('/(tabs)/home');
@@ -120,7 +121,7 @@ const SignIn = () => {
 
           </View>
           <TouchableOpacity className='flex-row mt-2 gap-2 min-w-full w-full min-h-11 h-11 bg-blue-600 justify-center items-center rounded-xl shadow-lg shadow-gray-400 elevation-4'
-           onPress={handleEmailLogin}>
+           onPress={handleEmailLogin} disabled={loading}>
             {loading ? (<ActivityIndicator size="small" color="white"/>) : (
               <Text className='font-bold text-lg text-white'>Login</Text>
             )}

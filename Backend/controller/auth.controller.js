@@ -57,24 +57,69 @@ export const forgotPassword = async (req, res) => {
 
     try {
         const existingUser = await User.findOne({email: email});
+        const currentTime = Date.now();
+        const twentyFourHoursInMs = 24 * 60 * 60 * 1000; 
 
         if (!existingUser) {
             return res.status(404).json({success: false, message: "User does not exist."});
+        };
+
+        if ( existingUser.resetPasswordTokenRequestLatest && currentTime - existingUser.resetPasswordTokenRequestLatest < twentyFourHoursInMs){
+            if (existingUser.resetPasswordTokenRequestCount >= 5){
+                return res.status(400).json({success: false, message: "Daily limit request for this email has been reached."});
+            }
+        }else {
+            existingUser.resetPasswordTokenRequestCount = 0;
+            await existingUser.save();
         }
     
-        const resetToken = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const resetToken = Math.random().toString(36).substring(2, 8).toUpperCase();
     
         existingUser.resetPasswordToken = resetToken;
+        existingUser.resetPasswordTokenRequestCount += 1;
+        existingUser.resetPasswordTokenRequestLatest = currentTime;
         await existingUser.save();
 
         //send email here
     
-        return res.status(200).json({success: true, message: "Reset password token sent to email."});
+        return res.status(200).json({success: true, message: "Reset password token sent to email.", resetToken: existingUser.resetPasswordToken, resetPasswordTokenRequestCount: existingUser.resetPasswordTokenRequestCount, resetPasswordTokenRequestLatest: existingUser.resetPasswordTokenRequestLatest, userEmail: existingUser.email});
 
     } catch (error) {
         return res.status(500).json({success: false, message: `Cannot create reset token: ${error.message}`});
     }
 };
+
+export const resendToken = async (req, res) => {
+    //resend token to user
+}
+
+export const getResetToken = async (req, res) => {
+    const {email} = req.body;
+    try {
+        const existingUser = await User.findOne({email: email});
+        const currentTime = Date.now();
+        const twentyFourHoursInMs = 24 * 60 * 60 * 1000; 
+
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: "User does not exist."});
+        };
+
+        if ( existingUser.resetPasswordTokenRequestLatest && currentTime - existingUser.resetPasswordTokenRequestLatest < twentyFourHoursInMs){
+            if (existingUser.resetPasswordTokenRequestCount >= 5){
+                return res.status(400).json({success: false, message: "Daily limit request for this email has been reached."});
+            }
+        }else {
+            existingUser.resetPasswordTokenRequestCount = 0;
+            await existingUser.save();
+        }
+
+        return res.status(200).json({success: true, message: "Successfully fetched reset token", resetToken: existingUser.resetPasswordToken})
+
+    }
+    catch (error){
+        return res.status(500).json({success: false, message: `Cannot access reset token: ${error.message}`});
+    }
+}
 
 export const resetPassword = async (req, res) => {
     const {email, resetToken, newPassword} = req.body;
@@ -84,11 +129,10 @@ export const resetPassword = async (req, res) => {
         if (!existingUser) {
             return res.status(404).json({success: false, message: `No reset token found for ${email} or invalid token.`});
         }
-        if (newPassword.length < 6) {
-            return res.status(400).json({success: false, message: "Password should be at least 6 character"});
-        }
         existingUser.password = await bcrypt.hash(newPassword, 10);
         existingUser.resetPasswordToken = undefined;
+        existingUser.resetPasswordTokenRequestCount = undefined;
+        existingUser.resetPasswordTokenRequestLatest = undefined;
         await existingUser.save();
         return res.status(200).json({success: true, message: "Password reset successfully."});
     } catch (error) {

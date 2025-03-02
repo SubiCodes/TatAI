@@ -15,7 +15,7 @@ export default function RootLayout() {
         headerTransparent: true,
         headerTitle: ''}}/>
     <Stack.Screen name="reset-password" options={{ 
-      headerShown: false,
+      headerShown: true,
         headerTransparent: true,
         headerTitle: ''}}/>
     <Stack.Screen name="signup" options={{headerShown: false}}/>
