@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: undefined
     },
+    resetPasswordTokenRequestCount: {
+        type: Number,
+        default: undefined
+    },
+    resetPasswordTokenRequestLatest: {
+        type: Date,
+        default: undefined
+    },
 }, {
     collection: 'UserInfo',
     timestamps: true
