@@ -11,14 +11,17 @@ export default function RootLayout() {
         headerTransparent: true,
         headerTitle: ''}}/>
     <Stack.Screen name="reset-token" options={{ 
-      headerShown: true,
+        headerShown: true,
         headerTransparent: true,
         headerTitle: ''}}/>
     <Stack.Screen name="reset-password" options={{ 
-      headerShown: true,
+        headerShown: true,
         headerTransparent: true,
         headerTitle: ''}}/>
-    <Stack.Screen name="signup" options={{headerShown: false}}/>
+    <Stack.Screen name="signup" options={{ 
+        headerShown: true,
+        headerTransparent: true,
+        headerTitle: ''}}/>
   </Stack>
   )
 }
