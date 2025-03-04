@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 
-config({path: `.env.${process.env.NODE_ENV || "development"}.local`});
+// Load only the main .env file
+config();
 
 export const { PORT, NODE_ENV, DB_URI, JWT_SECRET } = process.env;
