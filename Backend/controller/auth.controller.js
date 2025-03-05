@@ -5,11 +5,7 @@ import { JWT_SECRET } from '../config/env.js';
 
 export const signUp = async (req, res) => {
     const {firstName, lastName, gender, birthday, email, password} = req.body;
-
-    if (password.length < 6) {
-        return res.status(400).json({success: false, message: "Password should be at least 6 character"});
-    }
-
+    
     const checkExists = await User.findOne({email: email});
     
     if (checkExists) {
@@ -20,7 +16,8 @@ export const signUp = async (req, res) => {
 
     try {
         const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword});
-        res.status(201).json({success: true, message: "User created successfully.", data: user});
+        const token = await JWT.sign({ userID: user._id }, JWT_SECRET);
+        res.status(201).json({success: true, message: "User created successfully.", data: user, tokenCreated: token});
     } catch (error) {
         console.log(error);
         res.status(500).json({success: false, message: "Cannot create user.", error: error.message});

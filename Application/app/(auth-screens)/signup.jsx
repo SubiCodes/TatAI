@@ -6,7 +6,8 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import React, { useEffect } from "react";
 import { useState, useRef } from "react";
@@ -14,28 +15,42 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import Dropdown from "@/components/dropdown.tsx";
 import CheckBox from "expo-checkbox";
 import { Link } from "expo-router";
+import { useRouter } from "expo-router";
+import axios from "axios";
+import { API_URL } from "@/constants/links.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignUp = () => {
+  const router = useRouter();
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [birthDate, setBirthDate] = useState(null);
   const [gender, setGender] = useState("");
-  const [date, setDate] = useState(null);
   const [open, setOpen] = useState(false);
+
+  const [isFirstNameEmpty, setIsFirstNameEmpty] = useState(false);
+  const [isLastNameEmpty, setIsLastNameEmpty] = useState(false);
+  const [isBirthdateEmpty, setIsBirthdateEmpty] = useState(false);
+  const [isGenderEmpty, setIsGenderEmpty] = useState(false);
 
   const [email, setEmail] = useState("");
   const [isEmailValid, setIsEmailValid] = useState(true);
 
   const [password, setPassword] = useState("");
+  const [isPasswordValid, setIsPasswordvalid] = useState(true);
   const [showPassword, setShowPassword] = useState(true);
   const [rePassword, setRePassword] = useState("");
   const [showRePassword, setShowRePassword] = useState(true);
-  const [isPasswordMatch, setIsPassswordMatch] = useState(true);
+  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
 
   const [strength, setStrength] = useState(0);
-  const [strengthTerm, setStrengthTerm] = useState("weak");
+  const [strengthTerm, setStrengthTerm] = useState("Weak");
   const [loading, setLoading] = useState(false);
 
   const [aggreed, setAgreed] = useState(false);
 
-  const isFirstRun = useRef(true);
+  const isFirstRunEmail = useRef(true);
 
   const checkPasswordStrength = async () => {
     let score = 0;
@@ -46,6 +61,7 @@ const SignUp = () => {
     if (!hasMinLength || !(hasLetter && hasNumber)) {
       setStrength(0);
       setStrengthTerm("Weak");
+      setIsPasswordvalid(false);
       return;
     }
 
@@ -58,35 +74,21 @@ const SignUp = () => {
 
     if (score <= 1) {
       setStrengthTerm("Weak");
+      setIsPasswordvalid(false);
     }
     if (score > 1) {
       setStrengthTerm("Good");
+      setIsPasswordvalid(true);
     }
     if (score > 3) {
       setStrengthTerm("Strong");
+      setIsPasswordvalid(true);
     }
   };
 
-  useEffect(() => {
+  useEffect(()=> {
     checkPasswordStrength();
-  }, [password]);
-
-  const checkPasswordMatch = async() => {
-    if (password !== rePassword){
-      setIsPassswordMatch(false);
-    }
-    else {
-      setIsPassswordMatch(true);
-    }
-  }
-
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false; // Skip first render
-      return;
-    }
-    checkPasswordMatch();
-  }, [password]);
+  }, [password])
 
   const checkEmailValidity = async () => {
     const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -98,13 +100,102 @@ const SignUp = () => {
       setIsEmailValid(false);
     }
   }
+
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false; // Skip first render
+    if (isFirstRunEmail.current) {
+      isFirstRunEmail.current = false; 
       return;
     }
     checkEmailValidity();
   }, [email]);
+
+
+  const handleCreateAccount = async () => {
+
+    setLoading(true);
+
+    try {
+      firstName.trim() === "" ? (setIsFirstNameEmpty(true)) : (setIsFirstNameEmpty(false));
+      lastName.trim() === "" ? (setIsLastNameEmpty(true)) : (setIsLastNameEmpty(false));
+      birthDate ===  null ? (setIsBirthdateEmpty(true)) : (setIsBirthdateEmpty(false));
+      gender.trim() === "" ? (setIsGenderEmpty(true)) : (setIsGenderEmpty(false));
+
+      checkEmailValidity();
+      checkPasswordStrength();
+
+      if (isFirstNameEmpty || isLastNameEmpty || isBirthdateEmpty || isGenderEmpty) {
+        Alert.alert("Empty Fields", "Fill up all fields to create an account.", [
+          {text: 'Ok'}
+        ])
+        setLoading(false);
+        return;
+      }
+
+      if (!isEmailValid) {
+        Alert.alert("Invalid Email", "Enter a valid email. (e.g sample123@gmail.com)", [
+          {text: 'Ok'}
+        ])
+        setLoading(false);
+      }
+
+      if (!isPasswordValid) {
+        Alert.alert("Invalid Password", "Must contain alphanumeric values and is 6 characters long.", [
+          {text: 'Ok'}
+        ])
+        setLoading(false);
+        return;
+      }
+
+      if (password !== rePassword) {
+        Alert.alert("Password Mismatch", "Make sure re-entered password matches the password.", [
+          {text: 'Ok'}
+        ])
+        setIsPasswordMatch(false);
+        setLoading(false);
+        return;
+      } else {setIsPasswordMatch(true); setLoading(false);}
+
+      if (!aggreed) {
+        Alert.alert("Agreed Terms", "In order to continue, please agree to the terms and conditions.", [
+          {text: 'Ok'}
+        ])
+        setLoading(false);
+        return;
+      }
+
+      const res = await axios.post(`${API_URL}/api/v1/auth/sign-up`, {firstName: firstName, lastName: lastName, gender: gender, birthday: birthDate, email: email, password: password}, 
+        { 
+          validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
+        }
+      );
+
+      if (res.data.success) {
+        Alert.alert("Account Created", "You're account is successfully created.", [
+          {text: 'Ok'}
+        ])
+        await AsyncStorage.setItem('token', res.data.tokenCreated);
+        await router.replace('/(tabs)/home');
+        setLoading(false);
+        return;
+      }
+
+      if (!res.data.success) {
+        Alert.alert("Existing Account", "There is an account exisiting with the same email.", [
+          {text: 'Ok'}
+        ])
+      }
+
+    } catch (error) {
+      setLoading(false);
+      Alert.alert("Signup Error", error.message, [
+        {text: 'Ok'}
+      ])
+    }
+    finally {
+      console.log(`First Name: ${firstName}, Last Name: ${lastName}, Birthdate: ${birthDate.toLocaleDateString()}, Gender: ${gender}, Email: ${email}, Password: ${password}, Re-Password: ${rePassword}, Terms: ${aggreed}`);
+    }
+  }
+
 
 
   return (
@@ -112,7 +203,7 @@ const SignUp = () => {
       <StatusBar translucent={true} backgroundColor="transparent" />
       <SafeAreaView className="h-[100%] w-screen flex justify-center items-center flex-col bg-background ">
         <ScrollView
-          className="flex-1 gap-4 min-h-[100%] overflow-y-auto px-12 pt-28"
+          className="flex-1 gap-4 min-h-[100%] overflow-y-auto px-10 pt-28"
           contentContainerStyle={{
             alignItems: "center",
             justifyContent: "center",
@@ -135,7 +226,11 @@ const SignUp = () => {
               <TextInput
                 placeholder="Enter First Name"
                 className="h-12 w-80 border-black border-2 rounded-md bg-white"
+                style={{borderColor: !isFirstNameEmpty ? "black" : "red",}}
+                value={firstName}
+                onChangeText={(text) => setFirstName(text)}
               ></TextInput>
+              {!isFirstNameEmpty ? (<></>) : (<Text className="font-bold text-sm text-red-600 md:text-xl">❗ This field cannot be empty</Text>)}
             </View>
 
             <View className="w-80 items-start gap-2 self-start ">
@@ -143,7 +238,11 @@ const SignUp = () => {
               <TextInput
                 placeholder="Enter Last Name"
                 className="h-12 w-80 border-black border-2 rounded-md bg-white"
+                style={{borderColor: !isLastNameEmpty ? "black" : "red",}}
+                value={lastName}
+                onChangeText={(text) => setLastName(text)}
               ></TextInput>
+              {!isLastNameEmpty ? (<></>) : (<Text className="font-bold text-sm text-red-600 md:text-xl">❗ This field cannot be empty</Text>)}
             </View>
 
             <View className="w-80 items-start gap-2 self-start">
@@ -153,19 +252,21 @@ const SignUp = () => {
                   placeholder="e.g. 01/01/2001"
                   className="h-12 w-80 border-black border-2 rounded-md p-2 bg-white"
                   editable={false}
-                  value={date ? date.toLocaleDateString("en-US") : ""}
+                  value={birthDate ? birthDate.toLocaleDateString("en-US") : ""}
+                  style={{borderColor: !isBirthdateEmpty ? "black" : "red"}}
                 />
               </TouchableOpacity>
+              {!isBirthdateEmpty ? (<></>) : (<Text className="font-bold text-sm text-red-600 md:text-xl">❗ This field cannot be empty</Text>)}
               {open && (
                 <DateTimePicker
-                  value={date || new Date()}
+                  value={birthDate || new Date()}
                   mode="date"
                   display="default"
                   maximumDate={new Date()}
                   onChange={(event, selectedDate) => {
                     setOpen(false);
                     if (selectedDate) {
-                      setDate(selectedDate);
+                      setBirthDate(selectedDate);
                     }
                   }}
                 />
@@ -184,7 +285,9 @@ const SignUp = () => {
                 onChange={(item) => setGender(item.value)}
                 placeholder="Gender"
                 height={40}
+                color={!isGenderEmpty ? 'black' : 'red'}
               />
+              {!isGenderEmpty ? (<></>) : (<Text className="font-bold text-sm text-red-600 md:text-xl">❗ This field cannot be empty</Text>)}
             </View>
 
             <View className="w-80 items-start gap-2 self-start">
@@ -193,8 +296,10 @@ const SignUp = () => {
                 placeholder="Enter Email Address"
                 className="h-12 w-80 border-black border-2 rounded-md bg-white"
                 style={{borderColor: isEmailValid ? "black" : "red",}}
+                value={email}
+                onChangeText={(text) => setEmail(text)}
               ></TextInput>
-              {!isEmailValid ? (<Text className="font-bold text-sm text-red-600 md:text-xl">❗ Invalid Email Format</Text>) : (<></>)}
+              {isEmailValid ? (<></>) : (<Text className="font-bold text-sm text-red-600 md:text-xl">❗ Invalid Email Format</Text>)}
             </View>
 
             <View className="w-80 items-start gap-2 md:w-3/5">
@@ -204,8 +309,14 @@ const SignUp = () => {
               <TextInput
                 placeholder="Enter Password"
                 className="h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16 bg-white"
+                style={{borderColor: isPasswordValid ? "black" : "red",
+                        borderTopColor: isPasswordMatch ? "black" : "red",
+                        borderBottomColor: isPasswordMatch ? "black" : "red",
+                        borderLeftColor: isPasswordMatch ? "black" : "red",
+                        borderRightColor: isPasswordMatch ? "black" : "red",
+                      }}
                 value={password}
-                onChangeText={(text) => setPassword(text)}
+                onChangeText={(text) => {setPassword(text); checkPasswordStrength()}}
                 secureTextEntry={showPassword}
               ></TextInput>
 
@@ -244,6 +355,7 @@ const SignUp = () => {
               <TextInput
                 placeholder="Re-enter Password"
                 className="h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16 bg-white"
+                style={{borderColor: isPasswordMatch ? "black" : "red",}}
                 value={rePassword}
                 onChangeText={(text) => setRePassword(text)}
                 secureTextEntry={showRePassword}
@@ -279,7 +391,7 @@ const SignUp = () => {
           </View>
 
           <View className="flex-row items-center justify-center gap-6 w-80 mr-auto">
-            <TouchableOpacity className='w-80 h-12 items-center justify-center bg-blue-700 rounded-md md:w-3/5'>
+            <TouchableOpacity className='w-80 h-12 items-center justify-center bg-blue-700 rounded-md md:w-3/5' onPress={handleCreateAccount} disabled={loading}>
               {loading ? (<ActivityIndicator size={'small'} color={'white'}/>) : (
               <Text className='text-lg text-white font-bold '> Change Password</Text>
               )}
