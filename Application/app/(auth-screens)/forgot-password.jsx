@@ -42,6 +42,13 @@ const ForgotPassword = () => {
             };
             if(res.data.success){
                 setLoading(false);
+                const emailRes = await axios.post(`${API_URL}/api/v1/auth/resend-reset-password-token`, {email: res.data.userEmail, token: res.data.resetToken.toUpperCase()});
+                if (!emailRes.data.success){
+                    Alert.alert('⚠️ Oops!', res.data.message, [
+                        {text: 'OK'},
+                    ]);
+                    return;
+                }
                 await AsyncStorage.setItem('reset-request-email', res.data.userEmail);
                 await AsyncStorage.setItem('reset-request-token', res.data.resetToken);
                 await router.push('/(auth-screens)/reset-token');
