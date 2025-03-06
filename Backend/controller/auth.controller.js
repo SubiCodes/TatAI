@@ -2,6 +2,7 @@ import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
+import { sendMail } from '../nodemailer/email.js';
 
 export const signUp = async (req, res) => {
     const {firstName, lastName, gender, birthday, email, password} = req.body;
@@ -87,19 +88,16 @@ export const forgotPassword = async (req, res) => {
 };
 
 export const resendToken = async (req, res) => {
-    //resend token to user
-}
+    const {email, token} = req.body;
 
-export const getResetToken = async (req, res) => {
-    const {email} = req.body;
     try {
         const existingUser = await User.findOne({email: email});
         const currentTime = Date.now();
-        const twentyFourHoursInMs = 24 * 60 * 60 * 1000; 
-
-        if (!existingUser) {
+        const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+        
+        if (!existingUser){
             return res.status(404).json({success: false, message: "User does not exist."});
-        };
+        }
 
         if ( existingUser.resetPasswordTokenRequestLatest && currentTime - existingUser.resetPasswordTokenRequestLatest < twentyFourHoursInMs){
             if (existingUser.resetPasswordTokenRequestCount >= 5){
@@ -109,6 +107,27 @@ export const getResetToken = async (req, res) => {
             existingUser.resetPasswordTokenRequestCount = 0;
             await existingUser.save();
         }
+
+        sendMail(email, token);
+        existingUser.resetPasswordTokenRequestCount += 1;
+        existingUser.resetPasswordTokenRequestLatest = currentTime;
+        await existingUser.save();
+
+        return res.status(200).json({success: true, message: 'Successfully sent email.'})
+
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot resend: ${error.message}`});
+    }
+}
+
+export const getResetToken = async (req, res) => {
+    const {email} = req.body;
+    try {
+        const existingUser = await User.findOne({email: email});
+
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: "User does not exist."});
+        };
 
         return res.status(200).json({success: true, message: "Successfully fetched reset token", resetToken: existingUser.resetPasswordToken})
 

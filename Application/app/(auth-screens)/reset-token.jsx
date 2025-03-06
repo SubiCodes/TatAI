@@ -43,8 +43,41 @@ const ResetToken = () => {
 
     const handleResendEmail = async () => {
         setResendEmail(false);
-        setResetTimer(59);
-        //send email here
+        setResetTimer(1);
+        
+        try {
+            const resToken = await axios.post(`${API_URL}/api/v1/auth/get-reset-token`, {email: email}, 
+                { 
+                  validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
+                }
+            );
+            if (!resToken) {
+                console.log("No res token existing");
+            }
+            console.log(resToken.data.resetToken);
+            
+            const res = await axios.post(`${API_URL}/api/v1/auth/resend-reset-password-token`, {email: email, token: resToken.data.resetToken.toUpperCase()}, 
+            { 
+              validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
+            });
+            if (!res.data.success){
+                Alert.alert('⚠️ Oops!', res.data.message, [
+                    {text: 'OK'},
+                ]);
+                return;
+            }
+            Alert.alert('✅ Success!', res.data.message, [
+                {text: 'OK'},
+            ]);
+            return;
+
+        } catch (error) {
+            Alert.alert('⚠️ Oops!', error.messsage, [
+                {text: 'OK'},
+            ]);
+            console.log(email);
+            console.log(error.message);
+        }
     }
 
     const submitToken = async () => {
@@ -75,9 +108,10 @@ const ResetToken = () => {
             };
 
         } catch (error) {
-            Alert.alert('⚠️ Oops!', error.messsage, [
+            Alert.alert('⚠️ Oops!', 'An error occured', [
                 {text: 'OK'},
             ]);
+            console.log(error.message);
         }
     };
 
