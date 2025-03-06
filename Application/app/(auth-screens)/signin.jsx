@@ -9,8 +9,6 @@ import axios from 'axios'
 import SplashScreen from '@/components/splash-screen.jsx'
 import { API_URL } from '@/constants/links.js'
 
-import googleIcon from '../../assets/images/google-icon.png'
-import facebookIcon from '../../assets/images/facebook-icon.png'
 import illustration from '../../assets/images/signin-illustration.png'
 
 const SignIn = () => {
@@ -24,8 +22,8 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const test = async () => {
-    await router.replace('/(tabs)/home');
+  const createAccount = async () => {
+    await router.push('/(auth-screens)/signup');
   };
 
   const handleEmailLogin = async() => {
@@ -89,8 +87,8 @@ const SignIn = () => {
       <StatusBar translucent={true} backgroundColor="transparent"/>
       {splashScreen ? (<SplashScreen/>) : (
       <SafeAreaView className='h-[100%] w-screen flex justify-center items-center flex-col bg-background '>
-        <ScrollView className='flex-1 gap-4 min-h-[100%] overflow-y-auto px-6 pt-12 pb-4'
-        contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 12,width: 320}}>
+        <ScrollView className='flex-1 gap-4 min-h-[100%] overflow-y-auto px-6 pt-20 pb-4'
+        contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 20,width: 320}}>
 
           <View className='min-w-full w-full min-h-40 h-60 items-center justify-center mb-0 mt-0' >
             <Image source={illustration} resizeMode="contain" style={{maxWidth: '90%'}}/>
@@ -127,8 +125,6 @@ const SignIn = () => {
             )}
           </TouchableOpacity>
           
-          <Link href={'/signup'} className='underline'>Don't have an Account? Signup here!</Link>
-
           <View className="flex-row items-center min-w-full w-full mt-2 mb-2">
 
             <View className="flex-1 h-[1px] bg-gray-300" />
@@ -138,19 +134,11 @@ const SignIn = () => {
           </View>
 
           <TouchableOpacity className='flex-row gap-2 min-w-full w-full min-h-12 h-12 bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
-           onPress={() => test()}
+           onPress={() => createAccount()}
           >
-            <Image source={googleIcon} resizeMode="contain" style={{maxWidth: '8%'}}/>
-            <Text className='font-semibold text-base text-black'>Continue With Google</Text>
+            <Text className='font-semibold text-base text-blue-500'>Create an Account</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className='flex-row gap-2 min-w-full w-full min-h-12 h-12 bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
-           onPress={() => test()}
-          >
-            <Image source={facebookIcon} resizeMode="contain" style={{maxWidth: '8%'}}/>
-            <Text className='font-semibold text-base text-black'>Continue With Facebook</Text>
-          </TouchableOpacity>
-          
           <View className="flex-column items-center min-w-full w-full mt-2 mb-2">
             <Text className='text-gray-400 text-sm'>By continuing your aggreeing to our</Text>
             <Text className='text-gray-400 text-sm'><Link className='text-black font-bold text-sm' href={'/user-agreement'} >User agreement</Link> and <Link className='text-black font-bold text-sm' href={'/privacy-policy'}>Privacy Policy.</Link></Text>  
