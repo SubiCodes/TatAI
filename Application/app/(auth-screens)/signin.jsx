@@ -76,9 +76,19 @@ const SignIn = () => {
     }
   };
 
+  const reset = () => {
+    setErrors("");
+    setHidePassword(true);
+    setSplashScreen(true);
+    setEmail("");
+    setPassword("");
+    setLoading(false)
+  }
+
   useFocusEffect(
       useCallback(() => {
         checkLoggedIn();
+        reset();
       }, [])
   );
 
@@ -98,11 +108,18 @@ const SignIn = () => {
             <Text className='font-extrabold text-2xl'>Welcome!</Text>
           </View>
 
-          <TextInput placeholder={errors ? (`❗ ${errors}`) : ('Enter Email')} placeholderTextColor={errors ? ('rgba(255, 105, 97, 0.7)') : ('gray')} value={email} onChangeText={(text) => setEmail(text)}
-          className='min-w-full w-full min-h-12 px-4 border border-gray-300 rounded-lg bg-white text-base'/>
-
-          <TextInput secureTextEntry={hidePassword} placeholder={errors ? (`❗ ${errors}`) : ('Enter Password')} placeholderTextColor={errors ? ('rgba(255, 105, 97, 0.7)') : ('gray')} value={password} onChangeText={(pass) => setPassword(pass)}
-          className='min-w-full w-full min-h-12 px-4 border border-gray-300 rounded-lg bg-white text-base'/>
+          
+          <View className='h-auto min-h-30 items-center'>
+            {errors && (
+            <View className='min-w-full h-12 border-2 border-red-500 rounded-lg mb-2 px-4 justify-center' style={{backgroundColor: '#fef6f5'}}>
+              <Text className='text-black'>{`ⓘ ${errors}`}</Text>
+            </View>  )}
+               
+            <TextInput placeholder={'Enter Email'}  value={email} onChangeText={(text) => setEmail(text)}
+            className='min-w-full w-full min-h-12 px-4 border border-gray-300 rounded-lg mb-3 bg-white text-base'/>
+            <TextInput secureTextEntry={hidePassword} placeholder={'Enter Password'} value={password} onChangeText={(pass) => setPassword(pass)}
+            className='min-w-full w-full min-h-12 px-4 border border-gray-300 rounded-lg bg-white text-base'/> 
+          </View>
 
           <View className='flex-row justify-between items-center gap-2 min-w-full w-fullself-start px-2'>
 
@@ -133,15 +150,23 @@ const SignIn = () => {
 
           </View>
 
-          <TouchableOpacity className='flex-row gap-2 min-w-full w-full min-h-12 h-12 bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
+          <View>
+            <TouchableOpacity className='flex-row gap-2 min-w-full w-full min-h-12 h-auto bg-white justify-center items-center rounded-xl shadow-lg border border-gray-200 shadow-gray-400 elevation-4'
            onPress={() => createAccount()}
-          >
-            <Text className='font-semibold text-base text-blue-500'>Create an Account</Text>
-          </TouchableOpacity>
+            >
+              <Text className='font-semibold text-base text-blue-500'>Create an Account</Text>
+            </TouchableOpacity>
 
-          <View className="flex-column items-center min-w-full w-full mt-2 mb-2">
-            <Text className='text-gray-400 text-sm'>By continuing your aggreeing to our</Text>
-            <Text className='text-gray-400 text-sm'><Link className='text-black font-bold text-sm' href={'/user-agreement'} >User agreement</Link> and <Link className='text-black font-bold text-sm' href={'/privacy-policy'}>Privacy Policy.</Link></Text>  
+            <View className="flex-column items-center min-w-full w-full mt-2 mb-2 border-0">
+              <Text className='text-gray-400 text-sm'>By continuing your aggreeing to our</Text>
+              <Text className='text-gray-400 text-sm'><Link className='text-black font-bold text-sm' href={'/user-agreement'} >User agreement</Link> and <Link className='text-black font-bold text-sm' href={'/privacy-policy'}>Privacy Policy.</Link></Text>  
+            </View>
+
+          </View>
+
+          
+          <View className='min-h-32'>
+
           </View>
          
         </ScrollView>
