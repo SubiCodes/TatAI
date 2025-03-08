@@ -98,7 +98,7 @@ const SignIn = () => {
     <>
       <StatusBar translucent={true} backgroundColor="transparent"/>
       {splashScreen ? (<SplashScreen/>) : (
-      <SafeAreaView className='h-[100%] w-screen flex justify-center items-center flex-col bg-background pt-20'>
+      <SafeAreaView className='h-[100%] w-screen flex justify-center items-center flex-col bg-background pt-24'>
         <ScrollView className='flex-1 gap-4 min-h-[100%] overflow-y-auto px-0 pt-10 pb-4'
         contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 20}} showsVerticalScrollIndicator={false}>
 
