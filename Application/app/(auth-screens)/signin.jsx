@@ -1,12 +1,12 @@
 import { View, Text, SafeAreaView, StatusBar, TextInput, TouchableOpacity, Image, ActivityIndicator, ScrollView, Alert, Dimensions} from 'react-native'
 import CheckBox from 'expo-checkbox'
+import * as SplashScreen from "expo-splash-screen"; 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { useState, useCallback } from 'react'
 import { useFocusEffect } from 'expo-router'
 import { Link, useRouter } from 'expo-router'
 import axios from 'axios'
 
-import SplashScreen from '@/components/splash-screen.jsx'
 import { API_URL } from '@/constants/links.js'
 
 import illustration from '../../assets/images/signin-illustration.png'
@@ -14,15 +14,16 @@ import signinImage from '../../assets/images/auth-images/logo1.png'
 
 const SignIn = () => {
 
+  const [appReady, setAppReady] = useState(false);
   const router = useRouter();
   const {width, height} = Dimensions.get('window');
 
   const [errors, setErrors] = useState("");
   const [hidePassword, setHidePassword] = useState(true);
-  const [splashScreen, setSplashScreen] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+ 
 
   const createAccount = async () => {
     await router.push('/(auth-screens)/signup');
@@ -70,34 +71,52 @@ const SignIn = () => {
       if(token) {
         router.replace('/(tabs)/home')
       }
-      setSplashScreen(false);
     } catch (error) {
       console.log(error);
       setErrors(error.message);
-      setSplashScreen(false);
     }
   };
 
   const reset = () => {
     setErrors("");
     setHidePassword(true);
-    setSplashScreen(true);
+    setAppReady(false)
     setEmail("");
     setPassword("");
     setLoading(false)
   }
 
+  const prepareApp = async () => {
+    try{
+      await SplashScreen.preventAutoHideAsync();
+      await checkLoggedIn();
+      await reset();
+      SplashScreen.hideAsync();
+      setAppReady(true);
+    }
+    catch (error){
+      console.log(error,message);
+    }
+  }
+
   useFocusEffect(
       useCallback(() => {
-        checkLoggedIn();
-        reset();
+        prepareApp();
       }, [])
   );
+
+  
 
   return (
     <>
       <StatusBar translucent={true} backgroundColor="transparent"/>
-      {splashScreen ? (<SplashScreen/>) : (
+      {!appReady ? 
+      (
+      <View className='h-screen w-screen items-center justify-center'>
+        <ActivityIndicator size={60} color={'blue'}/>
+      </View>) : 
+      (
+        <>
       <SafeAreaView className='h-[100%] w-screen flex justify-center items-center flex-col bg-background pt-24'>
         <ScrollView className='flex-1 gap-4 min-h-[100%] overflow-y-auto px-0 pt-10 pb-4'
         contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 20}} showsVerticalScrollIndicator={false}>
@@ -176,10 +195,9 @@ const SignIn = () => {
          
         </ScrollView>
       </SafeAreaView>
+      </>
       )}
-      
     </>
-    
   )
 }
 
