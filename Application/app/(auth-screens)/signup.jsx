@@ -284,7 +284,7 @@ const SignUp = () => {
             </View>
 
             <View className="w-80 items-start gap-2 self-start">
-              <Text className="text-lg font-bold">Enter Birthdate</Text>
+              <Text className="text-lg font-bold">Birthdate</Text>
               <TouchableOpacity onPress={() => setOpen(true)}>
                 <TextInput
                   placeholder="e.g. 01/01/2001"
@@ -346,10 +346,10 @@ const SignUp = () => {
 
             <View className="w-80 items-start gap-2 md:w-3/5">
               <Text className="text-base font-bold md:text-2xl">
-                New Password
+                Password
               </Text>
               <TextInput
-                placeholder="Enter 8+ alphaneumeric character"
+                placeholder="Enter 8+ alphaneumeric characters"
                 className="h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16 bg-white"
                 style={{borderColor: isPasswordValid ? "black" : "red",
                         borderTopColor: isPasswordMatch ? "black" : "red",
@@ -392,10 +392,10 @@ const SignUp = () => {
               </View>
 
               <Text className="text-base font-bold md:text-2xl">
-                Re-enter Password
+                Confirm Password
               </Text>
               <TextInput
-                placeholder="Re-enter Password"
+                placeholder="Confirm Password"
                 className="h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16 bg-white"
                 style={{borderColor: isPasswordMatch ? "black" : "red",}}
                 value={rePassword}
