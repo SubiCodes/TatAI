@@ -5,14 +5,12 @@ import SplashScreen from "@/components/splash-screen";
 import { useCallback, useState, useRef } from "react";
 import { Link, router, useFocusEffect, useRouter } from "expo-router";
 
-import HomeRepair from '../assets/images/initial-screen-images/HOME-REPAIR.jpg';
-
 const {width, height} = Dimensions.get('window');
 
 const slides = [
   {
     id: '1',
-    image: HomeRepair,
+    image: require('../assets/images/initial-screen-images/HOME-REPAIR.jpg'),
     title: 'Instant Fix-it Guides',
     subtitle: 'Solve common household problems quickly with easy-to-follow repair solutions.'
   },
