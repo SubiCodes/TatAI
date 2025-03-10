@@ -29,7 +29,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/auth-images/logo1.png",
-          "imageWidth": 400,
+          "imageWidth": 700,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }

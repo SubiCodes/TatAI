@@ -7,7 +7,6 @@ import HeaderContactUs from "@/components/header-contactus.jsx";
 export default function RootLayout() {
   return ( 
   <Stack>
-    <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
     <Stack.Screen name="signin" options={{
         headerShown: true,
         headerTransparent: true,
