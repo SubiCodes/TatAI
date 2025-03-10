@@ -1,9 +1,11 @@
-import { Text, View, SafeAreaView, StatusBar, Dimensions, FlatList, Image, StyleSheet, Touchable, TouchableOpacity } from "react-native";
+import { Text, View, SafeAreaView, StatusBar, Dimensions, FlatList, Image, StyleSheet, Touchable, TouchableOpacity, ActivityIndicator } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import SplashScreen from "@/components/splash-screen";
 import { useCallback, useState, useRef } from "react";
 import { Link, router, useFocusEffect, useRouter } from "expo-router";
+
+import logo from '@/assets/images/auth-images/logo1.png'
 
 const {width, height} = Dimensions.get('window');
 
@@ -67,15 +69,25 @@ const Slide = ({ item }) => {
 
 export default function Index() {
 
+  const router = useRouter();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const ref = useRef(null);
+  const [loading, setLoading] = useState(true);
 
-  const firstOpen = async () => {
-
+  const checkOpenned = async () => {
+    const isOpened = await AsyncStorage.getItem('opened');
+    if (!isOpened){
+      await AsyncStorage.setItem('opened', 'true');
+      return;
+    }
+    await router.replace('/(auth-screens)/signin');
   }
 
   useFocusEffect(
-    useCallback(() => {}, [])
+    useCallback(() => {
+      checkOpenned();
+      setLoading(false);
+    }, [])
   )
 
   const Footer = () => {
@@ -129,6 +141,15 @@ export default function Index() {
 
   const getStarted = () => {
     router.replace('/(auth-screens)/signin');
+  }
+
+  if(loading) {
+    return (
+      <View className="w-screen h-screen flex-column items-center justify-center gap-2">
+        <Image source={logo} style={{maxWidth: '60%',resizeMode: 'contain', height: '20%'}}/>
+        <ActivityIndicator size={32} color={'blue'}/>
+      </View>
+    )
   }
 
   return (
