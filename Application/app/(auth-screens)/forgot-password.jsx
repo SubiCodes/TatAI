@@ -72,7 +72,7 @@ const ForgotPassword = () => {
                         <Text className='font-bold md:text-xl'>ⓘ Enter you email address</Text>
                     </View>
 
-                    <TouchableOpacity className='w-80 h-12 items-center justify-center bg-blue-700 rounded-md md:w-3/5' onPress={submitEmail} disabled={loading}>
+                    <TouchableOpacity className='w-80 h-12 items-center justify-center bg-primary rounded-md md:w-3/5' onPress={submitEmail} disabled={loading}>
                         {loading ? (<ActivityIndicator size="small" color="white"/>) : (<Text className='text-lg text-white font-bold '>Submit Email</Text>)}
                     </TouchableOpacity>
 

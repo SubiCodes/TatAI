@@ -433,7 +433,7 @@ const SignUp = () => {
           </View>
 
           <View className="flex-row items-center justify-center gap-6 w-80 mr-auto">
-            <TouchableOpacity className='w-80 h-12 items-center justify-center bg-blue-700 rounded-md md:w-3/5' onPress={handleCreateAccount} disabled={loading}>
+            <TouchableOpacity className='w-80 h-12 items-center justify-center bg-primary rounded-md md:w-3/5' onPress={handleCreateAccount} disabled={loading}>
               {loading ? (<ActivityIndicator size={'small'} color={'white'}/>) : (
               <Text className='text-lg text-white font-bold '>Create Account</Text>
               )}

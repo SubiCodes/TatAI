@@ -113,7 +113,7 @@ const SignIn = () => {
       {!appReady ? 
       (
       <View className='h-screen w-screen items-center justify-center'>
-        <ActivityIndicator size={60} color={'blue'}/>
+        <ActivityIndicator size={60} color={'#0818A8'}/>
       </View>) : 
       (
         <>
@@ -148,7 +148,7 @@ const SignIn = () => {
                 value={!hidePassword} 
                 onValueChange={(newValue) => setHidePassword(!newValue)} 
                 color={'#2563EB'}
-                className='border-blue-300'
+                className='border-primary'
               />
               <Text className='text-m'>Show password</Text>
             </View>
@@ -158,7 +158,7 @@ const SignIn = () => {
           </View>
 
          
-          <TouchableOpacity className='flex-row mt-2 gap-2 min-h-11 h-11 bg-blue-700 justify-center items-center rounded-xl shadow-lg shadow-gray-400 elevation-2' style={{width: '80%'}}
+          <TouchableOpacity className='flex-row mt-2 gap-2 min-h-11 h-11 bg-primary justify-center items-center rounded-xl shadow-lg shadow-gray-400 elevation-2' style={{width: '80%'}}
            onPress={handleEmailLogin} disabled={loading}>
             {loading ? (<ActivityIndicator size="small" color="white"/>) : (
               <Text className='font-bold text-lg text-white'>Login</Text>
@@ -178,7 +178,7 @@ const SignIn = () => {
             style={{width: '80%'}}
             onPress={() => createAccount()}
             >
-              <Text className='font-semibold text-base text-blue-700'>Create an Account</Text>
+              <Text className='font-semibold text-base text-primary'>Create an Account</Text>
             </TouchableOpacity>
 
             <View className="flex-column items-center min-w-full w-full mt-2 mb-2">

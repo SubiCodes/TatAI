@@ -78,6 +78,7 @@ export default function Index() {
     const isOpened = await AsyncStorage.getItem('opened');
     if (!isOpened){
       await AsyncStorage.setItem('opened', 'true');
+      setLoading(false);
       return;
     }
     await router.replace('/(auth-screens)/signin');
@@ -86,7 +87,6 @@ export default function Index() {
   useFocusEffect(
     useCallback(() => {
       checkOpenned();
-      setLoading(false);
     }, [])
   )
 
@@ -95,7 +95,7 @@ export default function Index() {
       <View style={{height: height * .12, justifyContent: "center", flexDirection: "row", gap: 16}}>
 
         {currentSlideIndex == slides.length - 1 ? (
-          <TouchableOpacity className="w-5/6 h-12 items-center justify-center bg-blue-700 rounded-md " onPress={getStarted}>
+          <TouchableOpacity className="w-5/6 h-12 items-center justify-center bg-primary rounded-md " onPress={getStarted}>
           <Text className="font-bold text-white">Get Started</Text>
           </TouchableOpacity>
         ) : (
@@ -108,7 +108,7 @@ export default function Index() {
             <View key={index} style={[styles.indicator, currentSlideIndex == index && {backgroundColor: 'black'}]}/> 
             ))}
           </View>
-          <TouchableOpacity className="w-32 h-12 items-center justify-center bg-blue-700 rounded-md" onPress={goNextSlide}>
+          <TouchableOpacity className="w-32 h-12 items-center justify-center bg-primary rounded-md" onPress={goNextSlide}>
             <Text className="font-bold text-white">NEXT</Text>
           </TouchableOpacity>
         </>
@@ -147,7 +147,7 @@ export default function Index() {
     return (
       <View className="w-screen h-screen flex-column items-center justify-center gap-2">
         <Image source={logo} style={{maxWidth: '60%',resizeMode: 'contain', height: '20%'}}/>
-        <ActivityIndicator size={32} color={'blue'}/>
+        <ActivityIndicator size={32} color={'#0818A8'}/>
       </View>
     )
   }
