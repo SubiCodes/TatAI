@@ -120,7 +120,7 @@ const ResetToken = () => {
 
                 {loadingResource ? (
                     <View className='h-screen items-center justify-center '>
-                        <ActivityIndicator size="large" color="blue"/>
+                        <ActivityIndicator size="large" color="#0818A8"/>
                     </View> 
                 ) : (
                     <View className='w-80 items-start justify-center gap-4 pt-32 md:w-screen md:items-center md:gap-12'>
@@ -141,7 +141,7 @@ const ResetToken = () => {
                         </TouchableOpacity>
                                 
 
-                        <TouchableOpacity className='w-80 h-12 items-center justify-center bg-blue-700 rounded-md md:w-3/5 md:h-16' onPress={submitToken}>
+                        <TouchableOpacity className='w-80 h-12 items-center justify-center bg-primary rounded-md md:w-3/5 md:h-16' onPress={submitToken}>
                             <Text className='text-lg text-white font-bold '>Submit Token</Text>
                         </TouchableOpacity>
                     </View>

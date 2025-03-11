@@ -21,6 +21,7 @@ const Home = () => {
   const [previousPrompts, setPreviousPrompts] = useState([]);
 
   const checkLoggedIn = async () => {
+    setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
       setToken(token)
@@ -35,8 +36,10 @@ const Home = () => {
         }
       );
       if (!preference.data.success) {
-        await router.replace('/(personalization-screens)/personalization-main');
+        await router.push('/modal/personalization');
+        return;
       }
+      setLoading(false);
       setPreferredName(preference.data.data.preferredName);
       setPreferredTone(preference.data.data.preferredTone);
       setPreviousPrompts(preference.data.data.previousPrompts);
@@ -48,7 +51,6 @@ const Home = () => {
 
   const loadPage = async () => {
     await checkLoggedIn();
-    setLoading(false);
   }
 
   useFocusEffect(
