@@ -6,6 +6,11 @@ const preferenceSchema = new mongoose.Schema({
         ref: "User", // Reference to the User model
         required: true
     },
+    email: {
+        type: String,
+        ref: "User",
+        required: true
+    },
     preferredName: {
         type: String,
         required: true
@@ -13,6 +18,16 @@ const preferenceSchema = new mongoose.Schema({
     preferredTone: {
         type: String,
         enum: ["formal", "casual", "soft spoken", "strict"],
+        required: true
+    },
+    toolFamiliarity:{
+        type: String,
+        enum: ["unfamiliar", "recognizes basics", "functionally knowledgeable", "knowledgeable", "expert"],
+        required: true
+    },
+    skillLevel: {
+        type: String,
+        enum: ["beginner", "intermediate", "advance", "expert", "professional"],
         required: true
     },
     previousPrompts: {
