@@ -1,0 +1,45 @@
+Features:
+
+-> For Admin (Website)
+1. Authentication
+   - Admin login there account.
+2. All Accounts
+   - Admin can view all registered accounts.
+   - Admin can restrict accounts.
+3. Guides
+   - Admin can view guides
+   - Admin can add guides
+   - Admin can edit guides
+   - Admin can delete guides
+
+
+-> For Users (Android Application)
+1. Authentication
+✅ - User can create account and login. 
+✅ - User can change password when forgotten.
+2. Personalization
+✅ - User can choose between different personalization settings such us, name, tone, experience level etc.
+3. Profile
+   - User can edit information such as name birthdate, gender, password etc.
+   - User can edit personalization settings.
+4. Tool Guides
+   - User can see guides on how to use tools properly.
+   - User can save guides.
+5. Repair Guides
+   - User can see guides on how to do home repairs properly.
+   - User can save guides.
+6. DIY Guides
+   - User can see guides on how to do projects for a pleasing home.
+   - User can save guides.
+7. Cooking Guides
+   - User can see guides on how to prepare pleasing foods.
+   - User can save guides.
+8. Saved Pages
+   - User can view all the guides they saved.
+   - User can remove saved guides from the page.
+9. Problem Finder
+   - User can answer question from assistant to get the most possible issue.
+10. Chatbot
+   - User can interact with the AI for different things connected to DIY Home Projects, Home Repairs, Cooking and Tool Guides.
+   - User can turn on voice to hear the AI speak.
+   - User can use speech to send a query.
