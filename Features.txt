@@ -11,6 +11,8 @@ Features:
    - Admin can add guides
    - Admin can edit guides
    - Admin can delete guides
+4. Guide Verification
+   - Admin can accept or reject guides posted by user.
 
 
 -> For Users (Android Application)
@@ -37,9 +39,15 @@ Features:
 8. Saved Pages
    - User can view all the guides they saved.
    - User can remove saved guides from the page.
-9. Problem Finder
-   - User can answer question from assistant to get the most possible issue.
-10. Chatbot
+9. Post Guides plus Website to View Guides
+   - User can post guides, that will be posted when admin verifies there post.
+   - User can view guides through web.
+10. Chatbot Recommendation
+   - User can click the recommended question for the common queries.
+11. Chatbot
    - User can interact with the AI for different things connected to DIY Home Projects, Home Repairs, Cooking and Tool Guides.
    - User can turn on voice to hear the AI speak.
    - User can use speech to send a query.
+
+Build Steps:
+User (1,2,3) Admin (1,2,3) User(4,5,6,7,8,9) Admin (4) User (10, 11)
