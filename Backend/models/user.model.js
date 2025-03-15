@@ -16,7 +16,13 @@ const userSchema = new mongoose.Schema({
     },
     birthday: {
         type: Date,
-        required: true
+        required: true,
+        validate: {
+            validator: function (value) {
+                return value <= new Date();  // Ensures the date is not in the future
+            },
+            message: "Birthday must be a date in the past."
+        }
     },
     email: {
         type: String,
