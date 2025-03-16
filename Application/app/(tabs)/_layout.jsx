@@ -34,6 +34,15 @@ export default function Layout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile", 
+          tabBarIcon: ({ color, focused}) => (
+            <MaterialCommunityIcons name={focused ? "account-circle" : "account-circle-outline"} size={24} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

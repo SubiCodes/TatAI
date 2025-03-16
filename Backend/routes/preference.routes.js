@@ -3,7 +3,7 @@ import { createPreference, getPreference, updatePreference } from "../controller
 
 const preferenceRouter = Router();
 
-preferenceRouter.get('/:id', getPreference);
+preferenceRouter.get('/:_id', getPreference);
 preferenceRouter.post('/', createPreference);
 preferenceRouter.put('/:id', updatePreference);
 

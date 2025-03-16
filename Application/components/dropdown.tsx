@@ -126,7 +126,7 @@ import {
     },
     button: {
       justifyContent: "space-between",
-      backgroundColor: "white",
+      backgroundColor: "#FAF9F6",
       flexDirection: "row",
       width: "100%",
       alignItems: "center",

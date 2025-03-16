@@ -322,7 +322,7 @@ const SignUp = () => {
                   { value: "Male", label: "♂️ Male" },
                   { value: "Female", label: "♀️ Female" },
                   { value: "Non-Binary", label: "🏳️‍🌈 Non-Binary" },
-                  { value: "Rather not say", label: "🤐 Rather not say" },
+                  { value: "Prefer not to say", label: "🤐 Prefer not to say" },
                 ]}
                 onChange={handleDropdownChange}
                 placeholder="Gender"

@@ -15,8 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/auth-images/logo1.png",
         "backgroundColor": "#ffffff"
-      }
-      // "softwareKeyboardLayoutMode": "pan"
+      },
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "bundler": "metro",
