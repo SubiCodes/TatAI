@@ -22,7 +22,7 @@ export const getPreference = async (req, res) => {
 };
 
 export const createPreference = async (req, res) => {
-    const { userId, preferredName, preferredTone, toolFamiliarity, skillLevel } = req.body;
+    const { userId, preferredTone, toolFamiliarity, skillLevel } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
         return res.status(400).json({ success: false, message: "Invalid user ID format." });
@@ -34,6 +34,8 @@ export const createPreference = async (req, res) => {
     }
 
     const user = await User.findById(userId);
+
+    const preferredName = user.firstName;
 
     const validTones = ["formal", "casual", "soft spoken", "strict"];
     if (!validTones.includes(preferredTone)) {
@@ -51,7 +53,7 @@ export const createPreference = async (req, res) => {
     }
 
     try {
-        const preference = await UserPreference.create({ userId: userId, email: user.email, preferredName: preferredName,preferredTone: preferredTone, toolFamiliarity: toolFamiliarity, skillLevel: skillLevel });
+        const preference = await UserPreference.create({ userId: userId, email: user.email, preferredName: preferredName ,preferredTone: preferredTone, toolFamiliarity: toolFamiliarity, skillLevel: skillLevel });
         res.status(201).json({ success: true, message: "User preference created successfully.", data: preference });
     } catch (error) {
         console.log(error);
