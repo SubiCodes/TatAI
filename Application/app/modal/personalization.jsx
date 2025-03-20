@@ -278,7 +278,7 @@ const Personalization = () => {
         setButtonLoading(true);
         console.log(`${preferredNameToBeCalled}, ${preferredToneToBeUsed}, ${toolKnowledgeLevel}, ${skillLevel}`);
         try {
-            const res = await axios.post(`${API_URL}/api/v1/preference`, {userId: userID, preferredName: preferredNameToBeCalled, preferredTone: preferredToneToBeUsed, toolFamiliarity: toolKnowledgeLevel, skillLevel: skillLevel}, 
+            const res = await axios.post(`${API_URL}/api/v1/preference`, {userId: userID, preferredTone: preferredToneToBeUsed, toolFamiliarity: toolKnowledgeLevel, skillLevel: skillLevel}, 
                 { 
                   validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
                 })
@@ -290,10 +290,7 @@ const Personalization = () => {
                 return;
             }
             console.log(res.data.message);
-            Alert.alert("Congratulations🎊", res.data.message, [
-                {text: "Okay"}
-            ]);
-            await router.replace('/(tabs)/home');
+            await router.replace('/modal/askName');
         } catch (error) {
             Alert.alert("Oops⚠️", error.message, [
                 {text: "Okay"}
@@ -331,7 +328,7 @@ const Personalization = () => {
         )
     }
 
-    const pages = [preferredName, preferredTone, toolFamiliarity, skillsLevel, getStarted]
+    const pages = [preferredTone, toolFamiliarity, skillsLevel, getStarted]
 
     const Page = ({Component}) => {
         return (
