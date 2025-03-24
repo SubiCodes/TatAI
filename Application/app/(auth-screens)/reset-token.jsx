@@ -43,7 +43,7 @@ const ResetToken = () => {
 
     const handleResendEmail = async () => {
         setResendEmail(false);
-        setResetTimer(1);
+        setResetTimer(59);
         
         try {
             const resToken = await axios.post(`${API_URL}/api/v1/auth/get-reset-token`, {email: email}, 

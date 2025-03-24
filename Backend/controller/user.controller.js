@@ -7,7 +7,7 @@ export const getUserData = async (req, res) => {
     const {_id} = req.params;
 
     try {
-        const user = await User.findOne({_id: _id}).select("email firstName lastName gender birthday");
+        const user = await User.findOne({_id: _id}).select("email firstName lastName gender birthday verificationToken verified");
 
         if (!user) {
             return res.status(404).json({success: false, message: "User does not exist."})

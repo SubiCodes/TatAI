@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, StatusBar } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, StatusBar, Alert } from 'react-native'
 import React, { useCallback, useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect, useRouter, useNavigation } from 'expo-router'
@@ -30,6 +30,27 @@ const Home = () => {
       }
       const decodedToken = await jwtDecode(token);
       await setUserID(decodedToken.userID);
+      const userData = await axios.get(`${API_URL}/api/v1/user/${decodedToken.userID}`, 
+        { 
+          validateStatus: (status) => status < 500,
+        }
+      );
+      if (!userData.data.success) {
+        Alert.alert('⚠️Oops', 'User not found. Please sign in again.');
+        await AsyncStorage.removeItem('token');
+        console.log(userData.data.success);
+        await router.replace('/(auth-screens)/signin');
+        return;
+      };
+      if (!userData.data.data.verified) {
+        console.log(userData.data.data.verified);
+        Alert.alert('⚠️Oops', 'User not verified. Please verify your email.');
+        await AsyncStorage.removeItem('token');
+        setTimeout(() => {
+          router.replace(`/(auth-screens)/verify-account/${userData.data.data.email}`);
+        }, 100);
+        return;
+      }
       const preference = await axios.get(`${API_URL}/api/v1/preference/${decodedToken.userID}`, 
         { 
           validateStatus: (status) => status < 500,

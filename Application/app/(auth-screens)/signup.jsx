@@ -210,8 +210,7 @@ const SignUp = () => {
         Alert.alert("Account Created", "You're account is successfully created.", [
           {text: 'Ok'}
         ])
-        await AsyncStorage.setItem('token', res.data.tokenCreated);
-        await router.replace('/(tabs)/home');
+        await router.replace(`/(auth-screens)/verify-account/${email}`);
         setLoading(false);
         return;
       }

@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { signUp, signIn, forgotPassword, getResetToken, resetPassword, resendToken } from "../controller/auth.controller.js";
+import { signUp, verifyUser , resendVerificationToken, signIn, forgotPassword, getResetToken, resetPassword, resendToken } from "../controller/auth.controller.js";
 
 const authRouter = Router();
 
 authRouter.post('/sign-up', signUp);
+
+authRouter.post('/verify-user', verifyUser);
+
+authRouter.post('/resend-verification-token', resendVerificationToken);
 
 authRouter.post('/sign-in', signIn);
 

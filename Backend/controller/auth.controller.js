@@ -2,7 +2,7 @@ import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
-import { sendMail } from '../nodemailer/email.js';
+import { sendResetToken, sendVerificationToken } from '../nodemailer/email.js';
 
 export const signUp = async (req, res) => {
     const {firstName, lastName, gender, birthday, email, password} = req.body;
@@ -13,17 +13,58 @@ export const signUp = async (req, res) => {
         return res.status(400).json({success: false, message: "Email already exists."});
     }
 
+    const verificationToken = Math.random().toString(36).substring(2, 8).toUpperCase();
     const encryptedPassword = await bcrypt.hash(password, 10);
 
     try {
-        const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword});
-        const token = await JWT.sign({ userID: user._id }, JWT_SECRET);
-        res.status(201).json({success: true, message: "User created successfully.", data: user, tokenCreated: token});
+        const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword, verificationToken: verificationToken});
+        sendVerificationToken(email, verificationToken);
+        res.status(201).json({success: true, message: "User created successfully.", data: user, verificationToken: verificationToken});
     } catch (error) {
         console.log(error);
         res.status(500).json({success: false, message: "Cannot create user.", error: error.message});
     }
 };
+
+export const resendVerificationToken = async (req, res) => {
+    const {email} = req.body;
+
+    try {
+        const existingUser = await User.findOne({email: email});
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: "User does not exist."});
+        }
+        sendVerificationToken(email, existingUser.verificationToken);
+        return res.status(200).json({success: true, message: "Verification token resent successfully."});
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot resend verification token: Server side error.`, error: error.message});
+    }
+}
+
+export const verifyUser = async (req, res) => {
+    const {email, token} = req.body;
+
+    try {
+        const existingUser = await User.findOne({email: email});
+        if (!existingUser) {
+            return res.status(400).json({success: false, message: "User does not exist."});
+        };
+        if(existingUser.verified){
+            return res.status(400).json({success: false, message: "User is already verified."});
+        };
+
+        const verificationToken = existingUser.verificationToken;
+        if (verificationToken !== token.toUpperCase()) {
+            return res.status(400).json({success: false, message: "Incorrect verification token."});
+        };
+        existingUser.verified = true;
+        existingUser.verificationToken = undefined;
+        await existingUser.save();
+        return res.status(200).json({success: true, message: "User verified successfully."});
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot verify user: ${error.message}`});
+    }
+}
 
 export const signIn = async (req, res) => {
     const {email, password} = req.body;
@@ -78,8 +119,6 @@ export const forgotPassword = async (req, res) => {
         existingUser.resetPasswordTokenRequestLatest = currentTime;
         await existingUser.save();
 
-        //send email here
-    
         return res.status(200).json({success: true, message: "Reset password token sent to email.", resetToken: existingUser.resetPasswordToken, resetPasswordTokenRequestCount: existingUser.resetPasswordTokenRequestCount, resetPasswordTokenRequestLatest: existingUser.resetPasswordTokenRequestLatest, userEmail: existingUser.email});
 
     } catch (error) {
@@ -108,7 +147,7 @@ export const resendToken = async (req, res) => {
             await existingUser.save();
         }
 
-        sendMail(email, token);
+        sendResetToken(email, token);
         existingUser.resetPasswordTokenRequestCount += 1;
         existingUser.resetPasswordTokenRequestLatest = currentTime;
         await existingUser.save();
