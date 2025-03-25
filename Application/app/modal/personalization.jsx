@@ -328,7 +328,7 @@ const Personalization = () => {
         )
     }
 
-    const pages = [preferredTone, toolFamiliarity, skillsLevel, getStarted]
+    const pages = [ preferredTone, toolFamiliarity, skillsLevel, getStarted]
 
     const Page = ({Component}) => {
         return (
@@ -389,8 +389,9 @@ const Personalization = () => {
         <SafeAreaView style={{ flex: 1}}>
             <Indicator/>
             <FlatList 
-                // scrollEnabled={false}
-                keyboardShouldPersistTaps='handled'
+                //scrollEnabled={false}
+                keyboardShouldPersistTaps="handled"
+                //removeClippedSubviews={false}
                 ref={ref}
                 showsHorizontalScrollIndicator={true}
                 horizontal
