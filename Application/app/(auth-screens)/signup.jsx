@@ -438,9 +438,6 @@ const SignUp = () => {
               )}
             </TouchableOpacity>
           </View>
-
-         
-
           <View className="min-h-40"></View>
         </ScrollView>
       </SafeAreaView>
