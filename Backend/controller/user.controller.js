@@ -7,7 +7,7 @@ export const getUserData = async (req, res) => {
     const {_id} = req.params;
 
     try {
-        const user = await User.findOne({_id: _id}).select("email firstName lastName gender birthday verificationToken verified");
+        const user = await User.findOne({_id: _id}).select("email firstName lastName gender birthday verificationToken verified profileIcon");
 
         if (!user) {
             return res.status(404).json({success: false, message: "User does not exist."})
@@ -23,11 +23,8 @@ export const getUserData = async (req, res) => {
 
 export const editUserData = async (req, res) => {
     const {_id} = req.params;
-    const {firstName, lastName, gender, birthday, preferredName, preferredTone, toolFamiliarity, skillLevel} = req.body;
-
-    console.log(_id);
+    const {firstName, lastName, gender, birthday, preferredName, preferredTone, toolFamiliarity, skillLevel, profileIcon} = req.body;
     
-
     try {
         const user = await User.findOne({_id: _id});
         const preference = await UserPreference.findOne({userId: _id});
@@ -44,6 +41,7 @@ export const editUserData = async (req, res) => {
         if(lastName) user.lastName = lastName;
         if(gender) user.gender = gender;
         if(birthday) user.birthday = birthday;
+        if(profileIcon) user.profileIcon = profileIcon;
 
         if(preferredName) preference.preferredName = preferredName;
         if(preferredTone) preference.preferredTone = preferredTone;

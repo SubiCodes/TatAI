@@ -16,6 +16,9 @@ export default function RootLayout() {
         headerRight: () => (
             <HeaderContactUs/>
           ),
+        headerLeft: () => (
+            null
+          ),
         }}/>
     <Stack.Screen name="forgot-password" options={{ 
         headerShown: true,

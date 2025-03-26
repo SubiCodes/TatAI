@@ -21,9 +21,10 @@ import {
     placeholder: string;
     height: number;
     color: string;
+    bgColor: string
   }
   
-  export default function Dropdown({ data, onChange, placeholder, height, color }: DropDownProps) {
+  export default function Dropdown({ data, onChange, placeholder, height, color, bgColor }: DropDownProps) {
     const [expanded, setExpanded] = useState(false);
     const [value, setValue] = useState("");
     const buttonRef = useRef<View>(null);
@@ -51,7 +52,7 @@ import {
     return (
       <View ref={buttonRef}>
         <TouchableOpacity
-          style={[styles.button, { height, borderColor: color }]}
+          style={[styles.button, { height, borderColor: color, backgroundColor: bgColor }]}
           activeOpacity={0.8}
           onPress={toggleExpanded}
         >
