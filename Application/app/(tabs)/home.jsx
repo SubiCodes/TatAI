@@ -20,8 +20,11 @@ const Home = () => {
   const [preferredTone, setPreferredTone] = useState(null);
   const [previousPrompts, setPreviousPrompts] = useState([]);
 
+  const [serverError, setServerError] = useState(false);
+
   const checkLoggedIn = async () => {
     setLoading(true);
+    setServerError(false);
     try {
       const token = await AsyncStorage.getItem('token');
       setToken(token)
@@ -64,9 +67,10 @@ const Home = () => {
       setPreferredName(preference.data.data.preferredName);
       setPreferredTone(preference.data.data.preferredTone);
       setPreviousPrompts(preference.data.data.previousPrompts);
-      console.log(`User ID: ${decodedToken.userID}, Preferences: ${preference.data.data.preferredName}`);
     } catch (error) {
+      setLoading(false);
       console.log(error);
+      setServerError(true);
     }
   };
 
@@ -99,6 +103,16 @@ const Home = () => {
         <StatusBar translucent={true} backgroundColor={'transparent'}/>
         <ActivityIndicator size={32} color={'blue'}/>
         <Text>Loading Assets...</Text>
+      </View>
+    )
+  }
+
+  if (serverError){
+    return (
+      <View className='w-screen h-screen items-center justify-center'>
+          <StatusBar translucent={true} backgroundColor={'transparent'}/>
+          <Text className='text-3xl font-extrabold text-red-500'>Network Error</Text>
+          <Text>Please connect to a stable internet.</Text>
       </View>
     )
   }
