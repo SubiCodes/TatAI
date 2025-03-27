@@ -11,15 +11,11 @@ import logo from '@/assets/images/auth-images/logo1.png'
 
 const Home = () => {
   const router = useRouter();
-  const navigation = useNavigation();
-  const [userID, setUserID] = useState(null);
+
   const [token, setToken] = useState(null);
+  const [userID, setUserID] = useState();
+
   const [loading, setLoading] = useState(true);
-
-  const [preferredName, setPreferredName] = useState(null);
-  const [preferredTone, setPreferredTone] = useState(null);
-  const [previousPrompts, setPreviousPrompts] = useState([]);
-
   const [serverError, setServerError] = useState(false);
 
   const checkLoggedIn = async () => {
@@ -33,25 +29,36 @@ const Home = () => {
       }
       const decodedToken = await jwtDecode(token);
       await setUserID(decodedToken.userID);
-      const userData = await axios.get(`${API_URL}/api/v1/user/${decodedToken.userID}`, 
+      return;
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      setServerError(true);
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  const checkVerified = async () => {
+    setLoading(true);
+    setServerError(false);
+    try {
+
+      const token_copy = await AsyncStorage.getItem('token');
+      if (!token_copy){
+        router.replace('/(auth-screens)/signin');
+        return;
+      }
+      const decodedToken = await jwtDecode(token_copy);
+
+      const user = await axios.get(`${API_URL}/api/v1/user/${decodedToken.userID}`, 
         { 
           validateStatus: (status) => status < 500,
         }
       );
-      if (!userData.data.success) {
-        Alert.alert('⚠️Oops', 'User not found. Please sign in again.');
+      if (!user.data.data.verified) {
         await AsyncStorage.removeItem('token');
-        console.log(userData.data.success);
-        await router.replace('/(auth-screens)/signin');
-        return;
-      };
-      if (!userData.data.data.verified) {
-        console.log(userData.data.data.verified);
-        Alert.alert('⚠️Oops', 'User not verified. Please verify your email.');
-        await AsyncStorage.removeItem('token');
-        setTimeout(() => {
-          router.replace(`/(auth-screens)/verify-account/${userData.data.data.email}`);
-        }, 100);
+        await router.replace(`/(auth-screens)/verify-account/${user.data.data.email}`);
         return;
       }
       const preference = await axios.get(`${API_URL}/api/v1/preference/${decodedToken.userID}`, 
@@ -63,46 +70,29 @@ const Home = () => {
         await router.push('/modal/personalization');
         return;
       }
-      setLoading(false);
-      setPreferredName(preference.data.data.preferredName);
-      setPreferredTone(preference.data.data.preferredTone);
-      setPreviousPrompts(preference.data.data.previousPrompts);
     } catch (error) {
-      setLoading(false);
-      console.log(error);
+      console.log(error.message);
       setServerError(true);
+    }finally{
+      setLoading(false);
     }
-  };
-
-  const loadPage = async () => {
-    await checkLoggedIn();
   }
 
   useFocusEffect(
     useCallback(() => {
-      loadPage();
+      checkLoggedIn();
     }, [])
   );
 
   useEffect(() => {
-    navigation.setOptions({ tabBarStyle: loading ? { display: 'none' } : {} });
-  }, [loading]);
-
-  const logout = async () => {
-    try {
-      await AsyncStorage.removeItem('token');
-      checkLoggedIn();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    checkVerified();
+  }, [])
 
   if (loading){
     return (
       <View className='w-screen h-screen items-center justify-center gap-4'>
         <StatusBar translucent={true} backgroundColor={'transparent'}/>
         <ActivityIndicator size={32} color={'blue'}/>
-        <Text>Loading Assets...</Text>
       </View>
     )
   }
@@ -121,15 +111,7 @@ const Home = () => {
     <>
     <StatusBar translucent={true} backgroundColor={'transparent'}/>
     <View className='w-screen h-screen items-center justify-center bg-background'> 
-      <Text>Home</Text>
-      <Text>Token: {token}</Text>
-      <Text>User ID: {userID}</Text>
-      <Text>Preferred Name: {preferredName} </Text>
-      <Text>Preferred Tone: {preferredTone} </Text>
-      <Text>Previous Prompts: {previousPrompts} </Text>
-      <TouchableOpacity className='w-80 h-12 rounded bg-red-500 items-center justify-center' onPress={logout}>
-        <Text className='text-lg text-white font-bold'>Logout</Text>
-      </TouchableOpacity>
+      
     </View> 
     </>
   )
