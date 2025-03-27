@@ -20,7 +20,7 @@ const ResetPassword = () => {
 
   const checkPasswordStrength = async () => {
     let score = 0;
-    const hasMinLength = password.length >= 6;
+    const hasMinLength = password.length > 7;
     const hasLetter = /[a-zA-Z]/.test(password);
     const hasNumber = /\d/.test(password);
   

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, StatusBar, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, StatusBar, Alert, Dimensions } from 'react-native'
 import React, { useCallback, useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useFocusEffect, useRouter, useNavigation } from 'expo-router'
@@ -8,6 +8,8 @@ import { API_URL } from '@/constants/links.js'
 import axios from 'axios'
 
 import logo from '@/assets/images/auth-images/logo1.png'
+
+const {width, height} = Dimensions.get('screen');
 
 const Home = () => {
   const router = useRouter();
@@ -110,7 +112,7 @@ const Home = () => {
   return (
     <>
     <StatusBar translucent={true} backgroundColor={'transparent'}/>
-    <View className='w-screen h-screen items-center justify-center bg-background'> 
+    <View className='items-center justify-center bg-background' style={{width: width, height: height}}> 
       
     </View> 
     </>
