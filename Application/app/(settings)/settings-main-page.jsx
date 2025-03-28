@@ -5,6 +5,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 
@@ -46,22 +47,33 @@ const SettingsMainPage = () => {
                     <Text className='text-lg font-bold'>Preferences</Text>
                     <Text className='text-lg font-light mb-8'>Personalize your experience on TatAi</Text>
                     <View className='w-full h-auto gap-4'>
-                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
+                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center' onPress={() => router.push('/(settings)/preferred-name')}>
+                            <Text><FontAwesome name="id-card" size={24} color="black" /></Text>
+                            <Text className='text-lg'>Preferred Name</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center' onPress={() => router.push('/(settings)/tone')}>
                             <Text><Entypo name="sound" size={24} color="black" /></Text>
                             <Text className='text-lg'>Tone</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
+                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center' onPress={() => router.push('/(settings)/tool-knowledge')}>
                             <Text><MaterialCommunityIcons name="tools" size={24} color="black" /></Text>
                             <Text className='text-lg'>Tool Knowledge</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
+                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center' onPress={() => router.push('/(settings)/repair-expertise')}>
                             <Text><Ionicons name="hammer" size={24} color="black" /></Text>
                             <Text className='text-lg'>Repair Expertise</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
-                            <Text><MaterialIcons name="accessibility" size={24} color="black" /></Text>
-                            <Text className='text-lg'>Accessibility</Text>
-                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                <View className="flex-row items-center mb-8" style={{width: '100%'}}>
+                    <View className="flex-1 h-[2px] bg-[#CBC4C4]" />
+                </View>
+
+                <View className='w-full h-auto  mb-8'>
+                    <Text className='text-lg font-bold'>Accessibility</Text>
+                    <Text className='text-lg font-light mb-8'>Enhance accesibility on the TatAI app.</Text>
+                    <View className='w-full h-auto gap-4'>
                         <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
                             <Text><MaterialIcons name="dark-mode" size={24} color="black" /></Text>
                             <Text className='text-lg'>Dark Mode</Text>

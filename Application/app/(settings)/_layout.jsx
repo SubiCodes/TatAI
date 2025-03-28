@@ -25,6 +25,34 @@ export default function RootLayout() {
             headerTitleAlign: 'center',
             headerBlurEffect: 'regular',
             }}/>
+            <Stack.Screen name="tone" options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: 'Tone',
+            headerTitleAlign: 'center',
+            headerBlurEffect: 'regular',
+            }}/>
+            <Stack.Screen name="tool-knowledge" options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: 'Tool Knowledge',
+            headerTitleAlign: 'center',
+            headerBlurEffect: 'regular',
+            }}/>
+            <Stack.Screen name="repair-expertise" options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: 'Repair Expertise',
+            headerTitleAlign: 'center',
+            headerBlurEffect: 'regular',
+            }}/>
+            <Stack.Screen name="preferred-name" options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: 'Preferred Name',
+            headerTitleAlign: 'center',
+            headerBlurEffect: 'regular',
+            }}/>
         </Stack>
     )
 }
