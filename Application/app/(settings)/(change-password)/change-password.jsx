@@ -1,7 +1,12 @@
-import { View, Text, StatusBar, SafeAreaView, TextInput, TouchableOpacity, Alert, } from 'react-native'
+import { View, Text, StatusBar, SafeAreaView, TextInput, TouchableOpacity, Alert, Modal, ActivityIndicator, } from 'react-native'
 import CheckBox from 'expo-checkbox'
 import Toast from '@/components/toast/error-toast.jsx'
 import React, { useState, useEffect, useRef } from 'react'
+import axios from 'axios'
+import { API_URL } from '@/constants/links.js'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { jwtDecode } from 'jwt-decode'
+import { router } from 'expo-router'
 
 const ChangePassword = () => {
 
@@ -22,6 +27,8 @@ const ChangePassword = () => {
   const [errorList, setErrorList] = useState([]);
   const [showError, setShowError] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const handleClearFields = async () => {
     setCurrentPassword('');
     setNewPassword('');
@@ -29,6 +36,7 @@ const ChangePassword = () => {
   };
 
   const handleChangePassword = async () => {
+    setLoading(true);
     setCurrentPasswordError(false);
     setNewPasswordError(false);
     setNewReEnteredPasswordError(false);
@@ -62,14 +70,28 @@ const ChangePassword = () => {
 
     try {
       if (!currentPasswordError && !newPasswordError && !newReEnteredPasswordError){
-        console.log('Passed');
+        const token = await AsyncStorage.getItem('token');
+        const decryptedToken = await jwtDecode(token);
+        const changePass = await axios.post(`${API_URL}/api/v1/auth/change-password/${decryptedToken.userID}`, {currentPassword: currentPassword, newPassword: newPassword}, 
+          { 
+            validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
+          });
+        if (!changePass.data.success){
+          setCurrentPasswordError(true);
+          setErrorList((prev) => [...prev, changePass.data.message]);
+          Alert.alert("⚠️Oops", changePass.data.message);
+          return
+        };
+        Alert.alert("🎊Change Successful", changePass.data.message);
       }
       setShowError(true);
       setTimeout(() => {
-        setShowError(false);
+        setShowError(false); 
       }, 3000);
     } catch (error) {
-      
+      console.log(error.message);
+    } finally{
+      setLoading(false);
     }
   }
 
@@ -110,13 +132,20 @@ const ChangePassword = () => {
 
   return (
     <>
-    <StatusBar translucent={true} backgroundColor={'transparent'}/>
+    <StatusBar translucent={false} className='bg-background'/>
     
-    <SafeAreaView className='w-screen h-screen items-center pt-40 px-8'>
-      {showError && errorList.map((error, index) => (
-        <Toast key={index} index={index} message={error} />
-      ))}
+    <SafeAreaView className='w-screen h-screen items-center pt-32 px-8 bg-background'>
       <View className='w-full h-auto flex-col gap-4 mb-8'>
+
+        <Modal visible={loading} transparent={true}>
+          <View className='w-screen h-screen items-center justify-center' style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+            <View className='w-4/5 h-auto bg-white items-center gap-8 py-12 justify-center rounded-xl'>
+              <Text className='text-2xl font-bold'>Changing Password</Text>
+              <ActivityIndicator color={'#0818A8'} size={32}/>
+              <Text className='text-base font-light'>This may take a while...</Text>
+            </View>
+          </View>
+        </Modal>
 
         <View className='w-full h-auto flex-col gap-2'>
           <Text className='text-lg font-bold'>Current Password</Text>
@@ -181,7 +210,7 @@ const ChangePassword = () => {
         <View className="flex-1 h-[1px] bg-gray-300" />
       </View>
 
-      <TouchableOpacity className='w-auto h-auto items-center justify-center'>
+      <TouchableOpacity className='w-auto h-auto items-center justify-center' onPress={() => {router.push('/(settings)/(change-password)/forgot-password')}}>
         <Text className='text-lg font-bold text-primary'>Forgot Password</Text>
       </TouchableOpacity>
 

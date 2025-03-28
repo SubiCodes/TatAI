@@ -195,3 +195,27 @@ export const resetPassword = async (req, res) => {
     }
 };
 
+export const changePassword = async (req, res) => {
+    const {_id} = req.params;
+    const {currentPassword, newPassword} = req.body;
+
+    try {
+        const existingUser = await User.findOne({_id: _id}).select("password");
+        if (!existingUser) {
+            return res.status(404).json({success: false, message: `No user found`});
+        }
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        const isPasswordValid = await bcrypt.compare(currentPassword, existingUser.password);
+
+        if (!isPasswordValid) {
+            return res.status(400).json({success: false, message: "Input password does not match current password."});
+        }
+        existingUser.password = hashedNewPassword;
+        await existingUser.save();
+        return res.status(200).json({success: true, message: "Password changed successfully."});
+    } catch (error) {
+        return res.status(500).json({success: false, message: `Cannot change password: ${error.message}`});
+    }
+}
+

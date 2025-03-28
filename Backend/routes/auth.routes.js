@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signUp, verifyUser , resendVerificationToken, signIn, forgotPassword, getResetToken, resetPassword, resendToken } from "../controller/auth.controller.js";
+import { signUp, verifyUser , resendVerificationToken, signIn, forgotPassword, getResetToken, resetPassword, resendToken, changePassword } from "../controller/auth.controller.js";
 
 const authRouter = Router();
 
@@ -18,6 +18,8 @@ authRouter.post('/get-reset-token', getResetToken);
 authRouter.post('/resend-reset-password-token', resendToken);
 
 authRouter.post('/reset-password', resetPassword);
+
+authRouter.post('/change-password/:_id', changePassword);
 
 
 export default authRouter;

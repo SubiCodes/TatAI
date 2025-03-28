@@ -14,9 +14,9 @@ const SettingsMainPage = () => {
 
   return (
     <>
-        <StatusBar translucent={true} backgroundColor={'transparent'}/>
+        <StatusBar translucent={false} className='bg-background'/>
         <SafeAreaView className='min-w-screen min-h-screen'>
-            <ScrollView className='w-screen h-screen bg-background' contentContainerStyle={{justifyContent: 'center', paddingHorizontal: 32, paddingTop: 100}}>
+            <ScrollView className='w-screen h-screen bg-background' contentContainerStyle={{justifyContent: 'center', paddingHorizontal: 32, paddingTop: 80}}>
 
                 <View className='w-full h-auto gap-8 mb-8'>
                     <Text className='text-lg font-bold'>Account Profile</Text>
