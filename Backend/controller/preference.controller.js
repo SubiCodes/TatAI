@@ -12,7 +12,7 @@ export const getPreference = async (req, res) => {
     try {
         const preference = await UserPreference.findOne({ userId: _id }).select("preferredName preferredTone skillLevel toolFamiliarity");
         if (!preference) {
-            return res.status(404).json({ success: false, message: "User preference not found." });
+            return res.status(404).json({ success: false, message: "User yet to set up preference not." });
         }
         res.status(200).json({ success: true, message: "Preference retrieved successfully.", data: preference });
     } catch (error) {
@@ -75,12 +75,12 @@ export const updatePreference = async (req, res) => {
     }  
     
     const validToolFamiliarity = ["unfamiliar", "recognizes basics", "functionally knowledgeable", "knowledgeable", "expert"];
-    if (!validToolFamiliarity.includes(toolFamiliarity)) {
+    if (toolFamiliarity && !validToolFamiliarity.includes(toolFamiliarity)) {
         return res.status(400).json({ success: false, message: "Invalid Tool Familiarity." });
     }
 
     const validSkillLevel = ["beginner", "intermediate", "advance", "expert", "professional"];
-    if (!validSkillLevel.includes(skillLevel)) {
+    if (skillLevel && !validSkillLevel.includes(skillLevel)) {
         return res.status(400).json({ success: false, message: "Invalid Skill Level." });
     }
 
