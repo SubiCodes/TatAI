@@ -72,6 +72,10 @@ const Profile = () => {
         try {
             const token = await AsyncStorage.getItem('token');
             const decryptedToken = await jwtDecode(token);
+            if (!token) {
+                router.dismissAll();
+                router.replace('/(auth-screens)/signin');
+            }
             const res = await axios.get(`${API_URL}/api/v1/user/${decryptedToken.userID}`);
             setFullName(`${res.data.data.firstName} ${res.data.data.lastName}`);
             setEmail(res.data.data.email);
