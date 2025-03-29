@@ -30,7 +30,7 @@ const RepairExpertise = () => {
                 Alert.alert("⚠️Oops", res.data.message);
                 return;
             };
-            Alert.alert("🎊Change Successful", res.data.message);
+            Alert.alert("Change Successful", res.data.message);
         } catch (error) {
             Alert.alert("⚠️Oops", error.message);
         }finally{
@@ -69,8 +69,8 @@ const RepairExpertise = () => {
 
   return (
     <>  
-        <StatusBar translucent={false} className='bg-background'/>
-        <SafeAreaView className='min-w-screen min-h-screen bg-background px-8 pt-32 gap-8'>
+        <StatusBar translucent={false} className='bg-background dark:bg-background-dark'/>
+        <SafeAreaView className='min-w-screen min-h-screen bg-background px-8 pt-32 gap-8 dark:bg-background-dark'>
 
             {fetchingData ? (
                 <View className='w-full h-auto flex-col mb-4 gap-2'>
@@ -80,7 +80,7 @@ const RepairExpertise = () => {
                 <View className='w-full h-screen items-center gap-6'>
                     <Text className='text-xl font-bold text-red-500'>Error fetching preference.</Text>
                     <TouchableOpacity className='w-40 h-8 items-center justify-center bg-primary rounded-3xl' onPress={getUserPreference}>
-                        <Text className='text-lg font-bold text-white'>Retry</Text>
+                        <Text className='text-lg font-bold text-text dark:text-text-dark'>Retry</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -97,32 +97,32 @@ const RepairExpertise = () => {
             </Modal>
 
             <View className='w-full h-auto flex-col mb-4 gap-2'>
-                <Text className='text-xl font-bold'>Repair Expertise</Text>
-                <Text>Select your repair expertise level.</Text>
+                <Text className='text-xl font-bold text-text dark:text-text-dark'>Repair Expertise</Text>
+                <Text className='text-text dark:text-text-dark'>Select your repair expertise level.</Text>
             </View>
 
             <View className='w-full h-auto flex-col gap-6 px-2'>
 
 
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('beginner')}>
-                    <Text className='text-lg font-bold flex-1'>Beginner</Text>
-                    {activeRadioButton === 'beginner' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Beginner</Text>
+                    {activeRadioButton === 'beginner' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark' ><Ionicons name="radio-button-off-sharp" size={24}/></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('intermediate')}>
-                    <Text className='text-lg font-bold flex-1'>Intermediate</Text>
-                    {activeRadioButton === 'intermediate' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Intermediate</Text>
+                    {activeRadioButton === 'intermediate' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24}/></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('advance')}>
-                    <Text className='text-lg font-bold flex-1'>Advance</Text>
-                    {activeRadioButton === 'advance' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Advance</Text>
+                    {activeRadioButton === 'advance' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24} /></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('expert')}>
-                    <Text className='text-lg font-bold flex-1'>Expert</Text>
-                    {activeRadioButton === 'expert' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Expert</Text>
+                    {activeRadioButton === 'expert' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24} /></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('professional')}>
-                    <Text className='text-lg font-bold flex-1'>Professional</Text>
-                    {activeRadioButton === 'professional' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Professional</Text>
+                    {activeRadioButton === 'professional' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24} /></Text>)}
                 </TouchableOpacity>
 
 

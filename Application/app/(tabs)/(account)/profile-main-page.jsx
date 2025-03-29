@@ -93,15 +93,16 @@ const Profile = () => {
             getUserData();
         }, [])
     )
+
     
 
     return (
         <>
-            <StatusBar translucent={true} backgroundColor="transparent" />
+            <StatusBar translucent={true} className='bg-background dark:bg-background-dark'/>
             {fetchingData ? (
                     <FetchingDataScreen/>
                 ) : errorFetching ? (
-                    <View className='w-screen h-screen items-center justify-center gap-4'>
+                    <View className='w-screen h-screen items-center justify-center gap-4 bg-background dark:bg-background-dark'>
                          <Text className='text-3xl font-extrabold text-red-500'>Network Error</Text>
                                   <Text>Please connect to a stable internet.</Text>
                         <TouchableOpacity className='w-44 h-8 items-center justify-center bg-primary rounded-xl'>
@@ -109,7 +110,7 @@ const Profile = () => {
                         </TouchableOpacity>
                     </View>
                 ) : (
-            <SafeAreaView className="h-screen w-screen flex-col items-center bg-background px-8 py-4 gap-4">
+            <SafeAreaView className="h-screen w-screen flex-col items-center bg-background px-8 py-4 gap-4 dark:bg-background-dark">
                 
                 <View className='w-full flex flex-col justify-end items-center gap-4 pb-8' style={{height: '48%'}}>
                     <View className='w-52 h-52 flex flex-col justify-center items-center bg-[#A9A9A9] rounded-full'>
@@ -133,7 +134,7 @@ const Profile = () => {
 
                     <View className='w-auto h-auto flex-col items-center'>
                         <Text className='text-3xl text-secondary font-semibold'>{fullName}</Text>
-                        <Text className='text-base'>{email}</Text>
+                        <Text className='text-base text-text dark:text-text-dark'>{email}</Text>
                     </View>
                 </View>
 
@@ -144,48 +145,48 @@ const Profile = () => {
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
                     <TouchableOpacity className='w-full flex-row justify-start items-center gap-2' onPress={() => {router.push('/(tabs)/(account)/edit-profile')}}>
                         <View className='w-12 h-auto border-0 items-center justify-center'>
-                            <Text className="text-white text-2xl">
-                                <MaterialCommunityIcons name="pencil" size={20} color="black"/>
+                            <Text className="text-text text-2xl dark:text-text-dark">
+                                <MaterialCommunityIcons name="pencil" size={20}/>
                             </Text>
                         </View>  
-                        <Text className='text-xl font-bold'>Edit Profile</Text>
-                        <Text className="text-white text-xl ml-auto"><AntDesign name="right" size={20} color="black"/></Text>
+                        <Text className='text-xl font-bold dark:text-text-dark'>Edit Profile</Text>
+                        <Text className="text-text text-xl ml-auto dark:text-text-dark"><AntDesign name="right" size={20}/></Text>
                     </TouchableOpacity>
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
                     <View className='w-full flex-row justify-start items-center gap-2'>
                         <View className='w-12 h-auto border-0 items-center justify-cente'>
-                            <Text className="text-white text-2xl">
-                                <FontAwesome name="book" size={20} color="black" />
+                            <Text className="text-text text-2xl dark:text-text-dark">
+                                <FontAwesome name="book" size={20} />
                             </Text>
                         </View>
-                        <Text className='text-xl font-bold'>My Guides</Text>
-                        <Text className="text-white text-xl ml-auto"><AntDesign name="right" size={20} color="black"/></Text>
+                        <Text className='text-xl font-bold dark:text-text-dark'>My Guides</Text>
+                        <Text className="text-text text-xl ml-auto dark:text-text-dark"><AntDesign name="right" size={20}/></Text>
                     </View>
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
                     <View className='w-full flex-row justify-start items-center gap-2'>
                         <View className='w-12 h-auto border-0 items-center justify-cente'>
-                            <Text className="text-white text-2xl">
-                                <FontAwesome name="bookmark" size={20} color="black" />
+                            <Text className="text-text text-2xl dark:text-text-dark">
+                                <FontAwesome name="bookmark" size={20}/>
                             </Text>
                         </View>
-                        <Text className='text-xl font-bold'>Saved</Text>
-                        <Text className="text-white text-xl ml-auto"><AntDesign name="right" size={20} color="black"/></Text>
+                        <Text className='text-xl font-bold dark:text-text-dark'>Saved</Text>
+                        <Text className="text-text text-xl ml-auto dark:text-text-dark"><AntDesign name="right" size={20}/></Text>
                     </View>
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
                     <TouchableOpacity className='w-full flex-row justify-start items-center gap-2' onPress={() => {router.push('/(settings)/settings-main-page')}}>
                         <View className='w-12 h-auto border-0 items-center justify-cente'>
-                            <Text className="text-white text-2xl">
-                                <Ionicons name="settings-sharp" size={20} color="black" />
+                            <Text className="text-text text-2xl dark:text-text-dark">
+                                <Ionicons name="settings-sharp" size={20} />
                             </Text>
                         </View>
-                        <Text className='text-xl font-bold'>Settings</Text>
-                        <Text className="text-white text-xl ml-auto"><AntDesign name="right" size={20} color="black"/></Text>
+                        <Text className='text-xl font-bold dark:text-text-dark'>Settings</Text>
+                        <Text className="text-text text-xl ml-auto dark:text-text-dark"><AntDesign name="right" size={20}/></Text>
                     </TouchableOpacity>
                 </View>
 
@@ -199,8 +200,8 @@ const Profile = () => {
                         checkLoggedIn();
                     }}>
                         <View className='w-12 h-auto border-0 items-center justify-cente'>
-                            <Text className="text-white text-2xl">
-                              <Ionicons name="exit-outline" size={20} color="black" />  
+                            <Text className="text-text text-2xl dark:text-text-dark">
+                              <Ionicons name="exit-outline" size={20}/>  
                             </Text>
                         </View>
                         <Text className='text-xl font-bold text-red-400'>Logout</Text>

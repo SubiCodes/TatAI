@@ -109,7 +109,7 @@ const SignIn = () => {
 
   return (
     <>
-      <StatusBar translucent={true} backgroundColor="transparent"/>
+      <StatusBar translucent={false} className='bg-background'/>
       {!appReady ? 
       (
       <View className='h-screen w-screen items-center justify-center'>
@@ -117,8 +117,8 @@ const SignIn = () => {
       </View>) : 
       (
         <>
-      <SafeAreaView className='h-[100%] w-screen flex justify-center items-center flex-col bg-background pt-24'>
-        <ScrollView className='flex-1 gap-4 min-h-[100%] overflow-y-auto px-0 pt-10 pb-4'
+      <SafeAreaView className='h-[100%] w-screen flex justify-center items-center flex-col bg-background pt-20'>
+        <ScrollView className='flex-1 gap-4 min-h-[100%] overflow-y-auto px-0 pt-8 pb-4'
         contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 20}} showsVerticalScrollIndicator={false}>
 
           <View className='min-h-30 h-40 items-center justify-center rounded-lg overflow-visible' >

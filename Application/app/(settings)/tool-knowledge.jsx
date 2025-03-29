@@ -1,6 +1,6 @@
 import { View, Text, StatusBar, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native'
 import { Modal } from 'react-native';
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,8 +8,11 @@ import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { API_URL } from '@/constants/links';
 import { useFocusEffect } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 
 const ToolKnowledge = () => {
+
+    const {colorScheme, toggleColorScheme} = useColorScheme();
 
     const [activeRadioButton, setActiveRadioButton] = useState('formal');
 
@@ -30,7 +33,7 @@ const ToolKnowledge = () => {
                 Alert.alert("⚠️Oops", res.data.message);
                 return;
             };
-            Alert.alert("🎊Change Successful", res.data.message);
+            Alert.alert("Change Successful", res.data.message);
         } catch (error) {
             Alert.alert("⚠️Oops", error.message);
         }finally{
@@ -67,10 +70,24 @@ const ToolKnowledge = () => {
         }, [])
     )
 
+    useEffect(() => {
+        const loadTheme = async () => {
+            try {
+              const storedTheme = await AsyncStorage.getItem('theme');
+              if (storedTheme && storedTheme !== colorScheme) {
+                toggleColorScheme();
+              }
+            } catch (error) {
+              console.error('Failed to load theme:', error);
+            }
+          };
+          loadTheme();
+    }, [])
+
   return (
     <>  
-        <StatusBar translucent={false} className='bg-background'/>
-        <SafeAreaView className='min-w-screen min-h-screen bg-background px-8 pt-32 gap-8'>
+        <StatusBar translucent={false} className='bg-background dark:bg-background-dark'/>
+        <SafeAreaView className='min-w-screen min-h-screen bg-background px-8 pt-32 gap-8 dark:bg-background-dark'>
 
             {fetchingData ? (
                 <View className='w-full h-auto flex-col mb-4 gap-2'>
@@ -80,7 +97,7 @@ const ToolKnowledge = () => {
                 <View className='w-full h-screen items-center gap-6'>
                     <Text className='text-xl font-bold text-red-500'>Error fetching preference.</Text>
                     <TouchableOpacity className='w-40 h-8 items-center justify-center bg-primary rounded-3xl' onPress={getUserPreference}>
-                        <Text className='text-lg font-bold text-white'>Retry</Text>
+                        <Text className='text-lg font-bold text-text dark:text-text-dark'>Retry</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -97,31 +114,31 @@ const ToolKnowledge = () => {
             </Modal>
 
             <View className='w-full h-auto flex-col mb-4 gap-2'>
-                <Text className='text-xl font-bold'>Tool Knowledge</Text>
-                <Text>Select your level in tool familiarity.</Text>
+                <Text className='text-xl font-bold  text-text dark:text-text-dark'>Tool Knowledge</Text>
+                <Text className=' text-text dark:text-text-dark'>Select your level in tool familiarity.</Text>
             </View>
 
             <View className='w-full h-auto flex-col gap-6 px-2'>
 
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('unfamiliar')}>
-                    <Text className='text-lg font-bold flex-1'>Unfamiliar</Text>
-                    {activeRadioButton === 'unfamiliar' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Unfamiliar</Text>
+                    {activeRadioButton === 'unfamiliar' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24} /></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('recognizes basics')}>
-                    <Text className='text-lg font-bold flex-1'>Recognizes Basics</Text>
-                    {activeRadioButton === 'recognizes basics' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Recognizes Basics</Text>
+                    {activeRadioButton === 'recognizes basics' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24}/></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('functionally knowledgeable')}>
-                    <Text className='text-lg font-bold flex-1'>Functionally Knowledgeable</Text>
-                    {activeRadioButton === 'functionally knowledgeable' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Functionally Knowledgeable</Text>
+                    {activeRadioButton === 'functionally knowledgeable' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24}/></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('knowledgeable')}>
-                    <Text className='text-lg font-bold flex-1'>Knowledgeable</Text>
-                    {activeRadioButton === 'knowledgeable' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Knowledgeable</Text>
+                    {activeRadioButton === 'knowledgeable' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24}/></Text>)}
                 </TouchableOpacity>
                 <TouchableOpacity className='w-full h-auto flex-row' onPress={() => setActiveRadioButton('expert')}>
-                    <Text className='text-lg font-bold flex-1'>Expert</Text>
-                    {activeRadioButton === 'expert' ? (<Text><Ionicons name="radio-button-on" size={24} color="black" /></Text>) : (<Text><Ionicons name="radio-button-off-sharp" size={24} color="black" /></Text>)}
+                    <Text className='text-lg font-bold flex-1 text-text dark:text-text-dark'>Expert</Text>
+                    {activeRadioButton === 'expert' ? (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-on" size={24}/></Text>) : (<Text className='text-text dark:text-text-dark'><Ionicons name="radio-button-off-sharp" size={24}/></Text>)}
                 </TouchableOpacity>
 
             </View>

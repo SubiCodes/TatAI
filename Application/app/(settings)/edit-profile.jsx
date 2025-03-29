@@ -26,6 +26,7 @@ import { API_URL } from '@/constants/links';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { useFocusEffect } from 'expo-router';
+import { useColorScheme } from 'nativewind';
 
 const {width, height} = Dimensions.get('screen');
 
@@ -145,8 +146,8 @@ const EditProfile = () => {
 
   return (
     <>
-      <StatusBar translucent={false} backgroundColor={'#FAF9F6'}/>
-      <SafeAreaView className="h-[100%] w-screen flex-col bg-background">
+      <StatusBar translucent={false} className='bg-background dark:bg-background-dark'/>
+      <SafeAreaView className="h-[100%] w-screen flex-col bg-background dark:bg-background-dark">
       {fetchingData ? (
         <FetchingDataScreen/>
       ) : (
@@ -226,7 +227,7 @@ const EditProfile = () => {
           <View className='w-full h-auto gap-4 flex-col'>
               
               <View className='w-full h-auto gap-2 flex-col'>
-                <Text className='text-black text-lg font-semibold'>First Name</Text>
+                <Text className='text-lg font-semibold text-text dark:text-text-dark'>First Name</Text>
                 <TextInput className='w-full h-auto text-base font-normal text-black border-black border-2 rounded px-4 bg-[#F8F8FF]' style={{borderColor: isFirstNameEmpty ? 'red' : 'black'}}
                 value={firstName} onChangeText={(text) => {
                   setFirstName(text);
@@ -234,7 +235,7 @@ const EditProfile = () => {
               </View>
 
               <View className='w-full h-auto gap-2 flex-col'>
-                <Text className='text-black text-lg font-semibold'>Last Name</Text>
+                <Text className='text-lg font-semibold text-text dark:text-text-dark'>Last Name</Text>
                 <TextInput className='w-full h-auto text-base font-normal text-black border-black border-2 px-4 rounded bg-[#F8F8FF]' style={{borderColor: isLastNameEmpty ? 'red' : 'black'}}
                 value={lastName} onChangeText={(text) => {
                   setLastName(text);
@@ -242,7 +243,7 @@ const EditProfile = () => {
               </View>
 
               <View className='w-full h-auto gap-2 flex-col'>
-                <Text className='text-black text-lg font-semibold'>Birhtdate</Text>
+                <Text className='text-lg font-semibold text-text dark:text-text-dark'>Birthdate</Text>
                 <TouchableOpacity onPress={() => setOpenCalendar(true)}>
                 <TextInput
                   placeholder="e.g. 01/01/2001"
@@ -268,7 +269,7 @@ const EditProfile = () => {
               </View>
 
               <View className='w-full h-auto gap-2 flex-col'>
-                <Text className='text-black text-lg font-semibold'>Gender</Text>
+                <Text className='text-lg font-semibold text-text dark:text-text-dark'>Gender</Text>
                 <Dropdown
                   data={[
                     { value: "Male", label: "♂️ Male" },
