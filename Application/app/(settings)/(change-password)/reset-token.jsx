@@ -5,8 +5,11 @@ import { OtpInput } from "react-native-otp-entry";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL } from '@/constants/links';
+import { useColorScheme } from 'nativewind';
 
 const ResetToken = () => {
+
+    const {colorScheme, toggleColorScheme} = useColorScheme();
 
     const [loadingResource, setLoadingResource] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -40,6 +43,20 @@ const ResetToken = () => {
             emailResetExist();
         }, [])
     );
+
+    useEffect(() => {
+        const loadTheme = async () => {
+            try {
+              const storedTheme = await AsyncStorage.getItem('theme');
+              if (storedTheme && storedTheme !== colorScheme) {
+                toggleColorScheme();
+              }
+            } catch (error) {
+              console.error('Failed to load theme:', error);
+            }
+          };
+          loadTheme();
+    }, [])
 
     const handleResendEmail = async () => {
         setResendEmail(false);
@@ -116,28 +133,27 @@ const ResetToken = () => {
     };
 
     return (
-        <SafeAreaView className='h-[100%] w-screen flex items-center flex-col bg-background  md:pt-0 md:justify-center'>
-
+        <SafeAreaView className='h-[100%] w-screen flex items-center flex-col bg-background  md:pt-0 md:justify-center dark:bg-background-dark'>
                 {loadingResource ? (
                     <View className='h-screen items-center justify-center '>
                         <ActivityIndicator size="large" color="#0818A8"/>
                     </View> 
                 ) : (
                     <View className='w-80 items-start justify-center gap-4 pt-32 md:w-screen md:items-center md:gap-12'>
-                        <View className='w-80 items-center gap-2 md:w-4/5 overflow-ellipsis md:gap-8'>
-                            <Text className='text-base font-bold md:text-4xl'>Verification code has been sent to</Text>
-                            <View className='items-center justify-center bg-white border-2 border-black w-80 h-14 rounded-xl md:h-16 md:w-4/5'>
+                        <View className='w-80 items-center gap-2 md:w-4/5 overflow-ellipsis md:gap-8 '>
+                            <Text className='text-base font-bold md:text-4xl text-text dark:text-text-dark'>Verification code has been sent to</Text>
+                            <View className='items-center justify-center bg-white border-2 border-black w-80 h-14 rounded-xl md:h-16 md:w-4/5 dark:bg-background'>
                                 <Text className='font-bold text-lg md:text-3xl' numberOfLines={1} 
                                 ellipsizeMode="tail">{email}</Text>
                             </View>
                         </View>
 
                         <View className='w-80 items-center justify-center md:w-80'>
-                            <OtpInput numberOfDigits={6} type='alphanumeric' onTextChange={(text) => setToken(text)} focusColor={'#60A5FA'} />
+                            <OtpInput numberOfDigits={6} type='alphanumeric' onTextChange={(text) => setToken(text)} focusColor={'#60A5FA'} theme={{ pinCodeTextStyle: { color: '#006FFD' } }} />
                         </View>
 
                         <TouchableOpacity className='w-80 items-center justify-center md:w-80' onPress={handleResendEmail} disabled={!resendEmail}>
-                            {resendEmail ? (<Text className='text-md text-black'>Resend Email</Text>  ) : (<Text className='text-md text-gray-500'>Resend {resetTimer}</Text>  )}
+                            {resendEmail ? (<Text className='text-md text-black dark:text-text-dark'>Resend Email</Text>  ) : (<Text className='text-md text-gray-500'>Resend {resetTimer}</Text>  )}
                         </TouchableOpacity>
                                 
 

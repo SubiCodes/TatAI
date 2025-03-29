@@ -5,9 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { API_URL } from '@/constants/links';
+import { useColorScheme } from 'nativewind';
 
 const ResetPassword = () => {
   const router = useRouter();
+  const {colorScheme, toggleColorScheme} = useColorScheme();
 
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
@@ -112,24 +114,39 @@ const ResetPassword = () => {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    const loadTheme = async () => {
+        try {
+          const storedTheme = await AsyncStorage.getItem('theme');
+          if (storedTheme && storedTheme !== colorScheme) {
+            toggleColorScheme();
+          }
+        } catch (error) {
+          console.error('Failed to load theme:', error);
+        }
+      };
+      loadTheme();
+  }, [])
   
 
   return (
-     <SafeAreaView className='h-[100%] w-screen flex items-center flex-col bg-background pt-32 md:pt-0 md:justify-center'>
+     <SafeAreaView className='h-[100%] w-screen flex items-center flex-col bg-background pt-32 md:pt-0 md:justify-center dark:bg-background-dark'>
         <View className='w-80 items-center justify-center gap-4 md:w-screen md:gap-12'>
             <View className='w-screen items-center md:w-3/5'>
-                <Text className='text-4xl font-extrabold mb-6 md:text-5xl'>Reset Password</Text>
-                <Text className='text-base mb-6 md:text-xl md:mb-2'>At least 6 characters with alphanumeric values.</Text>
+                <Text className='text-4xl font-extrabold mb-6 md:text-5xl text-text dark:text-text-dark'>Reset Password</Text>
+                <Text className='text-base mb-6 md:text-xl md:mb-2 text-text dark:text-text-dark'>At least 6 characters with alphanumeric values.</Text>
             </View>
             <View className='w-80 items-start gap-2 md:w-3/5'>
-              <Text className='text-base font-bold md:text-2xl'>New Password</Text>
-              <TextInput placeholder='Enter Password' className='h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16'
+              <Text className='text-base font-bold md:text-2xl text-text dark:text-text-dark'>New Password</Text>
+              <TextInput placeholder='Enter Password' placeholderTextColor={colorScheme === 'dark' ? '#A0A0A0' : '#606060'}
+              className='h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16 dark:border-white dark:text-text-dark'
               value={password} onChangeText={(text) => setPassword(text)} secureTextEntry={showPassword}
               ></TextInput>
               
               <View className='flex-row items-center gap-4 mr-auto mb-2 md:gap-8 md:mb-6'>
                 <View className='flex-row items-center justify-center gap-1 mr-auto'>
-                  <Text className='font-bold text-sm md:text-xl'>ⓘ Password Strength:</Text>
+                  <Text className='font-bold text-sm md:text-xl text-text dark:text-text-dark'>ⓘ Password Strength:</Text>
                   <Text className={`font-bold md:text-xl ${
                   strengthTerm === 'Weak'
                     ? 'text-red-500'
@@ -148,17 +165,18 @@ const ResetPassword = () => {
                   color={'black'}
                   className="transform scale-75 md:transform md:scale-150" 
                   />
-                  <Text className='text-sm md:text-lg'>Show password</Text>
+                  <Text className='text-sm md:text-lg text-text dark:text-text-dark'>Show password</Text>
                 </View>
               </View>
 
-              <Text className='text-base font-bold md:text-2xl'>Re-enter Password</Text>
-              <TextInput placeholder='Re-enter Password' className='h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16'
+              <Text className='text-base font-bold md:text-2xl text-text dark:text-text-dark'>Re-enter Password</Text>
+              <TextInput placeholder='Re-enter Password' placeholderTextColor={colorScheme === 'dark' ? '#A0A0A0' : '#606060'}
+              className='h-12 w-80 border-black border-2 rounded-md md:w-full md:h-16 dark:border-white dark:text-text-dark'
               value={rePassword} onChangeText={(text) => setRePassword(text)} secureTextEntry={showRePassword}
               ></TextInput>
 
               <View className='flex-row items-center gap-8 mr-auto mb-2 md:gap-14 md:mb-4'>
-                <Text className='font-bold text-sm md:text-xl'>ⓘ Re-enter you password</Text>
+                <Text className='font-bold text-sm md:text-xl text-text dark:text-text-dark'>ⓘ Re-enter you password</Text>
                 <View className='flex-row items-center gap-1 mr-auto md:gap-2'>
                   <CheckBox 
                   value={!showRePassword} 
@@ -166,7 +184,7 @@ const ResetPassword = () => {
                   color={'black'}
                   className="transform scale-75 md:transform md:scale-150" 
                   />
-                  <Text className='text-sm md:text-lg'>Show password</Text>
+                  <Text className='text-sm md:text-lg text-text dark:text-text-dark'>Show password</Text>
                 </View>
               </View>
             </View>

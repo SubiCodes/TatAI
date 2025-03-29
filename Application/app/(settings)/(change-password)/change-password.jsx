@@ -7,8 +7,11 @@ import { API_URL } from '@/constants/links.js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { jwtDecode } from 'jwt-decode'
 import { router } from 'expo-router'
+import { useColorScheme } from 'nativewind'
 
 const ChangePassword = () => {
+
+  const {colorScheme, toggleColorScheme} = useColorScheme();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -82,7 +85,8 @@ const ChangePassword = () => {
           Alert.alert("⚠️Oops", changePass.data.message);
           return
         };
-        Alert.alert("🎊Change Successful", changePass.data.message);
+        handleClearFields();
+        Alert.alert("Change Successful", changePass.data.message);
       }
       setShowError(true);
       setTimeout(() => {
@@ -126,15 +130,30 @@ const ChangePassword = () => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
       checkPasswordStrength();
-    }, [newPassword]);
+  }, [newPassword]);
+  
+  useEffect(() => {
+      const loadTheme = async () => {
+          try {
+            const storedTheme = await AsyncStorage.getItem('theme');
+            if (storedTheme && storedTheme !== colorScheme) {
+              toggleColorScheme();
+            }
+          } catch (error) {
+            console.error('Failed to load theme:', error);
+          }
+        };
+        loadTheme();
+  }, [])
+
 
   return (
     <>
-    <StatusBar translucent={false} className='bg-background'/>
+    <StatusBar translucent={false} className='bg-background dark:bg-background-dark'/>
     
-    <SafeAreaView className='w-screen h-screen items-center pt-32 px-8 bg-background'>
+    <SafeAreaView className='w-screen h-screen items-center pt-32 px-8 bg-background dark:bg-background-dark'>
       <View className='w-full h-auto flex-col gap-4 mb-8'>
 
         <Modal visible={loading} transparent={true}>
@@ -148,46 +167,47 @@ const ChangePassword = () => {
         </Modal>
 
         <View className='w-full h-auto flex-col gap-2'>
-          <Text className='text-lg font-bold'>Current Password</Text>
-          <TextInput placeholder='' className='h-12 w-full border-black border-2 rounded-md md:w-full md:h-16'
-          secureTextEntry={isCurrentPasswordHidden} value={currentPassword} onChangeText={(text) => setCurrentPassword(text)} style={{borderColor: currentPasswordError ? 'red' : 'black'}}/>
+          <Text className='text-lg font-bold text-text dark:text-text-dark'>Current Password</Text>
+          <TextInput placeholder='' className={`h-12 w-full border-2 rounded-md md:w-full md:h-16 ${currentPasswordError ? 'border-red-500' : 'border-black'} dark:${currentPasswordError ? 'border-red-500' : 'border-white'} dark:text-text-dark`}
+          secureTextEntry={isCurrentPasswordHidden} value={currentPassword} onChangeText={(text) => setCurrentPassword(text)}/>
           <View className='max-w-full flex-row items-center mr-auto mb-2 md:gap-14 md:mb-4'>
-            <Text className='font-bold text-sm md:text-xl'>ⓘ Enter current password</Text>
+            <Text className='font-bold text-sm md:text-xl text-text dark:text-text-dark'>ⓘ Enter current password</Text>
             <View className='flex-1'/>
             <View className='flex-row items-center gap-1 md:gap-2'>
-              <CheckBox className="transform scale-75 md:transform md:scale-150" color={'#0818A8'}
+              <CheckBox className="transform scale-75 md:transform md:scale-150" color={colorScheme === 'dark' ? 'white' : '#0818A8'}
               value={!isCurrentPasswordHidden} onValueChange={(newValue) => setIsCurrentPasswordHidden(!newValue)}/>
-              <Text className='text-sm md:text-lg'>Show password</Text>
+              <Text className='text-sm md:text-lg text-text dark:text-text-dark'>Show password</Text>
             </View>
           </View>
         </View>
 
         <View className='w-full h-auto flex-col gap-2'>
-          <Text className='text-lg font-bold'>New Password</Text>
-          <TextInput placeholder='' className={`h-12 w-full border-black border-2 rounded-md md:w-full md:h-16`}
-          secureTextEntry={isNewPasswordHidden} value={newPassword} onChangeText={(text) => setNewPassword(text)} style={{borderColor: newPasswordError ? 'red' : 'black'}}/>
+          <Text className='text-lg font-bold text-text dark:text-text-dark'>New Password</Text>
+          <TextInput placeholder='' className={`h-12 w-full border-2 rounded-md md:w-full md:h-16 ${newPasswordError ? 'border-red-500' : 'border-black'} dark:${newPasswordError ? 'border-red-500' : 'border-white'} dark:text-text-dark`}
+          secureTextEntry={isNewPasswordHidden} value={newPassword} onChangeText={(text) => setNewPassword(text)}/>
           <View className='max-w-full flex-row items-center mr-auto mb-2 md:gap-14 md:mb-4'>
-            <Text className='font-bold text-sm md:text-xl'>ⓘ Password Strength: </Text>
+            <Text className='font-bold text-sm md:text-xl text-text dark:text-text-dark'>ⓘ Password Strength: </Text>
             <Text className={`font-bold md:text-xl ${strengthTerm === 'Weak'? 'text-red-500': strengthTerm === 'Good'? 'text-lime-400': 'text-green-500'}`}>{strengthTerm}</Text>
             <View className='flex-1'/>
             <View className='flex-row items-center gap-1 md:gap-2'>
-              <CheckBox className="transform scale-75 md:transform md:scale-150" color={'#0818A8'}
+              <CheckBox className="transform scale-75 md:transform md:scale-150" color={colorScheme === 'dark' ? 'white' : '#0818A8'}
               value={!isNewPasswordHidden} onValueChange={(newValue) => setIsNewPasswordHidden(!newValue)}/>
-              <Text className='text-sm md:text-lg'>Show password</Text>
+              <Text className='text-sm md:text-lg text-text dark:text-text-dark'>Show password</Text>
             </View>
           </View>
         </View>
 
         <View className='w-full h-auto flex-col gap-2'>
-          <TextInput placeholder='Re-enter Password' className='h-12 w-full border-black border-2 rounded-md md:w-full md:h-16'
-          secureTextEntry={isNewReEnterPasswordHidden} value={newReEnteredPassword} onChangeText={(text) => setNewReEnteredPassword(text)} style={{borderColor: newReEnteredPasswordError ? 'red' : 'black'}}/>
+          <TextInput placeholder='Re-enter Password' placeholderTextColor={colorScheme === 'dark' ? '#A0A0A0' : '#606060'}
+          className={`h-12 w-full border-2 rounded-md md:w-full md:h-16 ${currentPasswordError ? 'border-red-500' : 'border-black'} dark:${newReEnteredPasswordError ? 'border-red-500' : 'border-white'} dark:text-text-dark`}
+          secureTextEntry={isNewReEnterPasswordHidden} value={newReEnteredPassword} onChangeText={(text) => setNewReEnteredPassword(text)}/>
           <View className='max-w-full flex-row items-center mr-auto mb-2 md:gap-14 md:mb-4'>
-            <Text className='font-bold text-sm md:text-xl'>ⓘ Re-Enter new password</Text>
+            <Text className='font-bold text-sm md:text-xl text-text dark:text-text-dark'>ⓘ Re-Enter new password</Text>
             <View className='flex-1'/>
             <View className='flex-row items-center gap-1 md:gap-2'>
-              <CheckBox className="transform scale-75 md:transform md:scale-150" color={'#0818A8'}
+              <CheckBox className="transform scale-75 md:transform md:scale-150" color={colorScheme === 'dark' ? 'white' : '#0818A8'}
               value={!isNewReEnterPasswordHidden} onValueChange={(newValue) => setIsNewReEnterPasswordHidden(!newValue)}/>
-              <Text className='text-sm md:text-lg'>Show password</Text>
+              <Text className='text-sm md:text-lg text-text dark:text-text-dark'>Show password</Text>
             </View>
           </View>
         </View>
@@ -211,7 +231,7 @@ const ChangePassword = () => {
       </View>
 
       <TouchableOpacity className='w-auto h-auto items-center justify-center' onPress={() => {router.push('/(settings)/(change-password)/forgot-password')}}>
-        <Text className='text-lg font-bold text-primary'>Forgot Password</Text>
+        <Text className='text-lg font-bold text-primary dark:text-secondary'>Forgot Password</Text>
       </TouchableOpacity>
 
     </SafeAreaView>

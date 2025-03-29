@@ -13,6 +13,7 @@ const {width, height} = Dimensions.get('screen');
 
 const Home = () => {
   const router = useRouter();
+  const navigation = useNavigation();
 
   const [token, setToken] = useState(null);
   const [userID, setUserID] = useState();
@@ -42,6 +43,7 @@ const Home = () => {
   };
 
   const checkVerified = async () => {
+    navigation.setOptions({ tabBarStyle: { display: 'none' } });
     setLoading(true);
     setServerError(false);
     try {
@@ -77,6 +79,14 @@ const Home = () => {
       setServerError(true);
     }finally{
       setLoading(false);
+      navigation.setOptions({ tabBarStyle: { borderRadius: 12,
+        bottom: 24,
+        width: '90%',
+        height: 60,
+        alignSelf: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center', } });  // ✅ Restore the tab bar
     }
   }
 
@@ -88,7 +98,7 @@ const Home = () => {
 
   useEffect(() => {
     checkVerified();
-  }, [])
+  }, []);
 
   if (loading){
     return (

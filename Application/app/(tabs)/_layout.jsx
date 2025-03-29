@@ -2,28 +2,35 @@ import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { View } from "react-native";
+import { useColorScheme } from "nativewind";
 
 export default function Layout() {
+
+  const {colorScheme} = useColorScheme();
+
   return (
     <>
-    <View className="absolute h-24 w-screen bg-background" style={{position: 'absolute', bottom: 0, }}/>
+    <View className="absolute h-24 w-screen bg-background dark:bg-background-dark" style={{position: 'absolute', bottom: 0, }}/>
     <Tabs screenOptions={{
       tabBarStyle: {
         borderRadius: 12,
         bottom: 24,
         width: '90%',
-        height: 60,
+        height: 56,
         alignSelf: 'center',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: colorScheme === 'dark' ? '#4A4A4A' : 'white',
+        borderWidth: 2,
+        borderColor: colorScheme === 'dark' ? '#4A4A4A' : 'white',
       },
       tabBarItemStyle: {
         justifyContent: 'center',   
         alignItems: 'center',
-        paddingTop: 4,    
-        flex: 1,                    
-      }
+        paddingTop: 4,                       
+      },
+      tabBarActiveTintColor: '#006FFD'
     }}>
       <Tabs.Screen
         name="home"
