@@ -27,12 +27,12 @@ const RepairExpertise = () => {
                 validateStatus: (status) => status < 500,
             });
             if(!res.data.success){
-                Alert.alert("⚠️Oops", res.data.message);
+                Alert.alert("Oops", res.data.message);
                 return;
             };
             Alert.alert("Change Successful", res.data.message);
         } catch (error) {
-            Alert.alert("⚠️Oops", error.message);
+            Alert.alert("Oops", error.message);
         }finally{
             setLoading(false);
             getUserPreference();
@@ -48,14 +48,14 @@ const RepairExpertise = () => {
                 validateStatus: (status) => status < 500,
             });
             if(!preference.data.success){
-                Alert.alert("⚠️Oops", preference.data.message);
+                Alert.alert("Oops", preference.data.message);
                 return;
             };
             setActiveRadioButton(preference.data.data.skillLevel);
             return;
         } catch (error) {
             setFetchingError(true)
-            Alert.alert("⚠️Oops", 'Error fetching data.');
+            Alert.alert("Oops", 'Error fetching data.');
         }finally{
             setFetchingData(false);
         }

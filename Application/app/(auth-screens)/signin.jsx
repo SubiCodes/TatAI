@@ -2,7 +2,7 @@ import { View, Text, SafeAreaView, StatusBar, TextInput, TouchableOpacity, Image
 import CheckBox from 'expo-checkbox'
 import * as SplashScreen from "expo-splash-screen"; 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useFocusEffect } from 'expo-router'
 import { Link, useRouter } from 'expo-router'
 import axios from 'axios'
@@ -11,8 +11,12 @@ import { API_URL } from '@/constants/links.js'
 
 import illustration from '../../assets/images/signin-illustration.png'
 import signinImage from '../../assets/images/auth-images/logo1.png'
+import { useColorScheme } from 'nativewind';
 
 const SignIn = () => {
+
+  const {colorScheme, toggleColorScheme} = useColorScheme();
+  
 
   const [appReady, setAppReady] = useState(false);
   const router = useRouter();
@@ -105,11 +109,23 @@ const SignIn = () => {
       }, [])
   );
 
-  
+  useEffect(() => {
+    const loadTheme = async () => {
+        try {
+          const storedTheme = await AsyncStorage.getItem('theme');
+          if (storedTheme && storedTheme !== colorScheme) {
+            toggleColorScheme();
+          }
+        } catch (error) {
+          console.error('Failed to load theme:', error);
+        }
+      };
+      loadTheme();
+  }, [])
 
   return (
     <>
-      <StatusBar translucent={false} className='bg-background'/>
+      <StatusBar translucent={false} className='bg-background dark:bg-background-dark'/>
       {!appReady ? 
       (
       <View className='h-screen w-screen items-center justify-center'>

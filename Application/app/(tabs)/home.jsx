@@ -8,10 +8,14 @@ import { API_URL } from '@/constants/links.js'
 import axios from 'axios'
 
 import logo from '@/assets/images/auth-images/logo1.png'
+import { useColorScheme } from 'nativewind'
 
 const {width, height} = Dimensions.get('screen');
 
 const Home = () => {
+
+  const {colorScheme, toggleColorScheme} = useColorScheme();
+
   const router = useRouter();
   const navigation = useNavigation();
 
@@ -100,9 +104,23 @@ const Home = () => {
     checkVerified();
   }, []);
 
+  useEffect(() => {
+    const loadTheme = async () => {
+        try {
+          const storedTheme = await AsyncStorage.getItem('theme');
+          if (storedTheme && storedTheme !== colorScheme) {
+            toggleColorScheme();
+          }
+        } catch (error) {
+          console.error('Failed to load theme:', error);
+        }
+      };
+      loadTheme();
+  }, []);
+
   if (loading){
     return (
-      <View className='w-screen h-screen items-center justify-center gap-4'>
+      <View className='w-screen h-screen items-center justify-center gap-4 dark:bg-background-dark dark:text-text-dark'>
         <StatusBar translucent={true} backgroundColor={'transparent'}/>
         <ActivityIndicator size={32} color={'blue'}/>
       </View>
