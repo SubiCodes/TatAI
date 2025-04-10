@@ -23,6 +23,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const SignUp = () => {
   const router = useRouter();
 
+  const today = new Date();
+  const eighteenYearsAgo = new Date();
+  eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState(null);
@@ -300,7 +304,7 @@ const SignUp = () => {
                   value={birthDate || new Date()}
                   mode="date"
                   display="default"
-                  maximumDate={new Date()}
+                  maximumDate={eighteenYearsAgo}
                   onChange={(event, selectedDate) => {
                     setOpen(false);
                     if (selectedDate) {
@@ -327,6 +331,7 @@ const SignUp = () => {
                 placeholder="Gender"
                 height={40}
                 color={!isGenderEmpty ? 'black' : 'red'}
+                bgColor="white"
               />
               {!isGenderEmpty ? (<></>) : (<Text className="font-bold text-sm text-red-600 md:text-xl">ⓘ This field cannot be empty</Text>)}
             </View>
