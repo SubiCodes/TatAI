@@ -1,4 +1,4 @@
-TatAI: A smart home assistant using NLP and decisin tree algorithm.
+TatAI: A smart home assistant using NLP and Rule-based Algortihm.
 
 Contributors:
 Reineer Kim C. Subisol
