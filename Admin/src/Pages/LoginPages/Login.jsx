@@ -1,11 +1,17 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import axios from 'axios'
 import { URI } from '../../constants/URI.js'
+import BeatLoader from 'react-spinners/BeatLoader'
 
 import loginWallpaper from '../../Images/login-wallpaper.jpg'
 import loginLogo from '../../Images/login-logo.png'
 
 function Login() {
+
+    const dialogRef = useRef(null);
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -19,15 +25,27 @@ function Login() {
         }
     };
 
+    const closeModal = () => {
+        dialogRef.current.close();
+    };    
+
     const handleLogin = async() => {
-        console.log("Email:", email);
-        console.log("Password:", password);
+        setLoading(true);
         try {
+            if (!email || !password) {
+                setError('Please fill in all fields.');
+                dialogRef.current.showModal();
+                return;
+            }
             const res = await axios.post(`${URI}auth/sign-in-admin`, {email: email, password: password},{withCredentials: true});
             console.log(URI);
             console.log(res.data.message);
         } catch (error) {
             console.log(error);
+            dialogRef.current.showModal();
+            setError(error.response.data.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -52,7 +70,11 @@ function Login() {
                             <div className='flex grow'/>
                             <span className='text-base text-secondary'>Forgot Password</span>
                         </div>
-                        <button className='w-[70%] h-14 bg-primary text-white rounded-xl cursor-pointer hover:bg-blue-600 mt-4' onClick={handleLogin}>Login</button>
+                        <button className={`w-[70%] h-14 text-white rounded-xl mt-4 transition 
+                            ${loading ? 'bg-primary cursor-not-allowed opacity-70' : 'bg-primary hover:bg-blue-600 cursor-pointer'}`}
+                            onClick={handleLogin} disabled={loading}>
+                            {loading ? <BeatLoader loading={true} color='white' size={8}/> : 'Login'}
+                        </button>
                     </div>
                 </div>
 
@@ -62,6 +84,21 @@ function Login() {
         <div className='w-2/5 h-screen bg-white overflow-hidden object-cover'> 
             <img src={loginWallpaper} className='max-w-[100%] min-h-screen'/>
         </div>
+
+        <dialog
+        ref={dialogRef}
+        className="p-6 w-96 rounded-lg bg-white shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
+            <h2 className="text-xl font-semibold mb-4">Login Unsuccessful</h2>
+            <p className="mb-4 text-gray-600">{error}</p>
+            <div className="w-full flex justify-end">
+                <button onClick={closeModal} className="px-4 py-2 bg-primary text-white rounded hover:bg-secondary hover:cursor-pointer transition duration-400">
+                    Close
+                </button>
+            </div>
+            
+        </dialog>
+
     </div>
   )
 }
