@@ -8,7 +8,13 @@ import userRouter from './routes/user.routes.js';
 
 const app = express();
 
-app.use(cors({ origin: "*" }));
+app.use(cors({
+    origin: (origin, callback) => {
+        callback(null, origin); // Reflect the origin (allow all)
+    },
+    credentials: true
+}));
+
 app.use(express.json());
 
 app.use('/api/v1/auth', authRouter);

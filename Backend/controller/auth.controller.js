@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import JWT from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
 import { sendResetToken, sendVerificationToken } from '../nodemailer/email.js';
+import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
 
 export const signUp = async (req, res) => {
     const {firstName, lastName, gender, birthday, email, password} = req.body;
@@ -17,7 +18,7 @@ export const signUp = async (req, res) => {
     const encryptedPassword = await bcrypt.hash(password, 10);
 
     try {
-        const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword, verificationToken: verificationToken});
+        const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword,verificationToken: verificationToken});
         sendVerificationToken(email, verificationToken);
         res.status(201).json({success: true, message: "User created successfully.", data: user, verificationToken: verificationToken});
     } catch (error) {
@@ -88,6 +89,43 @@ export const signIn = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({success: false, message: `Cannot login user: ${error.message}`});
+    }
+};
+
+export const signInAdmin = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({email});
+        if(!user){
+            return res.status(400).json({success: false, message: "Invalid Credentials."})
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if(!isPasswordValid){
+            return res.status(400).json({success: false, message: "Invalid Credentials."})
+        }
+
+        if(user.role !== "admin"){
+            return res.status(400).json({success: false, message: "Your account dont have access to this website."})
+        }
+
+        generateTokenAndSetCookie(res, user._id);
+
+        user.lastLogin = new Date();
+        await user.save()
+
+        return res.status(200).json({
+            success: true,
+            message: "Logged in successfully!",
+            user:{
+                ...user._doc,
+                password: undefined,
+            },
+        });
+
+    } catch (error) {
+        console.error("Error in Login", error);
+        return res.status(500).json({success: false, message: `Error Logging in: ${error}`});
     }
 };
 
