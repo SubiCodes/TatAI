@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-
+import axios from 'axios'
+import { URI } from '../../constants/URI.js'
 
 import loginWallpaper from '../../Images/login-wallpaper.jpg'
 import loginLogo from '../../Images/login-logo.png'
@@ -18,15 +19,22 @@ function Login() {
         }
     };
 
-    const handleLogin = () => {
-        console.log('Email:', email);
-        console.log('Password:', password);
+    const handleLogin = async() => {
+        console.log("Email:", email);
+        console.log("Password:", password);
+        try {
+            const res = await axios.post(`${URI}auth/sign-in-admin`, {email: email, password: password},{withCredentials: true});
+            console.log(URI);
+            console.log(res.data.message);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
   return (
     <div className='w-screen h-screen flex justify-center items-center flex-row'>
-        <div className='w-3/5 h-full bg-white flex items-center justify-center px-52'>
-            <div className='w-full h-[90%] flex flex-col justify-start items-center px-12 py-8 bg-gray-100 rounded-3xl gap-20'>
+        <div className='w-3/5 h-full bg-white flex items-center justify-center'>
+            <div className='w-[720px] h-[90%] flex flex-col justify-start items-center px-12 py-8 bg-gray-100 rounded-3xl gap-20'>
 
                 <div className='w-full h-fit flex flex-col justify-center items-center object-contain border-0'>
                     <img src={loginLogo} className='max-w-[40%]'/>
@@ -38,7 +46,7 @@ function Login() {
                     <div className='w-full flex flex-col items-center gap-4'>
                         <input type="text" placeholder='Email' className='w-[70%] h-14 rounded-xl border-2 border-gray-400 px-4 mb-4' onChange={(e) => setEmail(e.target.value)}/>
                         <input type={type} placeholder='Password' className='w-[70%] h-14 rounded-xl border-2 border-gray-400 px-4 mb-4' onChange={(e) => setPassword(e.target.value)}/>
-                        <div className='w-[70%] h-auto flex flex-row items-center justify-start gap-2'>
+                        <div className='w-[70%] h-auto flex flex-row items-center justify-start px-2 gap-2'>
                             <input type="checkbox" className="w-5 h-5" onChange={showPassword} checked={type === 'text'}/>
                             <span className='text-base'>Show Password</span>
                             <div className='flex grow'/>

@@ -55,7 +55,7 @@ export const sendVerificationToken = (to, otp) =>  {
     transporter.sendMail({
         from: 'tataihomeassistant@gmail.com',
         to: to,
-        subject: "Reset Password Token",
+        subject: "Verify your account",
         html: htmlTemplate
     }, (err, info) => {
         if (err) {
