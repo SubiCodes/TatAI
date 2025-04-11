@@ -22,8 +22,9 @@ Features:
 2. Personalization
 ✅ - User can choose between different personalization settings such us, name, tone, experience level etc.
 3. Profile
-   - User can edit information such as name birthdate, gender, password etc.
-   - User can edit personalization settings.
+✅ - User can choose between different personalization settings such us, name, tone, experience level etc.
+✅ - User can edit information such as name birthdate, gender, password etc.
+✅ - User can edit personalization settings.
 4. Tool Guides
    - User can see guides on how to use tools properly.
    - User can save guides.
