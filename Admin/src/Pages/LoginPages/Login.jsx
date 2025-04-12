@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { URI } from '../../constants/URI.js'
 import BeatLoader from 'react-spinners/BeatLoader'
@@ -7,6 +8,8 @@ import loginWallpaper from '../../Images/login-wallpaper.jpg'
 import loginLogo from '../../Images/login-logo.png'
 
 function Login() {
+
+    const navigate = useNavigate();
 
     const dialogRef = useRef(null);
 
@@ -38,8 +41,8 @@ function Login() {
                 return;
             }
             const res = await axios.post(`${URI}auth/sign-in-admin`, {email: email, password: password},{withCredentials: true});
-            console.log(URI);
             console.log(res.data.message);
+            navigate('/dashboard');
         } catch (error) {
             console.log(error);
             dialogRef.current.showModal();
@@ -48,6 +51,20 @@ function Login() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const checkTokenExist = async() => {
+            try {
+                const res = await axios.get(`${URI}auth/get-cookie`, {withCredentials: true});
+                console.log(res.data.message);
+                navigate('/dashboard');
+            } catch (error) {
+                console.log("User unauthenticated, redirecting to login page.");
+                console.log("Error:", error);
+            }
+        };
+        checkTokenExist();
+    }, [navigate]);
 
   return (
     <div className='w-screen h-screen flex justify-center items-center flex-row'>

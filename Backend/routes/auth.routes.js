@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signUp, verifyUser , resendVerificationToken, signIn, signInAdmin, getCookie, forgotPassword, getResetToken, resetPassword, resendToken, changePassword } from "../controller/auth.controller.js";
+import { signUp, verifyUser , resendVerificationToken, signIn, signInAdmin, getCookie, deleteCookie, forgotPassword, getResetToken, resetPassword, resendToken, changePassword } from "../controller/auth.controller.js";
 
 const authRouter = Router();
 
@@ -12,6 +12,8 @@ authRouter.post('/resend-verification-token', resendVerificationToken);
 authRouter.post('/sign-in', signIn);
 
 authRouter.get('/get-cookie', getCookie);
+
+authRouter.post('/delete-cookie', deleteCookie);
 
 authRouter.post('/sign-in-admin', signInAdmin);
 

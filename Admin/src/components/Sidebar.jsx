@@ -1,10 +1,13 @@
-import { Box, ChevronDown, ChartArea, Menu, NotebookPen, User, Wrench, X } from 'lucide-react';
-import { useState } from 'react';
+import { Box, ChevronDown, ChartArea, Menu, NotebookPen, User, Wrench, X, LogOut } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { URI } from '../constants/URI.js';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const [activeDropdown, setActiveDropdown] = useState('');
   const navigate = useNavigate();
+  const dialogRef = useRef(null);
   
   const navItems = [
     { 
@@ -31,11 +34,35 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         { title: 'Security', link: '/settings/security' },
         { title: 'Notifications', link: '/settings/notifications' }
       ]
-    }
+    },
+    { 
+      title: 'Logout', 
+      icon: LogOut,
+      link: '/login'
+    },
   ];
 
-  const handleNavigation = (link) => {
-    if (link) {
+  const closeModal = () => {
+    dialogRef.current.close();
+  }; 
+
+  const logOut = async () => {
+    try {
+      await axios.post(
+        `${URI}auth/delete-cookie`, // Replace with your actual backend logout route
+        {},
+        { withCredentials: true }
+      );
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error.response?.data?.message || error.message);
+    }
+  };
+
+  const handleNavigation = async (link) => {
+    if (link === '/login') {
+      dialogRef.current.showModal();
+    } else if (link) {
       navigate(link);
     }
   };
@@ -103,6 +130,22 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           </div>
         ))}
       </nav>
+      <dialog
+        ref={dialogRef}
+        className="p-6 w-96 rounded-lg bg-white shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        >
+            <h2 className="text-xl font-semibold mb-4">Login Unsuccessful</h2>
+            <p className="mb-4 text-gray-600">Are you sure you want to logout?</p>
+            <div className="w-full flex justify-end gap-2">
+                <button onClick={closeModal} className="px-4 py-2 bg-primary text-white rounded hover:bg-secondary hover:cursor-pointer transition duration-400">
+                    Close
+                </button>
+                <button onClick={logOut} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-400 hover:cursor-pointer transition duration-400">
+                    Logout
+                </button>
+            </div>
+            
+        </dialog>
     </div>
   );
 };
