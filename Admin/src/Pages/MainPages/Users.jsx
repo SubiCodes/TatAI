@@ -1,8 +1,11 @@
 import React from 'react'
+import UserTable from '../../components/UserTable.jsx'
 
 function Users() {
   return (
-    <div>Users</div>
+    <div className='flex-1 p-8 bg-[#F8F8FF]'> 
+      <UserTable />
+    </div>
   )
 }
 
