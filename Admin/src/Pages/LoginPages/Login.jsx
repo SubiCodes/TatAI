@@ -73,7 +73,7 @@ function Login() {
 
                 <div className='w-full h-fit flex flex-col justify-center items-center object-contain border-0'>
                     <img src={loginLogo} className='max-w-[40%]'/>
-                    <h1 className='text-4xl font-bold'>Welcome Admin!</h1>
+                    <h1 className='text-4xl font-bold text-black'>Welcome Admin!</h1>
                 </div>
 
                 <div className='w-full flex flex-col items-center'>
@@ -82,8 +82,8 @@ function Login() {
                         <input type="text" placeholder='Email' className='w-[70%] h-14 rounded-xl border-2 border-gray-400 px-4 mb-4' onChange={(e) => setEmail(e.target.value)}/>
                         <input type={type} placeholder='Password' className='w-[70%] h-14 rounded-xl border-2 border-gray-400 px-4 mb-4' onChange={(e) => setPassword(e.target.value)}/>
                         <div className='w-[70%] h-auto flex flex-row items-center justify-start px-2 gap-2'>
-                            <input type="checkbox" className="w-5 h-5" onChange={showPassword} checked={type === 'text'}/>
-                            <span className='text-base'>Show Password</span>
+                            <input type="checkbox" className="w-5 h-5" color='white' onChange={showPassword} checked={type === 'text'}/>
+                            <span className='text-base text-black'>Show Password</span>
                             <div className='flex grow'/>
                             <span className='text-base text-secondary'>Forgot Password</span>
                         </div>
