@@ -5,7 +5,8 @@ import axios from 'axios';
 import { URI } from '../constants/URI.js';
 import ModalMessage from './ModalMessage.jsx';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { User, LockKeyhole } from 'lucide-react';
+import { User, LockKeyhole, Dot } from 'lucide-react';
+import DropDown from './DropDown.jsx';
 
 import empty_profile from '../Images/profile-icons/empty_profile.png'
 import boy_1 from '../Images/profile-icons/boy_1.png'
@@ -119,7 +120,7 @@ function BarChart() {
   }
 
   return (
-    <div className="max-w-screen">
+    <div className="max-w-screen min-h-full">
       <div className='w-full h-auto justify-between flex items-center px-4 py-4 border-b-[1px] border-[#EBEEF2]'>
         <h1 className='text-xl font-bold text-[#343C6A]'>All Users</h1>
         <button className='bg-[#0818A8] p-2 rounded-lg hover:cursor-pointer'>
@@ -127,7 +128,7 @@ function BarChart() {
         </button>
       </div>
       
-      <div className="relative overflow-x-auto sm:rounded-lg">
+      <div className="relative h-auto overflow-visible sm:rounded-lg">
         <div className="p-4 bg-[#F5F7FA]">
           <label htmlFor="table-search" className="sr-only">Search</label>
           <div className="relative mt-1">
@@ -152,24 +153,22 @@ function BarChart() {
         <table className="w-full text-sm text-left text-gray-500 ">
           <thead className="text-xs text-gray-700 uppercase bg-[#F5F7FA]">
             <tr>
-              <th scope="col" className="p-4">
-                <div className="flex items-center">
-                  
-                </div>
+              <th scope="col" className="p-4 w-12">
+                <div className="flex items-center"></div>
               </th>
-              <th scope="col" className="px-6 py-3 text-base font-semibold">
+              <th scope="col" className="px-6 py-3 text-base font-semibold w-56">
                 User
               </th>
-              <th scope="col" className="px-6 py-3 text-base font-semibold">
+              <th scope="col" className="px-6 py-3 text-base font-semibold w-40">
                 Role
               </th>
-              <th scope="col" className="px-6 py-3 text-base font-semibold">
+              <th scope="col" className="px-6 py-3 text-base font-semibold w-64">
                 Email
               </th>
-              <th scope="col" className="px-6 py-3 text-base font-semibold">
+              <th scope="col" className="px-6 py-3 text-base font-semibold w-40">
                 Status
               </th>
-              <th scope="col" className="px-6 py-3 text-base font-semibold text-center">
+              <th scope="col" className="px-6 py-3 text-base font-semibold w-20 text-center">
                 Action
               </th>
             </tr>
@@ -204,12 +203,12 @@ function BarChart() {
                   <td className="px-6 py-4 text-gray-900">
                     {user.email}
                   </td>
-                  <td className="px-6 text-gray-900 flex flex-row items-center justify-start gap-4">
+                  <td className="px-0 py-0 text-gray-900 flex flex-row items-center justify-start gap-0 pt-4">
+                    <span className={`${user.status === "Verified" ? "text-green-300" : (user.status === "Restricted" || user.status === "Banned" ? "text-red-500" : "text-gray-400")}`}><Dot size={38}/></span>
                     {user.status}
-                    <div className={`w-2 h-2 rounded-full ${user.status === "Verified" ? "bg-green-300" : (user.status === "Restricted" || user.status === "Banned" ? "bg-red-500" : "bg-gray-400")}`}/>
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <a href="#" className="font-medium text-blue-600  hover:underline">Edit</a>
+                  <td className="px-6 py-4 text-center overflow-visible">
+                    <DropDown user={user}/>
                   </td>
                 </tr>
               ))
