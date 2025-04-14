@@ -18,7 +18,7 @@ export const signUp = async (req, res) => {
     const encryptedPassword = await bcrypt.hash(password, 10);
 
     try {
-        const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword,verificationToken: verificationToken});
+        const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword,status: "Unverified", role: 'user', verificationToken: verificationToken});
         sendVerificationToken(email, verificationToken);
         res.status(201).json({success: true, message: "User created successfully.", data: user, verificationToken: verificationToken});
     } catch (error) {
@@ -50,7 +50,7 @@ export const verifyUser = async (req, res) => {
         if (!existingUser) {
             return res.status(400).json({success: false, message: "User does not exist."});
         };
-        if(existingUser.verified){
+        if(existingUser.status === "Verified"){
             return res.status(400).json({success: false, message: "User is already verified."});
         };
 
@@ -58,7 +58,7 @@ export const verifyUser = async (req, res) => {
         if (verificationToken !== token.toUpperCase()) {
             return res.status(400).json({success: false, message: "Incorrect verification token."});
         };
-        existingUser.verified = true;
+        existingUser.status = "Verified";
         existingUser.verificationToken = undefined;
         await existingUser.save();
         return res.status(200).json({success: true, message: "User verified successfully."});

@@ -123,7 +123,7 @@ function BarChart() {
       <div className='w-full h-auto justify-between flex items-center px-4 py-4 border-b-[1px] border-[#EBEEF2]'>
         <h1 className='text-xl font-bold text-[#343C6A]'>All Users</h1>
         <button className='bg-[#0818A8] p-2 rounded-lg hover:cursor-pointer'>
-          <h1 className='text-lg text-white' onClick={showUsers}>+ Add User</h1>
+          <h1 className='text-base text-white' onClick={showUsers}>+ Add User</h1>
         </button>
       </div>
       
@@ -197,15 +197,16 @@ function BarChart() {
                   <td className="px-6 py-4 text-gray-900">
                     <div className='flex flex-row w-fit items-center justify-center gap-2 p-2 px-4 bg-[#D7E9FE] rounded-lg'>
                       {user.role === 'user' ? <User size={16} color='#3F5DBF'/> : <LockKeyhole size={16} color='#3F5DBF'/>}
-                      <text className='text-[#3F5DBF]'>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</text>
+                      <span className='text-[#3F5DBF]'>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
                     </div>
                    
                   </td>
                   <td className="px-6 py-4 text-gray-900">
                     {user.email}
                   </td>
-                  <td className="px-6 py-4 text-gray-900">
-                    {user.verified ? 'Verified' : 'Not Verified'}
+                  <td className="px-6 text-gray-900 flex flex-row items-center justify-start gap-4">
+                    {user.status}
+                    <div className={`w-2 h-2 rounded-full ${user.status === "Verified" ? "bg-green-300" : (user.status === "Restricted" || user.status === "Banned" ? "bg-red-500" : "bg-gray-400")}`}/>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <a href="#" className="font-medium text-blue-600  hover:underline">Edit</a>

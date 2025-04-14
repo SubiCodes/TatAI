@@ -64,7 +64,7 @@ const Home = () => {
           validateStatus: (status) => status < 500,
         }
       );
-      if (!user.data.data.verified) {
+      if (user.data.data.status === 'Unverified'){
         await AsyncStorage.removeItem('token');
         await router.replace(`/(auth-screens)/verify-account/${user.data.data.email}`);
         return;
@@ -80,6 +80,7 @@ const Home = () => {
       }
     } catch (error) {
       console.log(error.message);
+      await AsyncStorage.removeItem('token');
       setServerError(true);
     }finally{
       setLoading(false);

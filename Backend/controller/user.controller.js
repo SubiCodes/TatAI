@@ -7,7 +7,7 @@ export const getUserData = async (req, res) => {
     const {_id} = req.params;
 
     try {
-        const user = await User.findOne({_id: _id}).select("email firstName lastName role gender birthday verificationToken verified profileIcon");
+        const user = await User.findOne({_id: _id}).select("email firstName lastName role gender birthday verificationToken status profileIcon");
 
         if (!user) {
             return res.status(404).json({success: false, message: "User does not exist."})
@@ -23,7 +23,7 @@ export const getUserData = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select("email firstName lastName role gender birthday verificationToken verified profileIcon");
+        const users = await User.find().select("email firstName lastName role gender birthday verificationToken status profileIcon");
 
         if (!users || users.length === 0) {
             return res.status(404).json({ success: false, message: "No users found." });
