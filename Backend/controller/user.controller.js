@@ -7,7 +7,7 @@ export const getUserData = async (req, res) => {
     const {_id} = req.params;
 
     try {
-        const user = await User.findOne({_id: _id}).select("email firstName lastName gender birthday verificationToken verified profileIcon");
+        const user = await User.findOne({_id: _id}).select("email firstName lastName role gender birthday verificationToken verified profileIcon");
 
         if (!user) {
             return res.status(404).json({success: false, message: "User does not exist."})
@@ -20,6 +20,23 @@ export const getUserData = async (req, res) => {
         return res.status(500).json({success: false, message: "Cant get user data.", error: error.message})
     }
 };
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select("email firstName lastName role gender birthday verificationToken verified profileIcon");
+
+        if (!users || users.length === 0) {
+            return res.status(404).json({ success: false, message: "No users found." });
+        }
+
+        return res.status(200).json({ success: true, message: "Users fetched successfully", data: users });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Can't get users data.", error: error.message });
+    }
+};
+
 
 export const editUserData = async (req, res) => {
     const {_id} = req.params;
