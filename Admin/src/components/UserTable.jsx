@@ -31,6 +31,7 @@ function BarChart() {
   });
 
   const [users, setUsers] = useState([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -142,14 +143,32 @@ function BarChart() {
     } finally {
       setLoading(false);
     }
-  };  
+  };
+
+  const checkUserRole = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${URI}admin/check-role`, {
+        withCredentials: true,
+      });
+      res.data.role === "super admin" ? setIsSuperAdmin(true) : setIsSuperAdmin(false);
+    } catch (error) {
+      console.log(error);
+      setModalContent({ title: "Error fetching", text: error.message || "Unknown error" });
+      modalRef.current?.open(); // safer call
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const showUsers = () => {
     console.log(users);
+    console.log(isSuperAdmin);
   }
   
   useEffect(() => {
     getUser();
+    checkUserRole();
   }, []);
 
   if(loading) {
@@ -308,7 +327,7 @@ function BarChart() {
                     {user.status}
                   </td>
                   <td className="px-6 py-4 text-center overflow-visible">
-                    <DropDown user={user}/>
+                    <DropDown user={user} isSuperAdmin={isSuperAdmin}/>
                   </td>
                 </tr>
               ))

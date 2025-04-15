@@ -107,7 +107,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           onClick={() => setIsOpen(!isOpen)}
           className="hover:bg-[#F3F5F7] p-2 rounded-lg hover:cursor-pointer"
         >
-          {isOpen ? <X size={24} strokeWidth={1.5} className='hover:cursor-pointer'/> : <Menu size={24} strokeWidth={1.5} className='hover:cursor-pointer'/>}
+          {isOpen ? <X size={20} strokeWidth={1.5} className='hover:cursor-pointer'/> : <Menu size={20} strokeWidth={1.5} className='hover:cursor-pointer'/>}
         </button>
       </div>
       <nav className="mt-6">
@@ -130,7 +130,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               >
                 <div className="flex items-center">
                   <item.icon 
-                    size={24} 
+                    size={18} 
                     strokeWidth={1.5} 
                     color={isActive ? '#3B40E8' : '#000'} 
                   />
