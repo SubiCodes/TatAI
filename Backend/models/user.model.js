@@ -47,7 +47,8 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         default: "user",
-        required: true
+        required: true,
+        enum: ["user", "admin", "super admin"]
     },
     verificationToken: {
         type: String,

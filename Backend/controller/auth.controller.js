@@ -105,7 +105,7 @@ export const signInAdmin = async (req, res) => {
             return res.status(400).json({success: false, message: "Invalid Credentials."})
         }
 
-        if(user.role !== "admin"){
+        if(user.role !== "admin" && user.role !== 'super admin'){
             return res.status(400).json({success: false, message: "Your account dont have access to this website."})
         }
 
