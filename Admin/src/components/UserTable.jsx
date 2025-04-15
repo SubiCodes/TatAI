@@ -5,7 +5,7 @@ import axios from 'axios';
 import { URI } from '../constants/URI.js';
 import ModalMessage from './ModalMessage.jsx';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { User, LockKeyhole, Dot } from 'lucide-react';
+import { User, LockKeyhole, Dot, SlidersHorizontal } from 'lucide-react';
 import DropDown from './DropDown.jsx';
 
 import empty_profile from '../Images/profile-icons/empty_profile.png'
@@ -35,6 +35,26 @@ function BarChart() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [filterStatus, setFilterStatus] = useState('');
+  const [sortDirection, setSortDirection] = useState('asc'); 
+  const [userType, setUserType] = useState('all');
+
+  const handleSortChange = (direction) => {
+    setSortDirection(direction);
+    console.log(`Sort direction changed to: ${direction}`);
+  };
+
+  const handleUserTypeChange = (type) => {
+    setUserType(type);
+    console.log(`User type filter changed to: ${type}`);
+  };
+
+  const handleResetFilter = () => {
+    setFilterStatus('');
+    setSortDirection('asc');
+    setUserType('all');
+  };
+
   // Map of profile icon names to their imports
   const profileIcons = {
     'empty_profile': empty_profile,
@@ -61,27 +81,53 @@ function BarChart() {
     return profileIcons[iconName];
   };
   
-  // Filter products based on search term
-  const filteredUsers = users.filter(user => {
-    // If searchTerm is empty, return all users
-    if (!searchTerm) return true;
+  const filteredUsers = users
+  .filter(user => {
+    // Search term filter (already implemented)
+    if (searchTerm) {
+      const searchString = searchTerm.toLowerCase();
+      const firstName = user.firstName || '';
+      const lastName = user.lastName || '';
+      const name = `${firstName} ${lastName}`;
+      const role = user.role || '';
+      const email = user.email || '';
+      const status = user.status || '';
+      
+      if (!(name.toLowerCase().includes(searchString) ||
+            role.toLowerCase().includes(searchString) ||
+            email.toLowerCase().includes(searchString) ||
+            status.toLowerCase().includes(searchString))) {
+        return false;
+      }
+    }
+
+    // User type filter
+    if (userType !== 'all' && user.role !== userType) {
+      return false;
+    }
+
+    // Status filter (verified, unverified, restricted, banned)
+    if (filterStatus) {
+      // Convert status to match the case of the data
+      const statusCapitalized = filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1);
+      if (user.status !== statusCapitalized) {
+        return false;
+      }
+    }
+
+    return true;
+  })
+  // Sort by name
+  .sort((a, b) => {
+    const nameA = `${a.firstName || ''} ${a.lastName || ''}`.trim().toLowerCase();
+    const nameB = `${b.firstName || ''} ${b.lastName || ''}`.trim().toLowerCase();
     
-    const searchString = searchTerm.toLowerCase();
-    
-    // Safe access with null/undefined checks for all properties
-    const firstName = user.firstName || '';
-    const lastName = user.lastName || '';
-    const name = `${firstName} ${lastName}`;
-    const role = user.role || '';
-    const email = user.email || '';
-    const status = user.status || '';
-    
-    return (
-      name.toLowerCase().includes(searchString) ||
-      role.toLowerCase().includes(searchString) ||
-      email.toLowerCase().includes(searchString) ||
-      status.toLowerCase().includes(searchString)
-    );
+    // Sort direction
+    if (sortDirection === 'asc') {
+      return nameA.localeCompare(nameB);
+    } else {
+      return nameB.localeCompare(nameA);
+    }
   });
 
   const getUser = async () => {
@@ -125,7 +171,74 @@ function BarChart() {
       </div>
       
       <div className="relative h-auto overflow-visible sm:rounded-lg">
-        <div className="p-4 bg-[#F5F7FA]">
+        <div className="p-4 bg-[#F5F7FA] flex flex-row items-center gap-4">
+          <div className="dropdown">
+            <div tabIndex={0} role="button" className="hover:cursor-pointer"><SlidersHorizontal size={24} color='#101720'/></div>
+            <ul tabIndex={0} className="dropdown-content menu bg-white rounded-md z-1 w-auto p-4 shadow-sm gap-4">
+
+              <div className='flex flex-row justify-between'> 
+                <h1 className='text-base font-semibold'>Filter by</h1> 
+                <h1 className='text-base font-semibold hover:underline hover:cursor-pointer' onClick={handleResetFilter}>Reset</h1> 
+              </div>
+
+              {/* asc desc */}
+              <div className='flex flex-row items-center gap-6'>
+                <div className='flex flex-row items-center gap-2'>
+                  <input type="radio" name="radio-1" className="radio radio-xs border-[1px]" defaultChecked checked={sortDirection === 'asc'}
+                  onChange={() => handleSortChange('asc')}/>
+                  <p className='text-base font-semibold '>A-Z</p>
+                </div>
+                <div className='flex flex-row items-center gap-2'>
+                  <input type="radio" name="radio-1" className="radio radio-xs border-[1px]" checked={sortDirection === 'desc'}
+                  onChange={() => handleSortChange('desc')}/>
+                  <p className='text-base font-semibold' >Z-A</p>
+                </div>
+              </div>
+
+              <div className='w-full h-[1px] bg-gray-200'/>
+
+              {/* roles */}
+              <div className='flex flex-col gap-6'>
+                <div className='flex flex-row items-center gap-2'>
+                  <input type="radio" name="radio-2" className="radio radio-xs border-[1px]" defaultChecked checked={userType === 'all'}
+                  onChange={() => handleUserTypeChange('all')}/>
+                  <p className='text-base font-semibold '>All</p>
+                </div>
+                <div className='flex flex-row items-center gap-2'>
+                  <input type="radio" name="radio-2" className="radio radio-xs border-[1px]" checked={userType === 'user'}
+                  onChange={() => handleUserTypeChange('user')}/>
+                  <p className='text-base font-semibold '>User</p>
+                </div>
+                <div className='flex flex-row items-center gap-2'>
+                  <input type="radio" name="radio-2" className="radio radio-xs border-[1px]" checked={userType === 'admin'}
+                  onChange={() => handleUserTypeChange('admin')}/>
+                  <p className='text-base font-semibold '>Admin</p>
+                </div>
+              </div>
+
+              <div className='w-full h-[1px] bg-gray-200'/>
+
+              <div className='w-64 grid grid-cols-2 gap-4'>
+                <button className={`w-32 h-auto pr-2 gap-0 flex flex-row items-center border-[2px] border-gray-400 rounded-4xl hover:cursor-pointer ${filterStatus === 'verified' ? 'border-green-500' : 'border-gray-400'}`} onClick={() => setFilterStatus('verified')}>
+                  <span className='text-green-300'><Dot size={38}/> </span>
+                  <p className='text-base font-semibold'>Verified</p>
+                </button>
+                <button className={`w-32 h-auto pr-2 gap-0 flex flex-row items-center border-[2px] border-gray-400 rounded-4xl hover:cursor-pointer ${filterStatus === 'unverified' ? 'border-green-500' : 'border-gray-400'}`} onClick={() => setFilterStatus('unverified')}>
+                  <span className='text-gray-300'><Dot size={38}/> </span>
+                  <p className='text-base font-semibold'>Unverified</p>
+                </button>
+                <button className={`w-32 h-auto pr-2 gap-0 flex flex-row items-center border-[2px] border-gray-400 rounded-4xl hover:cursor-pointer ${filterStatus === 'restricted' ? 'border-green-500' : 'border-gray-400'}`} onClick={() => setFilterStatus('restricted')}>
+                  <span className='text-red-400'><Dot size={38}/> </span>
+                  <p className='text-base font-semibold'>Restricted</p>
+                </button>
+                <button className={`w-32 h-auto pr-2 gap-0 flex flex-row items-center border-[2px] border-gray-400 rounded-4xl hover:cursor-pointer ${filterStatus === 'banned' ? 'border-green-500' : 'border-gray-400'}`} onClick={() => setFilterStatus('banned')}>
+                  <span className='text-red-400'><Dot size={38}/> </span>
+                  <p className='text-base font-semibold'>Banned</p>
+                </button>
+              </div>
+
+            </ul>
+          </div>
           <label htmlFor="table-search" className="sr-only">Search</label>
           <div className="relative mt-1">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -149,9 +262,6 @@ function BarChart() {
         <table className="w-full text-sm text-left text-gray-500 ">
           <thead className="text-xs text-gray-700 uppercase bg-[#F5F7FA]">
             <tr>
-              <th scope="col" className="p-4 w-12">
-                <div className="flex items-center"></div>
-              </th>
               <th scope="col" className="px-6 py-3 text-base font-semibold w-56">
                 User
               </th>
@@ -173,12 +283,6 @@ function BarChart() {
             {filteredUsers.length > 0 ? (
               filteredUsers.map(user => (
                 <tr key={user._id} className="bg-[#F5F7FA] hover:bg-gray-50 ">
-                  <td className="w-4 p-4">
-                    <div className="flex items-center">
-                      <input id={`checkbox-table-search-${user.id}`} type="checkbox" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 " />
-                      <label htmlFor={`checkbox-table-search-${user.id}`} className="sr-only">checkbox</label>
-                    </div>
-                  </td>
                   <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap flex flex-row items-center gap-4">
                     <div className="w-8 h-8 flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-300">
                       <img 
