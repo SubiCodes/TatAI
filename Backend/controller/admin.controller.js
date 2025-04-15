@@ -11,7 +11,7 @@ export const changeStatus = async (req, res) => {
             return res.status(404).json({success: false, message: "User not found."});
         };
 
-        if(action !== "Restricted" && action !== "Banned" && action !== "Verified") {
+        if(action !== "Restricted" && action !== "Banned" && action !== "Verified"  && action !== "Unverified") {
             return res.status(400).json({success: false, message: "Invalid action."});
         };
 

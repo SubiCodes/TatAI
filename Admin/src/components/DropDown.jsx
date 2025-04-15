@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Ellipsis, Eye, Eraser, PencilOff, OctagonMinus } from 'lucide-react';
+import { Ellipsis, Eye, CircleCheck, CircleX, PencilOff, OctagonMinus } from 'lucide-react';
 import ModalConfirmStatusChange from './ModalConfirmStatusChange.jsx';
 
 function DropDown({user}) {
@@ -40,11 +40,21 @@ function DropDown({user}) {
                             <span>View</span>
                         </span>
                     </li>
-                    {(user.status === "Restricted" || user.status === "Banned") && (
+                    
+                    {(user.status !== "Verified") && (
                         <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-gray-800' onClick={() => confirmationStatusChange('Verified')}>
                             <span className='flex flex-row items-center gap-3'>
-                                <span><Eraser size={18}/></span>
-                                <span>Unrestrict / Unban</span>
+                                <span><CircleCheck size={18}/></span>
+                                <span>Verify</span>
+                            </span>
+                        </li>
+                    )}
+
+                    {(user.status !== "Unverified") && (
+                        <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-gray-800' onClick={() => confirmationStatusChange('Unverified')}>
+                            <span className='flex flex-row items-center gap-3'>
+                                <span><CircleX size={18}/></span>
+                                <span>Unverify</span>
                             </span>
                         </li>
                     )}
