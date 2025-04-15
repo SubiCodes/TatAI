@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
     status:{
         type: String,
         default: "Unverified",
-        enum: ["Unverified", "Verified", "Restricted", "Blocked"],
+        enum: ["Unverified", "Verified", "Restricted", "Banned"],
     },
     role: {
         type: String,

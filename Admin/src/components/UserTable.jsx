@@ -91,21 +91,17 @@ function BarChart() {
       setUsers(res.data.data);
     } catch (error) {
       console.log(error);
-      setModalContent(prev => ({...prev, title: "Error fetching", text: error.message}));
-      openModal();
-    } finally{
+      setModalContent({ title: "Error fetching", text: error.message || "Unknown error" });
+      modalRef.current?.open(); // safer call
+    } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const showUsers = () => {
     console.log(users);
   }
-
-  const openModal = () => {
-    modalRef.current.open();
-  };
-
+  
   useEffect(() => {
     getUser();
   }, []);

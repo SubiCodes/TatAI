@@ -6,6 +6,7 @@ import connectToDatabase from './database/mongodb.js';
 import authRouter from './routes/auth.routes.js';
 import preferenceRouter from './routes/preference.routes.js';
 import userRouter from './routes/user.routes.js';
+import adminRouter from './routes/admin.routes.js'
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/preference', preferenceRouter);
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/admin', adminRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World!!!');
