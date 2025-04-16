@@ -15,6 +15,10 @@ export const addAccount = async (req, res) => {
         return res.status(400).json({success: false, message: "Email already exists."});
     };
 
+    if (!firstName || !lastName || !gender || !birthday || !email || !password || !role) {
+        return res.status(400).json({success: false, message: "There is an empty field."});
+    };
+
     if (role === "admin" || role === "super admin") {
         status = "Verified";
     };
@@ -24,7 +28,7 @@ export const addAccount = async (req, res) => {
 
     try {
         const user = await User.create({firstName: firstName, lastName: lastName, gender: gender, birthday: birthday,email: email, password: encryptedPassword,status: status, role: role, verificationToken: verificationToken});
-        if (!status === "Verified"){
+        if (status !== "Verified"){
             sendVerificationToken(email, verificationToken);
         };
         res.status(201).json({success: true, message: "User created successfully.", data: user, verificationToken: verificationToken});

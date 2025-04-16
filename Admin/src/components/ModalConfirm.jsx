@@ -4,7 +4,7 @@ import ModalMessage from './ModalMessage.jsx'
 import { URI } from '../constants/URI.js';
 
 // Using forwardRef to make the modal accessible from parent components
-const ModalConfirmDelete = forwardRef(({ onSubmit, toDelete, title }, ref) => {
+const ModalConfirm = forwardRef(({ onSubmit, toConfirm, title, titleResult }, ref) => {
 
     const dialogRef = useRef(null);
     const modalRef = useRef(null);
@@ -56,13 +56,13 @@ const ModalConfirmDelete = forwardRef(({ onSubmit, toDelete, title }, ref) => {
             <>
             <h2 className="text-xl font-semibold mb-4">{title}</h2>
             <div className="mb-8 text-gray-600 text-sm text-start">
-                Are you sure you want to delete <span className="text-gray-800 text-sm font-semibold">{toDelete}?</span> 
+                <span className="text-gray-800 text-sm font-semibold">{toConfirm}</span> 
             </div>
             <div className="w-full flex justify-end gap-2">
                 <button onClick={closeModal} className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 hover:cursor-pointer transition duration-300">
                     Cancel
                 </button>
-                <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 hover:cursor-pointer transition duration-300" onClick={handleSubmit}>
+                <button className="px-4 py-2 bg-secondary text-white rounded hover:bg-primary hover:cursor-pointer transition duration-300" onClick={handleSubmit}>
                     Confirm
                 </button>
             </div>
@@ -77,9 +77,9 @@ const ModalConfirmDelete = forwardRef(({ onSubmit, toDelete, title }, ref) => {
         )}
             
         </dialog>
-        <ModalMessage ref={modalRef} modalTitle={"Delete status"} modalText={deleteStatus} shouldReload={true}/>
+        <ModalMessage ref={modalRef} modalTitle={titleResult} modalText={deleteStatus} shouldReload={true}/>
         </>
     );
     });
 
-export default ModalConfirmDelete;
+export default ModalConfirm;
