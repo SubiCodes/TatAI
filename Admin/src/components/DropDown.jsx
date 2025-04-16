@@ -3,7 +3,7 @@ import { URI } from '../constants/URI.js';
 
 import { Ellipsis, Eye, CircleCheck, CircleX, PencilOff, OctagonMinus, Trash2 } from 'lucide-react';
 import ModalConfirmStatusChange from './ModalConfirmStatusChange.jsx';
-import ModalConfirmDelete from './ModalConfirmDelete.jsx';
+import ModalConfirm from './ModalConfirm.jsx';
 import axios from 'axios';
 
 function DropDown({user, isSuperAdmin}) {
@@ -125,7 +125,7 @@ function DropDown({user, isSuperAdmin}) {
             )}
         </ul>
         <ModalConfirmStatusChange ref={confirmationRef} action={statusChangedTo} email={user.email} userID={user._id}/>
-        <ModalConfirmDelete ref={deleteRef} toDelete={user.email} title={"Confirm account deletion"} onSubmit={deleteAccount}/>
+        <ModalConfirm ref={deleteRef} toConfirm={`Are you sure you want to delete ${user.email}?`} title={"Confirm account deletion"} onSubmit={deleteAccount} titleResult={"Deletion result"}/>
     </div>
     </>
   )

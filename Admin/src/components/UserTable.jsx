@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import { URI } from '../constants/URI.js';
 import ModalMessage from './ModalMessage.jsx';
+import ModalAddAccount from './ModalAddAccount.jsx';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { User, LockKeyhole, Dot, SlidersHorizontal } from 'lucide-react';
 import DropDown from './DropDown.jsx';
@@ -24,6 +25,7 @@ import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
 
 function BarChart() {
 
+  const addUserModalRef = useRef(null);
   const modalRef = useRef(null);
   const [modalContent, setModalContent] = useState({
     title: '',
@@ -161,9 +163,8 @@ function BarChart() {
     }
   }
 
-  const showUsers = () => {
-    console.log(users);
-    console.log(isSuperAdmin);
+  const openAddAcountModal = () => {
+    addUserModalRef.current?.open()
   }
   
   useEffect(() => {
@@ -184,8 +185,8 @@ function BarChart() {
     <div className="max-w-screen min-h-full">
       <div className='w-full h-auto justify-between flex items-center px-4 py-4 border-b-[1px] border-[#EBEEF2]'>
         <h1 className='text-xl font-bold text-[#343C6A]'>All Users</h1>
-        <button className='bg-[#0818A8] p-2 rounded-lg hover:cursor-pointer'>
-          <h1 className='text-base text-white' onClick={showUsers}>+ Add User</h1>
+        <button className='bg-[#0818A8] p-2 rounded-lg hover:cursor-pointer'onClick={openAddAcountModal}>
+          <h1 className='text-base text-white' >+ Add User</h1>
         </button>
       </div>
       
@@ -342,6 +343,7 @@ function BarChart() {
         </table>
       </div>
       <ModalMessage ref={modalRef} modalTitle={modalContent.title} modalText={modalContent.text}/>
+      <ModalAddAccount ref={addUserModalRef} isSuperAdmin={isSuperAdmin} shouldReload={false}/>
     </div>
   );
 }
