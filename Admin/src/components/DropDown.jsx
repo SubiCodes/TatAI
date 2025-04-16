@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { URI } from '../constants/URI.js';
 
-import { Ellipsis, Eye, CircleCheck, CircleX, PencilOff, OctagonMinus, Trash2 } from 'lucide-react';
+import { Ellipsis, Eye, CircleCheck, CircleX, PencilOff, OctagonMinus, Trash2, LockKeyhole, User } from 'lucide-react';
 import ModalConfirmStatusChange from './ModalConfirmStatusChange.jsx';
 import ModalConfirm from './ModalConfirm.jsx';
 import axios from 'axios';
@@ -9,12 +9,17 @@ import axios from 'axios';
 function DropDown({user, isSuperAdmin}) {
 
     const confirmationRef = useRef(null);
+    const confirmationRefRole = useRef(null);
     const deleteRef = useRef(null);
 
+    const [newRole, setNewRole] = useState('');
     const [statusChangedTo, setStatusChangedTo] = useState('');
 
     const openModalStatus = () => {
         confirmationRef.current.open();
+    };
+    const openModalRole = () => {
+        confirmationRefRole.current.open();
     };
     const openModalDelete = () => {
         deleteRef.current.open();
@@ -25,6 +30,25 @@ function DropDown({user, isSuperAdmin}) {
         setStatusChangedTo(action);
         openModalStatus();
     };
+
+
+    const confirmationRoleChange = async () => {
+        openModalRole();
+    };
+
+    const changeRole = async () => {
+        try {
+            const res = await axios.post(`${URI}admin/role-change/${user._id}`, {role: newRole});
+            console.log(res);
+            return `Successfully updated ${user.email} to ${newRole}`;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "Something went wrong.";
+            console.error("Delete failed:", errorMessage);
+            console.log(error.message);
+            console.log(user._id, newRole);
+            return errorMessage
+        }
+    }
 
     const confirmationDelete = async () => {
         openModalDelete();
@@ -56,13 +80,21 @@ function DropDown({user, isSuperAdmin}) {
                         <span>View</span>
                     </span>
                 </li>
+                <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-red-500'  onClick={() => {setNewRole('user'); confirmationRoleChange()}}>
+                    <span className='flex flex-row items-center gap-3 text-blue-300'>
+                        <span><User size={18}/></span>
+                        <span>Demote to User</span> 
+                    </span>
+                </li>
                 {isSuperAdmin && (
+                    <>
                     <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-red-500' onClick={() => confirmationDelete()}>
                         <span className='flex flex-row items-center gap-3 text-red-400'>
                             <span><Trash2 size={18}/></span>
                             <span>Delete</span>
                         </span>
                     </li>
+                    </>
                 )}
                 </>
             ) : (
@@ -94,6 +126,29 @@ function DropDown({user, isSuperAdmin}) {
 
                     <div className='w-full h-[1px] bg-gray-200 mt-2 mb-2'/>
 
+                    
+                    {isSuperAdmin && (
+                        <>
+
+                        {user.role === 'user' && (
+                            <>
+                            <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-red-500' onClick={() => {setNewRole('admin'); confirmationRoleChange()}}>
+                                <span className='flex flex-row items-center gap-3 text-blue-300'>
+                                    <span><LockKeyhole size={18}/></span>
+                                    <span>Promote to Admin</span>
+                                </span>
+                            </li>
+                            </>
+                        )}
+
+                       
+
+                        <div className='w-full h-[1px] bg-gray-200 mt-2 mb-2'/>
+
+                        
+                        </>
+                    )}
+
                     {user.status !== "Restricted" && (
                         <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-red-500' onClick={() => confirmationStatusChange('Restricted')}>
                             <span className='flex flex-row items-center gap-3 text-red-400'>
@@ -111,7 +166,7 @@ function DropDown({user, isSuperAdmin}) {
                             </span>
                         </li>
                     )}
-                    
+
                     {isSuperAdmin && (
                         <li className='flex flex-row items-center hover:bg-[#F5F7FA] hover:cursor-pointer rounded-lg hover:font-semibold hover:text-red-500' onClick={() => confirmationDelete()}>
                             <span className='flex flex-row items-center gap-3 text-red-400'>
@@ -126,6 +181,7 @@ function DropDown({user, isSuperAdmin}) {
         </ul>
         <ModalConfirmStatusChange ref={confirmationRef} action={statusChangedTo} email={user.email} userID={user._id}/>
         <ModalConfirm ref={deleteRef} toConfirm={`Are you sure you want to delete ${user.email}?`} title={"Confirm account deletion"} onSubmit={deleteAccount} titleResult={"Deletion result"}/>
+        <ModalConfirm ref={confirmationRefRole} toConfirm={`Are you sure you want to change the role of ${user.email}?`} title={"Confirm role change"} onSubmit={changeRole} titleResult={"Role change result"}/>
     </div>
     </>
   )

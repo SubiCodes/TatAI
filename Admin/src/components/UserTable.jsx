@@ -6,7 +6,7 @@ import { URI } from '../constants/URI.js';
 import ModalMessage from './ModalMessage.jsx';
 import ModalAddAccount from './ModalAddAccount.jsx';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { User, LockKeyhole, Dot, SlidersHorizontal } from 'lucide-react';
+import { User, LockKeyhole, Dot, SlidersHorizontal, ShieldUser } from 'lucide-react';
 import DropDown from './DropDown.jsx';
 
 import empty_profile from '../Images/profile-icons/empty_profile.png'
@@ -234,6 +234,11 @@ function BarChart() {
                   onChange={() => handleUserTypeChange('admin')}/>
                   <p className='text-base font-semibold '>Admin</p>
                 </div>
+                <div className='flex flex-row items-center gap-2'>
+                  <input type="radio" name="radio-2" className="radio radio-xs border-[1px]" checked={userType === 'super admin'}
+                  onChange={() => handleUserTypeChange('super admin')}/>
+                  <p className='text-base font-semibold '>Super Admin</p>
+                </div>
               </div>
 
               <div className='w-full h-[1px] bg-gray-200'/>
@@ -315,7 +320,7 @@ function BarChart() {
                   </th>
                   <td className="px-6 py-4 text-gray-900">
                     <div className='flex flex-row w-fit items-center justify-center gap-2 p-2 px-4 bg-[#D7E9FE] rounded-lg'>
-                      {user.role === 'user' ? <User size={16} color='#3F5DBF'/> : <LockKeyhole size={16} color='#3F5DBF'/>}
+                      {user.role === 'user' && <User size={16} color='#3F5DBF'/>} { user.role === 'admin' && <LockKeyhole size={16} color='#3F5DBF'/>} { user.role === 'super admin' && <ShieldUser size={18} color='#3F5DBF'/>}
                       <span className='text-[#3F5DBF]'>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
                     </div>
                    

@@ -110,3 +110,29 @@ export const checkUserRole = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid token", error: error.message });
     }
 };
+
+export const changeRole = async (req, res) => {
+    const {_id} = req.params;
+    const {role} = req.body;
+
+    try {
+        const user = await User.findOne({_id: _id});
+
+        if(!user) {
+            return res.status(404).json({success: false, message: "User not found."});
+        };
+
+        if(role !== "admin" && role !== "user") {
+            return res.status(400).json({success: false, message: "Invalid role."});
+        };
+
+        user.role = role;
+        user.save();
+
+        return res.status(200).json({success: true, message: "User role updated successfully."});
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Can't update user role.", error: error.message });
+    }
+};

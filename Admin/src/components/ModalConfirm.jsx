@@ -10,7 +10,7 @@ const ModalConfirm = forwardRef(({ onSubmit, toConfirm, title, titleResult }, re
     const modalRef = useRef(null);
 
     const [loading, setLoading] = useState(false);
-    const [deleteStatus, setDeleteStatus] = useState('');
+    const [status, setStatus] = useState('');
     
     useImperativeHandle(ref, () => ({
         open: () => {
@@ -35,7 +35,7 @@ const ModalConfirm = forwardRef(({ onSubmit, toConfirm, title, titleResult }, re
         dialogRef.current.close();
         setLoading(true);
         try {
-            setDeleteStatus(onSubmit());
+            setStatus(onSubmit());
             modalRef.current.open();
         } catch (error) {
             setLoading(false);
@@ -77,7 +77,7 @@ const ModalConfirm = forwardRef(({ onSubmit, toConfirm, title, titleResult }, re
         )}
             
         </dialog>
-        <ModalMessage ref={modalRef} modalTitle={titleResult} modalText={deleteStatus} shouldReload={true}/>
+        <ModalMessage ref={modalRef} modalTitle={titleResult} modalText={status} shouldReload={true}/>
         </>
     );
     });
