@@ -136,3 +136,54 @@ export const changeRole = async (req, res) => {
         return res.status(500).json({ success: false, message: "Can't update user role.", error: error.message });
     }
 };
+
+export const getAdminData = async (req, res) => {
+    try {
+      const token = req.cookies.token;
+  
+      if (!token) {
+        return res.status(401).json({ success: false, message: "No token found" });
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.userId;
+
+      const user = await User.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+
+      return res.status(200).json({ success: true, data: user });
+  
+    } catch (error) {
+      return res.status(401).json({ success: false, message: "Invalid token", error: error.message });
+    }
+};
+
+export const editAdminData = async (req, res) => {
+    const {_id} = req.params;
+    const {firstName, lastName, gender, birthday, profileIcon} = req.body;
+    
+    try {
+        const user = await User.findOne({_id: _id});
+
+        if(!user){
+            return res.status(404).json({success: false, message: "User does not exist.", userID: _id})
+        }
+
+        if(firstName) user.firstName = firstName;
+        if(lastName) user.lastName = lastName;
+        if(gender) user.gender = gender;
+        if(birthday) user.birthday = birthday;
+        if(profileIcon) user.profileIcon = profileIcon;
+
+        await user.save();
+
+        return res.status(200).json({success: true, message: "Admin information updated successfully", userInfo: user})
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({success: false, message: "Cant update admin data.", error: error.message})
+    }
+}
