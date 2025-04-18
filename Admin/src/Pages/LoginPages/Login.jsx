@@ -4,6 +4,8 @@ import axios from 'axios'
 import { URI } from '../../constants/URI.js'
 import BeatLoader from 'react-spinners/BeatLoader'
 
+import { Link } from 'react-router-dom';
+
 import loginWallpaper from '../../Images/login-wallpaper.jpg'
 import loginLogo from '../../Images/login-logo.png'
 
@@ -85,7 +87,9 @@ function Login() {
                             <input type="checkbox" className="w-5 h-5" color='white' onChange={showPassword} checked={type === 'text'}/>
                             <span className='text-base text-black'>Show Password</span>
                             <div className='flex grow'/>
-                            <span className='text-base text-secondary'>Forgot Password</span>
+                            <Link to="/forgot-password">
+                                <h1 className='text-lg font-bold text-primary cursor-pointer hover:underline'>Forgot Password?</h1>
+                            </Link>
                         </div>
                         <button className={`w-[70%] h-14 text-white rounded-xl mt-4 transition 
                             ${loading ? 'bg-primary cursor-not-allowed opacity-70' : 'bg-primary hover:bg-blue-600 cursor-pointer'}`}

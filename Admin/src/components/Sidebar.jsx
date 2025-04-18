@@ -1,4 +1,4 @@
-import { Box, ChevronDown, ChartArea, Menu, NotebookPen, User, Wrench, X, LogOut } from 'lucide-react';
+import { Box, ChevronDown, ChartArea, Menu, NotebookPen, User, Wrench, X, LogOut, Settings } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -27,16 +27,21 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       icon: NotebookPen,
       link: '/pending-guides'
     },
-    {
-      title: 'Settings',
-      icon: Wrench,
-      hasDropdown: true,
-      dropdownItems: [
-        { title: 'Preferences', link: '/settings/preferences' },
-        { title: 'Security', link: '/settings/security' },
-        { title: 'Notifications', link: '/settings/notifications' }
-      ]
+    { 
+      title: 'Settings', 
+      icon: Settings,
+      link: '/settings'
     },
+    // {
+    //   title: 'Settings',
+    //   icon: Wrench,
+    //   hasDropdown: true,
+    //   dropdownItems: [
+    //     { title: 'Preferences', link: '/settings/preferences' },
+    //     { title: 'Security', link: '/settings/security' },
+    //     { title: 'Notifications', link: '/settings/notifications' }
+    //   ]
+    // },
     { 
       title: 'Logout', 
       icon: LogOut,

@@ -170,7 +170,7 @@ export const forgotPassword = async (req, res) => {
         };
 
         if ( existingUser.resetPasswordTokenRequestLatest && currentTime - existingUser.resetPasswordTokenRequestLatest < twentyFourHoursInMs){
-            if (existingUser.resetPasswordTokenRequestCount >= 5){
+            if (existingUser.resetPasswordTokenRequestCount >= 500){
                 return res.status(400).json({success: false, message: "Daily limit request for this email has been reached."});
             }
         }else {
@@ -179,7 +179,7 @@ export const forgotPassword = async (req, res) => {
         }
     
         const resetToken = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
+        sendResetToken(email, resetToken);
         existingUser.resetPasswordToken = resetToken;
         existingUser.resetPasswordTokenRequestCount += 1;
         existingUser.resetPasswordTokenRequestLatest = currentTime;
