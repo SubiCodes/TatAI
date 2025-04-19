@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       link: '/users'
     },
     { 
-      title: 'Pending Guides', 
+      title: 'Guides', 
       icon: NotebookPen,
       link: '/pending-guides'
     },
