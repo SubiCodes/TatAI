@@ -6,6 +6,10 @@ const guideSchema = new mongoose.Schema({
         ref: 'UserInfo',
         required: true
     },
+    uploader: {
+        type: String,
+        required: true
+    },
     status: {
         type: String,
         default: "pending",
@@ -28,6 +32,14 @@ const guideSchema = new mongoose.Schema({
         default: "",
         required: true
     },
+    toolsNeeded: {
+        type: String,
+        required: false
+    },
+    materialsNeeded: {
+        type: String,
+        required: false
+    },
     stepTitles: {
         type: [String],
         default: [],
@@ -48,6 +60,6 @@ const guideSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Guide = mongoose.model("UserInfo", guideSchema);
+const Guide = mongoose.model("Guide", guideSchema);
 
 export default Guide;
