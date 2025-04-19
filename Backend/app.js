@@ -7,6 +7,7 @@ import authRouter from './routes/auth.routes.js';
 import preferenceRouter from './routes/preference.routes.js';
 import userRouter from './routes/user.routes.js';
 import adminRouter from './routes/admin.routes.js'
+import guideRouter from './routes/guide.route.js'
 
 const app = express();
 
@@ -17,13 +18,15 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/preference', preferenceRouter);
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/guide', guideRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World!!!');

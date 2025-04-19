@@ -1,19 +1,26 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import MoonLoader from 'react-spinners/MoonLoader'
-import ModalMessage from './ModalMessage.jsx'
+import ModalConfirmReusable from './ModalConfirmReusable.jsx';
+import ModalMessage from './ModalMessage.jsx';
 import { URI } from '../constants/URI.js';
+import BeatLoader from 'react-spinners/BeatLoader';
+
+import axios from 'axios';
 
 import {X, Wrench, Hammer, Sofa, CookingPot} from 'lucide-react';
+import { useEffect } from 'react';
 
 // Using forwardRef to make the modal accessible from parent components
 const ModalAddGuide = forwardRef(({titleResult}, ref) => {
 
     const dialogRef = useRef(null);
     const modalRef = useRef(null);
+    const modalConfirmRef = useRef();
 
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
 
+    const [userId, setUserId] = useState('');
     const [category, setCategory] = useState(''); // State for selected category
     const [title, setTitle] = useState(''); // State for guide title
     const [description, setDescription] = useState(''); // State for guide description
@@ -160,31 +167,114 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                 modalRef.current.open();
                 return;
             }
-        }
-        console.log("Title", title);
-        console.log("Description", description);
-        console.log("Cover Photo", coverPhoto);
-        console.log("Materials", materials);
-        console.log("Category", category);
-        console.log("Closing Message", closingMessage);
-        console.log("Step Titles", stepTitles);
-        console.log("Step Contents", stepContents);
-        console.log("Step Files", stepFiles);
+        };
+
+        try {
+            modalConfirmRef.current?.open();
+            } catch (error) {
+            console.log(error.message);
+            }
+        
     };
+
+    const handleConfirm = async() => {
+        try {
+            setLoading(true);
+            // Upload cover photo first
+            let coverPhotoData = null;
+            if (coverPhoto) {
+            coverPhotoData = await uploadToCloudinary(coverPhoto);
+            }
+
+            // Upload all step files
+            const stepFilesData = [];
+            for (let i = 0; i < stepFiles.length; i++) {
+            if (stepFiles[i]) {
+                const fileData = await uploadToCloudinary(stepFiles[i]);
+                stepFilesData.push(fileData);
+            } else {
+                stepFilesData.push(null);
+            }
+            }
+
+            console.log('Cover Photo URL:', coverPhotoData.url);
+            console.log('Step Files URLs:', stepFilesData.map(file => file?.url));
+
+            const res = await axios.post(`${URI}guide/create`, 
+                {userID: userId, status: "pending", type: category, title: title, description: description, coverImg: coverPhotoData.url, toolsNeeded: tools, materialsNeeded: materials, stepTitles: stepTitles, stepDescriptions: stepContents, stepImg: stepFilesData.map(file => file?.url)}, {withCredentials: true});
+                console.log(res.data.guide);
+            return `Successfully created ${title}`;
+            } catch (error) {
+                console.log(error.message);
+                return `Error creating ${title}: ${error.message}`;
+            }
+    }
+
+    // Upload a file to Cloudinary and return the response
+    const uploadToCloudinary = async (file) => {
+        try {
+        // Convert file to base64
+        const base64 = await convertToBase64(file);
+        
+        // Send to backend
+        const response = await axios.post(`${URI}guide/upload`, {
+            data: base64
+        });
+        
+        return response.data;
+        } catch (error) {
+        console.error('Error uploading to Cloudinary:', error);
+        throw error;
+        }
+    };
+
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const clear = () => {
+            setTitle("");
+            setDescription("");
+            setCoverPhoto(null);
+            setMaterials('');
+            setClosingMessage('');
+            setStepContents([""]);
+            setStepTitles([""]);    
+            setStepFiles([null]);
+            setStepCount(1);
+    };
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const response = await axios.get(`${URI}admin/admin-data`, {withCredentials: true});
+                setUserId(response.data.data._id);
+                console.log(response.data.data._id);
+            } catch (error) {
+                console.error('Error fetching user ID:', error);
+            }
+        };
+        fetchUserId();
+    }, []);
 
     return (
         <>
         <dialog
         ref={dialogRef}
-        className="p-6 w-220 max-h-[90%] text-start rounded-lg bg-[#FAF9F6] shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="p-12 w-220 max-h-[90%] text-start rounded-lg bg-[#FAF9F6] shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
         >   
         
-                <div className='flex flex-col gap-4 bg-white py-4 px-4 rounded-lg shadow-md max-h-full overflow-y-auto'>
+                <div className='flex flex-col gap-4 bg-white py-12 px-4 rounded-lg shadow-md max-h-full overflow-y-auto'>
 
                     <div className='flex flex-row items-center justify-between'> 
                         <span></span>
                         <h1 className='text-lg font-bold'>Create Guide</h1>
-                        <X size={16} onClick={closeModal} className='cursor-pointer'/>
+                        <X size={16} onClick={closeModal} className='cursor-pointer' disabled={loading}/>
                     </div>
 
                     <div className='w-full flex flex-col gap-8 px-12'>
@@ -306,18 +396,20 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                         </div>
 
                         <div className='w-full flex flex-row gap-4 justify-between items-center'>
-                            <button className='w-full bg-gray-400 text-white rounded-lg py-2 hover:bg-gray-500 transition duration-300 cursor-pointer' onClick={closeModal}>
+                            <button className='w-full bg-gray-400 text-white rounded-lg py-2 hover:bg-gray-500 transition duration-300 cursor-pointer' onClick={clear} disabled={loading}>
                                 Cancel
                             </button>
-                            <button className='w-full bg-primary text-white rounded-lg py-2 cursor-pointer' onClick={handlePostGuide}>
-                                Post Guide
+                            <button className='w-full bg-primary text-white rounded-lg py-2 cursor-pointer' onClick={() => handlePostGuide()} disabled={loading}>
+                                {loading ? <BeatLoader color="#ffffff" size={10} /> : "Post Guide"}
                             </button>
                         </div>                                    
                     </div>
 
                 </div> 
+                <ModalConfirmReusable ref={modalConfirmRef} onSubmit={handleConfirm} toConfirm={`Create guide ${title}?`} title={"Create guide"} titleResult={"Creating guide result"} shouldReload={true} resetPage={'/pending-guides'}/>
         </dialog>
         <ModalMessage ref={modalRef} modalTitle={titleResult} modalText={status} shouldReload={false}/>
+        
         </>
     );
     });
