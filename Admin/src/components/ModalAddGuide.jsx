@@ -26,29 +26,35 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
     const [description, setDescription] = useState(''); // State for guide description
     const [coverPhoto, setCoverPhoto] = useState(null); // State for cover photo
     const [materials, setMaterials] = useState(''); // State for materials
-    const [tools, setTools] = useState(''); // State for materials
+    const [tools, setTools] = useState([]); // State for materials
+    const [currentTool, setCurrentTool] = useState("");
     const [closingMessage, setClosingMessage] = useState(''); // State for closingMessage
+    const [additionalLinks, setAdditionalLinks] = useState(''); // State for closingMessage
     const [stepTitles, setStepTitles] = useState([""]); // Array for step titles
     const [stepContents, setStepContents] = useState([""]); // Array for step contents/descriptions
     const [stepFiles, setStepFiles] = useState([null]); // Array for step files
     const [stepCount, setStepCount] = useState(1); // Keep track of step count for labeling
+
+    const [coverPhotoPreview, setCoverPhotoPreview] = useState(null);
+    const [stepFilesPreviews, setStepFilesPreviews] = useState([null]);
 
     // Add a new step when the button is clicked
     const addStep = () => {
         setStepTitles([...stepTitles, ""]);
         setStepContents([...stepContents, ""]);
         setStepFiles([...stepFiles, null]);
+        setStepFilesPreviews([...stepFilesPreviews, null]);
         setStepCount(stepCount + 1);
     };
 
     // Delete a step at the specified index
     const deleteStep = (indexToDelete) => {
-        // Don't delete if only one step remains
         if (stepTitles.length <= 1) return;
-        
+  
         setStepTitles(stepTitles.filter((_, index) => index !== indexToDelete));
         setStepContents(stepContents.filter((_, index) => index !== indexToDelete));
         setStepFiles(stepFiles.filter((_, index) => index !== indexToDelete));
+        setStepFilesPreviews(stepFilesPreviews.filter((_, index) => index !== indexToDelete));
         setStepCount(stepCount - 1);
     };
 
@@ -71,8 +77,35 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
         const newFiles = [...stepFiles];
         newFiles[index] = file;
         setStepFiles(newFiles);
+
+        if (file) {
+            const newPreviews = [...stepFilesPreviews];
+            newPreviews[index] = URL.createObjectURL(file);
+            setStepFilesPreviews(newPreviews);
+        }
+    };
+
+    const handleCoverPhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          setCoverPhoto(file);
+          setCoverPhotoPreview(URL.createObjectURL(file));
+        }
+    };
+
+    // Function to add a tool
+    const addTool = () => {
+        if (currentTool.trim()) {
+        setTools([...tools, currentTool.trim()]);
+        setCurrentTool(""); // Clear the input after adding
+        }
     };
     
+    // Function to remove a specific tool by index
+    const removeTool = (indexToRemove) => {
+        setTools(tools.filter((_, index) => index !== indexToRemove));
+    };
+
     useImperativeHandle(ref, () => ({
         open: () => {
         if (dialogRef.current) {
@@ -88,19 +121,11 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
 
     const closeModal = () => {
         if (dialogRef.current) {
-            setTitle("");
-            setDescription("");
-            setCoverPhoto(null);
-            setMaterials('');
-            setClosingMessage('');
-            setStepContents([""]);
-            setStepTitles([""]);    
-            setStepFiles([null]);
-            setStepCount(1);
-
+            clear();
             dialogRef.current.close();
         }
     };
+
 
     const handlePostGuide = async () => {
         if (!category) {
@@ -128,7 +153,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
         }
         
         if(category !== 'tool') {
-            if (!tools.trim()) {
+            if (tools.length === 0 || (tools.length === 1 && !tools[0].trim())) {
                 setStatus("Please list the tools needed");
                 modalRef.current.open();
                 return;
@@ -201,7 +226,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
             console.log('Step Files URLs:', stepFilesData.map(file => file?.url));
 
             const res = await axios.post(`${URI}guide/create`, 
-                {userID: userId, status: "pending", type: category, title: title, description: description, coverImg: coverPhotoData.url, toolsNeeded: tools, materialsNeeded: materials, stepTitles: stepTitles, stepDescriptions: stepContents, stepImg: stepFilesData.map(file => file?.url)}, {withCredentials: true});
+                {userID: userId, type: category, title: title, description: description, coverImg: coverPhotoData.url, toolsNeeded: tools, materialsNeeded: materials, stepTitles: stepTitles, stepDescriptions: stepContents, stepImg: stepFilesData.map(file => file?.url), closingMessage: closingMessage, additionalLinks: additionalLinks}, {withCredentials: true});
                 console.log(res.data.guide);
             return `Successfully created ${title}`;
             } catch (error) {
@@ -238,15 +263,20 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
     };
 
     const clear = () => {
-            setTitle("");
-            setDescription("");
-            setCoverPhoto(null);
-            setMaterials('');
-            setClosingMessage('');
-            setStepContents([""]);
-            setStepTitles([""]);    
-            setStepFiles([null]);
-            setStepCount(1);
+        setTitle("");
+        setDescription("");
+        setCoverPhoto(null);
+        setCoverPhotoPreview(null); // Clear the preview
+        setTools([]);
+        setCurrentTool("");
+        setMaterials('');
+        setClosingMessage('');
+        setAdditionalLinks('');
+        setStepContents([""]);
+        setStepTitles([""]);    
+        setStepFiles([null]);
+        setStepFilesPreviews([null]); // Clear step previews
+        setStepCount(1);
     };
 
     useEffect(() => {
@@ -316,17 +346,66 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                             <textarea value={description} placeholder="Provide a brief introduction for your post. A minimum of 30 words is recommended to ensure optimal visibility and engagement." 
                             className="textarea textarea-md border-1 border-gray-200 rounded-sm w-full min-h-48" onChange={(e) => {const descriptionText = e.target.value; setDescription(descriptionText)}}></textarea>
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend text-base font-semibold">Pick a photo for your guides cover.</legend>
-                                <input type="file" className="file-input file-input-md border-gray-200 border-1 rounded-sm w-full h-auto" onChange={(e) => setCoverPhoto(e.target.files[0])}/>
+                            <legend className="fieldset-legend text-base font-semibold">Pick a photo for your guides cover.</legend>
+                            <input 
+                                type="file" 
+                                className="file-input file-input-md border-gray-200 border-1 rounded-sm w-full h-auto" 
+                                onChange={handleCoverPhotoChange}
+                                accept="image/*"
+                            />
                             </fieldset>
+                            {coverPhotoPreview && (
+                                <div className="w-full flex justify-center mt-2">
+                                    <img 
+                                    src={coverPhotoPreview} 
+                                    alt="Cover preview" 
+                                    className="max-w-full h-auto object-contain rounded-md max-h-64"
+                                    />
+                                </div>
+                            )}
+
                             {category !== 'tool' && (
                                 <>  
                                 <div className='w-full flex flex-col gap-2'>
                                     <legend className="fieldset-legend text-base font-semibold">Tools needed:</legend>
-                                    <input type="text" value={tools} placeholder="List the tools needed for this guide." className="input border-1 border-gray-200 rounded-sm w-full" onChange={(e) => {const materialsText = e.target.value; setTools(materialsText)}}/>
+                                    <div className='w-full flex flex-row gap-2 justify-between items-center'>
+                                        <input type="text" value={currentTool} placeholder="List the tools needed for this guide." className="input border-1 border-gray-200 rounded-sm  w-full"onChange={(e) => setCurrentTool(e.target.value)}  onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                addTool();
+                                                }}}/>
+                                        <button className='w-24 self-end bg-gray-400 text-white rounded-lg py-2 cursor-pointer' onClick={addTool} disabled={!currentTool.trim()}>
+                                                Add Tool
+                                        </button>
+                                    </div>
                                 </div>
+                                {/* display tools that are added here */}
+                                {tools.length > 0 && (
+                                <div className="w-full mt-2 mb-4">
+                                    <div className="w-full flex flex-wrap gap-2 p-2">
+                                    {tools.map((tool, index) => (
+                                        tool && (
+                                        <div 
+                                            key={index} 
+                                            className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                                        >
+                                            <span className="mr-2">{tool}</span>
+                                            <button 
+                                            onClick={() => removeTool(index)} 
+                                            className="text-red-500 hover:text-red-700 ml-2 flex items-center justify-center"
+                                            aria-label="Remove tool"
+                                            >
+                                            <X size={16} />
+                                            </button>
+                                        </div>
+                                        )
+                                    ))}
+                                    </div>
+                                </div>
+                                )}
+
                                 <div className='w-full flex flex-col gap-2'>
-                                    <legend className="fieldset-legend text-base font-semibold">Materials needed:</legend>
+                                    <legend className="fieldset-legend text-base font-semibold">{category === "cooking" ? ("Ingredients Needed:") : ("Materials needed:")}</legend>
                                     <input type="text" value={materials} placeholder="List the materials needed for this guide." className="input border-1 border-gray-200 rounded-sm w-full" onChange={(e) => {const materialsText = e.target.value; setMaterials(materialsText)}}/>
                                 </div>  
                             </>
@@ -368,7 +447,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                                 </div>
                                 <div className="w-full flex flex-col gap-4">
                                     <fieldset className="border border-gray-200 p-2 rounded-sm">
-                                    <legend className="text-base px-1">Post a photo or video.</legend>
+                                    <legend className="text-base px-1">Post a photo for this step.</legend>
                                     <input
                                         type="file"
                                         className="file-input border-gray-200 border w-full h-auto rounded-sm"
@@ -380,6 +459,25 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                                         </div>
                                     )}
                                     </fieldset>
+                                    {stepFilesPreviews[index] && (
+                                    <div className="w-full flex justify-center mt-2">
+                                    {stepFiles[index]?.type.startsWith('image/') ? (
+                                        <img 
+                                        src={stepFilesPreviews[index]} 
+                                        alt={`Step ${index + 1} preview`} 
+                                        className="max-w-full h-auto object-contain rounded-md max-h-48"
+                                        />
+                                    ) : stepFiles[index]?.type.startsWith('video/') ? (
+                                        <video 
+                                        src={stepFilesPreviews[index]} 
+                                        controls 
+                                        className="max-w-full h-auto rounded-md max-h-48"
+                                        >
+                                        Your browser does not support the video tag.
+                                        </video>
+                                    ) : null}
+                                    </div>
+                                )}
                                 </div>
                                 </div>
                             ))}
@@ -395,9 +493,15 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                             className="textarea textarea-md border-1 border-gray-200 rounded-sm w-full min-h-48" onChange={(e) => {const descriptionText = e.target.value; setClosingMessage(descriptionText)}}></textarea>
                         </div>
 
+                        <div className='w-full flex flex-col gap-2'>
+                            <legend className="fieldset-legend text-base font-semibold">Additional Links:</legend>
+                            <textarea value={additionalLinks} placeholder="Put your additional links here. This could be empty" 
+                            className="textarea textarea-md border-1 border-gray-200 rounded-sm w-full min-h-48" onChange={(e) => {const descriptionText = e.target.value; setAdditionalLinks(descriptionText)}}></textarea>
+                        </div>
+
                         <div className='w-full flex flex-row gap-4 justify-between items-center'>
                             <button className='w-full bg-gray-400 text-white rounded-lg py-2 hover:bg-gray-500 transition duration-300 cursor-pointer' onClick={clear} disabled={loading}>
-                                Cancel
+                                Clear
                             </button>
                             <button className='w-full bg-primary text-white rounded-lg py-2 cursor-pointer' onClick={() => handlePostGuide()} disabled={loading}>
                                 {loading ? <BeatLoader color="#ffffff" size={10} /> : "Post Guide"}

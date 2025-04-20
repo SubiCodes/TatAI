@@ -10,6 +10,10 @@ const guideSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    uploaderName: {
+        type: String,
+        required: true
+    },
     status: {
         type: String,
         default: "pending",
@@ -33,7 +37,7 @@ const guideSchema = new mongoose.Schema({
         required: true
     },
     toolsNeeded: {
-        type: String,
+        type: [String],
         required: false
     },
     materialsNeeded: {
@@ -55,6 +59,19 @@ const guideSchema = new mongoose.Schema({
         default: [],
         required: true
     },
+    closingMessage: {
+        type: String,
+        default: "",
+        required: true
+    },
+    additionalLink: {
+        type: String,
+        required: false
+    },
+    feedBack:{
+        type: [{user:String, comment: String, rating: Number}],
+        required: false
+    }
 }, {
     collection: 'Guides',
     timestamps: true
