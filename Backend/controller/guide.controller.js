@@ -29,9 +29,29 @@ export const upload = async (req, res) => {
       }
 };
 
+export const deleteImageByUrl = async (req, res) => {
+    try {
+      const { public_id } = req.body;  // Use public_id from the request body
+      console.log('Received public_id:', public_id);
+  
+      // Delete the image from Cloudinary using the public_id
+      const result = await cloudinary.uploader.destroy(public_id);
+      console.log('Cloudinary deletion result:', result);
+  
+      if (result.result === 'ok') {
+        res.json({ message: 'Image deleted successfully' });
+      } else {
+        res.status(400).json({ error: 'Failed to delete image', details: result });
+      }
+    } catch (error) {
+      console.error('Server error:', error);
+      res.status(500).json({ error: 'Server error while deleting image' });
+    }
+  };
+
 export const createGuide = async (req, res) => {
     try {
-        const { userID, type, title, description, coverImg, toolsNeeded, materialsNeeded, stepTitles, stepDescriptions, stepImg, closingMessage, additionalLinks } = req.body;
+        const { userID, type, title, description, coverImg, toolsNeeded, materialsNeeded, stepTitles, stepDescriptions, stepImg, closingMessage, additionalLink } = req.body;
         let status = "pending";
         const user = await UserInfo.findById(userID);
         if (!user) {
@@ -59,7 +79,7 @@ export const createGuide = async (req, res) => {
             stepDescriptions,
             stepImg,
             closingMessage,
-            additionalLinks
+            additionalLink
         });
 
         const savedGuide = await newGuide.save();
@@ -70,10 +90,36 @@ export const createGuide = async (req, res) => {
     }
 };
 
+export const getGuide = async (req, res) => {
+    const _id = req.params._id;
+    try {
+        const guides = await Guide.find({_id: _id});
+        if (!guides) {
+            return res.status(404).json({success: false, error: "Guide not found"});
+        };
+        res.status(200).json({success: true, data: guides});
+    } catch (error) {
+        res.status(500).json({success: false, error: `Error: ${error.message}`});
+    }
+}
+
 export const getGuides = async (req, res) => {
     try {
         const guides = await Guide.find({});
         res.status(200).json({success: true, data: guides});
+    } catch (error) {
+        res.status(500).json({success: false, error: `Error: ${error.message}`});
+    }
+}
+
+export const deleteGuide = async (req, res) => {
+    const _id = req.params._id;
+    try {
+        const guide = await Guide.findByIdAndDelete(_id);
+        if (!guide) {
+            return res.status(404).json({success: false, error: "Guide not found"});
+        };
+        res.status(200).json({success: true, data: guide, message: "Guide deleted successfully"});
     } catch (error) {
         res.status(500).json({success: false, error: `Error: ${error.message}`});
     }
