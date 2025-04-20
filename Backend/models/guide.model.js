@@ -32,7 +32,7 @@ const guideSchema = new mongoose.Schema({
         required: true
     },
     coverImg: {
-        type: String,
+        type: { url: String, public_id: String },
         default: "",
         required: true
     },
@@ -55,7 +55,7 @@ const guideSchema = new mongoose.Schema({
         required: true
     },
     stepImg: {
-        type: [String],
+        type: [{url: String, public_id: String}],
         default: [],
         required: true
     },

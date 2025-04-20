@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import ModalAddGuide from '../../components/ModalAddGuide.jsx'
 import { Star, MessageSquareText, SlidersHorizontal, Search } from 'lucide-react';
 import axios from 'axios';
 import PropagateLoader from 'react-spinners/PropagateLoader';
+import ModalConfirmReusable from '../../components/ModalConfirmReusable.jsx';
 
 function Guides() {
 
+  const navigate = useNavigate();
+
   const addGuideRef = useRef();
+  const deleteGuideRef = useRef();
 
   const [loading, setLoading] = useState(true);
   const [guides, setGuides] = useState([]);
@@ -21,7 +27,7 @@ function Guides() {
   const getGuide = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_URI}guide/guides`);
+      const res = await axios.get(`${import.meta.env.VITE_URI}guide`);
       console.log(res.data.data);
       setGuides(res.data.data);
     } catch (error) {
@@ -51,7 +57,35 @@ function Guides() {
     return isLatestFirst ? dateB - dateA : dateA - dateB;
   });
 
+  const openDeleteRef = () => {
+    deleteGuideRef.current.open();
+  };
+
+  const deleteGuide = async (guideId, imageIDs) => {
+    try {
+      setLoading(true);
+      console.log(guideId, imageIDs);
   
+      for (const imageID of imageIDs) {
+        try {
+          const deleteRes = await axios.post(`${import.meta.env.VITE_URI}guide/deleteImage`, { public_id: imageID });
+          console.log(deleteRes.data); // Log the result of the deletion
+        } catch (deleteError) {
+          console.error('Error deleting image:', deleteError);
+        }
+      }
+  
+      // After all images are deleted, fetch the guide data again
+      const res = await axios.post(`${import.meta.env.VITE_URI}guide/${guideId}`);
+      console.log(res.data.data);
+      getGuide();  // Refresh the guide data
+  
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     getGuide();
@@ -162,11 +196,17 @@ function Guides() {
             const numFeedbacks = feedback.length;
             const totalRating = feedback.reduce((sum, item) => sum + (item.rating || 0), 0);
             const avgRating = numFeedbacks > 0 ? (totalRating / numFeedbacks).toFixed(1) : "0.0";
+            
+            const coverImgPublicId = guide.coverImg.public_id;
+            const stepImgPublicIds = guide.stepImg && Array.isArray(guide.stepImg) ? guide.stepImg.map(img => img.public_id) : [];
+          
+            const imageIDs = coverImgPublicId ? [coverImgPublicId, ...stepImgPublicIds] : stepImgPublicIds;
+          
             return (
-            <div key={guide._id} className="card bg-gray-50 w-full sm:w-96 md:w-80 lg:w-76 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
+            <div key={guide._id} className="card bg-gray-50 border-1 border-gray-400 rounded-lg w-full sm:w-96 md:w-80 lg:w-76 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
               <figure className="px-6 pt-10 h-64 w-full flex justify-center items-center rounded-xl overflow-hidden">
                 <img
-                  src={guide.coverImg}
+                  src={guide.coverImg.url}
                   alt={guide.title}
                   className="h-full w-full object-contain"
                 />
@@ -180,8 +220,8 @@ function Guides() {
                 </div>
                 <div className='w-full flex justify-between items-start flex-col h-auto gap-2 py-2'>
 
-                  <div className='w-full flex justify-start items-start flex-row gap-4 overflow-ellipsis '>
-                    <p className='text-gray-500 text-md truncate w-full text-start'>{guide.uploader}</p>
+                  <div className='w-full flex justify-start items-start flex-row gap-4 overflow-ellipsis mb-2'>
+                    <p className='text-gray-500 text-md truncate w-full text-start flex flex-row gap-2'>Posted by: <p className='font-bold'>{guide.uploaderName}</p></p>
                   </div>
 
                   <div className='w-full flex justify-start items-start flex-row gap-4'>
@@ -200,22 +240,26 @@ function Guides() {
                 </div>
                 
                 <div className="w-full flex justify-center items-center mt-4 gap-8">
-                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg'>
+                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => navigate(`/view-guide/${guide._id}`)}>
                     View Guide
                   </button>
-                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg'>
+                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg' onClick={() => {openDeleteRef()}}>
                     Delete Guide
                   </button>
                 </div>
               </div>
-            </div>
+              <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide ${guide.title} by ${guide.uploader}?`} titleResult={"Guide Deletion"} onSubmit={() => {deleteGuide(guide._id, imageIDs);
+              }} resetPage={'/pending-guides'}/>
+            </div>            
              );
+             
           })}
 
         </div>
         </>
       )}
       <ModalAddGuide ref={addGuideRef} titleResult={"Guide post result"}/>
+      
     </div>
   )
 }

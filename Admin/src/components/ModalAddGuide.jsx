@@ -158,12 +158,16 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                 modalRef.current.open();
                 return;
             }
-    
-            if (!materials.trim()) {
-                setStatus("Please list the materials needed");
-                modalRef.current.open();
-                return;
+
+            if (category !== 'repair'){
+                if (!materials.trim()) {
+                    setStatus("Please list the materials needed");
+                    modalRef.current.open();
+                    return;
+                }
             }
+    
+            
         }
 
         
@@ -205,34 +209,54 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
     const handleConfirm = async() => {
         try {
             setLoading(true);
+          
             // Upload cover photo first
             let coverPhotoData = null;
             if (coverPhoto) {
-            coverPhotoData = await uploadToCloudinary(coverPhoto);
+              coverPhotoData = await uploadToCloudinary(coverPhoto);
+              console.log('Cover photo:', coverPhotoData); // should have { url, public_id }
             }
-
+          
             // Upload all step files
             const stepFilesData = [];
             for (let i = 0; i < stepFiles.length; i++) {
-            if (stepFiles[i]) {
+              if (stepFiles[i]) {
                 const fileData = await uploadToCloudinary(stepFiles[i]);
-                stepFilesData.push(fileData);
-            } else {
+                console.log('Step file:', fileData);
+                stepFilesData.push(fileData); // push full { url, public_id } object
+              } else {
                 stepFilesData.push(null);
+              }
             }
-            }
-
-            console.log('Cover Photo URL:', coverPhotoData.url);
-            console.log('Step Files URLs:', stepFilesData.map(file => file?.url));
-
-            const res = await axios.post(`${URI}guide/create`, 
-                {userID: userId, type: category, title: title, description: description, coverImg: coverPhotoData.url, toolsNeeded: tools, materialsNeeded: materials, stepTitles: stepTitles, stepDescriptions: stepContents, stepImg: stepFilesData.map(file => file?.url), closingMessage: closingMessage, additionalLinks: additionalLinks}, {withCredentials: true});
-                console.log(res.data.guide);
+          
+            console.log('Cover Photo:', coverPhotoData);
+            console.log('Step Files:', stepFilesData);
+          
+            const res = await axios.post(
+              `${URI}guide/create`,
+              {
+                userID: userId,
+                type: category,
+                title: title,
+                description: description,
+                coverImg: coverPhotoData || {},
+                toolsNeeded: tools,
+                materialsNeeded: materials,
+                stepTitles: stepTitles,
+                stepDescriptions: stepContents,
+                stepImg: stepFilesData.filter(Boolean),
+                closingMessage: closingMessage,
+                additionalLink: additionalLinks,
+              },
+              { withCredentials: true }
+            );
+          
+            console.log(res.data.guide);
             return `Successfully created ${title}`;
-            } catch (error) {
-                console.log(error.message);
-                return `Error creating ${title}: ${error.message}`;
-            }
+          } catch (error) {
+            console.log(error.message);
+            return `Error creating ${title}: ${error.message}`;
+          }
     }
 
     // Upload a file to Cloudinary and return the response
@@ -404,10 +428,13 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                                 </div>
                                 )}
 
-                                <div className='w-full flex flex-col gap-2'>
+                                {category !== 'repair' && (
+                                    <div className='w-full flex flex-col gap-2'>
                                     <legend className="fieldset-legend text-base font-semibold">{category === "cooking" ? ("Ingredients Needed:") : ("Materials needed:")}</legend>
                                     <input type="text" value={materials} placeholder="List the materials needed for this guide." className="input border-1 border-gray-200 rounded-sm w-full" onChange={(e) => {const materialsText = e.target.value; setMaterials(materialsText)}}/>
-                                </div>  
+                                    </div>  
+                                )}
+                                
                             </>
                             )}
                             
@@ -452,6 +479,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                                         type="file"
                                         className="file-input border-gray-200 border w-full h-auto rounded-sm"
                                         onChange={(e) => handleFileChange(index, e.target.files[0])}
+                                        accept="image/*"
                                     />
                                     {stepFiles[index] && (
                                         <div className="mt-2 text-sm text-green-600">

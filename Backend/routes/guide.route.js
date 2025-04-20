@@ -1,10 +1,13 @@
 import { Router } from "express";
-import { upload, createGuide, getGuides } from "../controller/guide.controller.js";
+import { upload, deleteImageByUrl, createGuide, getGuides, getGuide, deleteGuide } from "../controller/guide.controller.js";
 
 const guideRouter = Router();
 
 guideRouter.post('/upload', upload);
+guideRouter.post('/deleteImage', deleteImageByUrl);
 guideRouter.post('/create', createGuide);
-guideRouter.get('/guides', getGuides);
+guideRouter.get('/', getGuides);
+guideRouter.get('/:_id', getGuide);
+guideRouter.post('/:_id', deleteGuide);
 
 export default guideRouter;
