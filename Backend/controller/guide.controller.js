@@ -31,15 +31,23 @@ export const upload = async (req, res) => {
 
 export const createGuide = async (req, res) => {
     try {
-        const { userID, status, type, title, description, coverImg, toolsNeeded, materialsNeeded, stepTitles, stepDescriptions, stepImg } = req.body;
+        const { userID, type, title, description, coverImg, toolsNeeded, materialsNeeded, stepTitles, stepDescriptions, stepImg, closingMessage, additionalLinks } = req.body;
+        let status = "pending";
         const user = await UserInfo.findById(userID);
         if (!user) {
             return res.status(404).json({success: false, error: "User not found"});
         };
+
+        if (user.role !== "user") {
+            status = "accepted";
+        };
+
         const uploader = user.email;
+        const uploaderName = user.firstName + " " + user.lastName;
         const newGuide = new Guide({
             userID,
             uploader,
+            uploaderName,
             status,
             type,
             title,
@@ -49,7 +57,9 @@ export const createGuide = async (req, res) => {
             materialsNeeded,
             stepTitles,
             stepDescriptions,
-            stepImg
+            stepImg,
+            closingMessage,
+            additionalLinks
         });
 
         const savedGuide = await newGuide.save();
@@ -59,3 +69,12 @@ export const createGuide = async (req, res) => {
         res.status(500).json({success: false, error: `Error: ${error.message}`});
     }
 };
+
+export const getGuides = async (req, res) => {
+    try {
+        const guides = await Guide.find({});
+        res.status(200).json({success: true, data: guides});
+    } catch (error) {
+        res.status(500).json({success: false, error: `Error: ${error.message}`});
+    }
+}
