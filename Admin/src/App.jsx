@@ -10,7 +10,6 @@ import Users from './Pages/MainPages/Users.jsx';
 import Guides from './Pages/MainPages/Guides.jsx';
 import Settings from './Pages/MainPages/Settings/Settings.jsx';
 import ForgotPassword from './Pages/MainPages/Settings/ForgotPassword.jsx';
-import ViewGuide from './Pages/ViewGuide.jsx';
 
 function App() {
   
@@ -30,10 +29,8 @@ function App() {
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/view-guide/:id" element={<ViewGuide />} />
-        </Route>
-        <Route path="/forgot-password" element={<ViewGuide />} />
+       
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         
         {/* Redirect to login if no route matches */}
         <Route path="*" element={<Navigate to="/login" replace />} />

@@ -47,6 +47,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
 
     const [guide, setGuide] = useState(null);
     const [poster, setPoster] = useState(null);
+    const [feedbackUsers, setFeedbackUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
@@ -76,6 +77,43 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
          }
     };
 
+    const calculateAverageRating = (guide) => {
+        if (!guide?.feedBack || guide.feedBack.length === 0) {
+          return { rating: 0, count: 0 };
+        }
+        
+        const totalRating = guide.feedBack.reduce((sum, feedback) => sum + feedback.rating, 0);
+        const averageRating = totalRating / guide.feedBack.length;
+        const roundedRating = Math.round(averageRating * 2) / 2;
+        
+        return { 
+          rating: averageRating, 
+          roundedRating: roundedRating, 
+          count: guide.feedBack.length 
+        };
+    };
+
+    const getFeedbackUserData = async () => {
+        if (!guide?.feedBack || guide.feedBack.length === 0) return;
+        
+        try {
+            const userPromises = guide.feedBack.map(feedback => 
+                axios.get(`${import.meta.env.VITE_URI}user/${feedback.user}`)
+            );
+    
+            const userResponses = await Promise.all(userPromises);
+            const userMap = {};
+    
+            guide.feedBack.forEach((feedback, index) => {
+                userMap[feedback.user] = userResponses[index].data.data;
+            });
+    
+            setFeedbackUsers(userMap);
+        } catch (error) {
+            console.error("Error fetching feedback user data:", error);
+        }
+    };
+
     const profileIcons = {
         'empty_profile': empty_profile,
         'boy_1': boy_1,
@@ -95,6 +133,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
     useEffect(() => {
         if (guide) {
             getUserData();
+            getFeedbackUserData();
         }
     }, [guide]);
 
@@ -121,7 +160,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                 </span>
             </div>
             
-            <div className='px-8'>
+            <div className='px-16'>
                 {loading ? (
                     <div className='w-full h-48 flex items-center justify-center flex-col gap-4'>
                         <h1 className='text-2xl font-bold'>Loading...</h1>
@@ -243,7 +282,67 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                                 return null;
                             })}
                         </div>
-                        
+
+                        <div className='w-full h-16 flex flex-col items-center justify-center '>
+                            <h1 className='text-4xl font-bold'>Reviews</h1>  
+                        </div>
+
+                        <div className="w-full flex flex-col items-center justify-center gap-2 mb-12">
+                        {guide && (() => {
+                            const ratingData = calculateAverageRating(guide);
+                            return (
+                            <>
+                                <div className="rating rating-xl rating-half pointer-events-none">
+                                <input type="radio" name="rating-display" className="rating-hidden" defaultChecked={ratingData.roundedRating === 0} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 0.5} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 1.0} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 1.5} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 2.0} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 2.5} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 3.0} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 3.5} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 4.0} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 4.5} />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 5.0} />
+                                </div>
+                                <span className="text-sm">
+                                {ratingData.rating.toFixed(1)} ({ratingData.count} reviews)
+                                </span>
+                            </>
+                            );
+                        })()}
+                        </div>
+
+                        <div className='w-full flex flex-col gap-6 mt-4 mb-24'>
+                        {guide.feedBack.map((feedback, index) => {
+                            const feedbackUser = feedbackUsers[feedback.user];
+                            return (
+                            <div key={index} className="flex flex-col gap-2 pb-4">
+                                <div className="flex  items-center gap-3">
+                                    <div className="avatar">
+                                        <div className="w-8 rounded-full">
+                                            <img src={
+                                                feedbackUser && feedbackUser.profileIcon 
+                                                ? profileIcons[feedbackUser.profileIcon] 
+                                                : profileIcons['empty_profile']
+                                            } alt="User profile" />
+                                        </div>
+                                    </div>
+                                <span className="font-semibold">
+                                    {feedbackUser ? feedbackUser.email || 'Anonymous User' : 'Loading...'}
+                                </span>
+                                
+                                {/* Individual rating */}
+                                <span className="text-sm font-semibold text-primary">{feedback.rating} stars</span>
+
+                                </div>
+                                
+                                <p className="text-sm pl-11">{feedback.comment}</p>
+                            </div>
+                            );
+                        })}
+                        </div>
+                                                
                     </div>
                 ) : (
                     <div className='w-full h-48 flex items-center justify-center'>
