@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 
-import { useNavigate } from 'react-router-dom';
 
 import ModalAddGuide from '../../components/ModalAddGuide.jsx'
+import ModalViewGuide from '../../components/ModalViewGuide.jsx';
 import { Star, MessageSquareText, SlidersHorizontal, Search } from 'lucide-react';
 import axios from 'axios';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import ModalConfirmReusable from '../../components/ModalConfirmReusable.jsx';
 
 function Guides() {
-
-  const navigate = useNavigate();
-
   const addGuideRef = useRef();
   const deleteGuideRef = useRef();
+  const openGuideRef = useRef();
 
   const [loading, setLoading] = useState(true);
   const [guides, setGuides] = useState([]);
@@ -59,6 +57,10 @@ function Guides() {
 
   const openDeleteRef = () => {
     deleteGuideRef.current.open();
+  };
+
+  const openViewRef = () => {
+    openGuideRef.current.open();
   };
 
   const deleteGuide = async (guideId, imageIDs) => {
@@ -240,7 +242,7 @@ function Guides() {
                 </div>
                 
                 <div className="w-full flex justify-center items-center mt-4 gap-8">
-                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => navigate(`/view-guide/${guide._id}`)}>
+                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => {openViewRef();}}>
                     View Guide
                   </button>
                   <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg' onClick={() => {openDeleteRef()}}>
@@ -250,6 +252,7 @@ function Guides() {
               </div>
               <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide ${guide.title} by ${guide.uploader}?`} titleResult={"Guide Deletion"} onSubmit={() => {deleteGuide(guide._id, imageIDs);
               }} resetPage={'/pending-guides'}/>
+              <ModalViewGuide ref={openGuideRef} guideID={guide._id}/>
             </div>            
              );
              
