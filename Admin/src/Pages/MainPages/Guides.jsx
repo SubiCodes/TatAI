@@ -16,6 +16,7 @@ function Guides() {
 
   const [loading, setLoading] = useState(true);
   const [guides, setGuides] = useState([]);
+  const [feedbackByGuide, setFeedbackByGuide] = useState({});
 
   const [searchTerm, setSearchTerm] = useState('');
   const [shownGuides, setShownGuides] = useState('all');
@@ -88,6 +89,37 @@ function Guides() {
       setLoading(false);
     }
   };
+
+  const getFeedback = async (guideId) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${import.meta.env.VITE_URI}guide/getFeedback/${guideId}`);
+      console.log(res.data.data);
+      return res.data.data;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const fetchFeedbackForAllGuides = async () => {
+      const feedbackMap = {};
+    
+      for (const guide of filteredGuides) {
+        const feedback = await getFeedback(guide._id);
+        feedbackMap[guide._id] = feedback;
+      }
+    
+      setFeedbackByGuide(feedbackMap);
+    };
+    
+    if (guides.length > 0) {
+      fetchFeedbackForAllGuides();
+    }
+  }, [guides]);
+  
 
   useEffect(() => {
     getGuide();
@@ -194,16 +226,21 @@ function Guides() {
         <div className='w-full h-full mt-4 flex flex-row flex-wrap gap-4 justify-start mb-96'>
           
           {filteredGuides.map((guide) => {
-            const feedback = guide.feedBack || [];
-            const numFeedbacks = feedback.length;
-            const totalRating = feedback.reduce((sum, item) => sum + (item.rating || 0), 0);
-            const avgRating = numFeedbacks > 0 ? (totalRating / numFeedbacks).toFixed(1) : "0.0";
-            
-            const coverImgPublicId = guide.coverImg.public_id;
-            const stepImgPublicIds = guide.stepImg && Array.isArray(guide.stepImg) ? guide.stepImg.map(img => img.public_id) : [];
-          
-            const imageIDs = coverImgPublicId ? [coverImgPublicId, ...stepImgPublicIds] : stepImgPublicIds;
-          
+             const feedback = feedbackByGuide[guide._id] || [];
+
+             const feedbackWithRating = feedback.filter(item => item.rating != null);
+             const numFeedbacksWithComment = feedback.filter(item => item.comment != null);
+             const numRatings = feedbackWithRating.length;
+         
+             const totalRating = feedbackWithRating.reduce((sum, item) => sum + (item.rating || 0), 0);
+             const avgRating = numRatings > 0 ? (totalRating / numRatings).toFixed(1) : "0.0";
+         
+             const coverImgPublicId = guide.coverImg.public_id;
+             const stepImgPublicIds = guide.stepImg && Array.isArray(guide.stepImg) ? guide.stepImg.map(img => img.public_id) : [];
+             const imageIDs = coverImgPublicId ? [coverImgPublicId, ...stepImgPublicIds] : stepImgPublicIds;
+         
+             console.log('avgRating:', avgRating);
+             console.log('numFeedbacksWithComment:', numFeedbacksWithComment);
             return (
             <div key={guide._id} className="card bg-gray-50 border-1 border-gray-400 rounded-lg w-full sm:w-96 md:w-80 lg:w-76 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
               <figure className="px-6 pt-10 h-64 w-full flex justify-center items-center rounded-xl overflow-hidden">
@@ -234,7 +271,7 @@ function Guides() {
                     </div>
                     <div className='flex flex-row items-center gap-1'>
                       <MessageSquareText className='text-primary' size={16}/>
-                      <p className='text-md text-gray-500 font-semibold'>{numFeedbacks}</p>
+                      <p className='text-md text-gray-500 font-semibold'>{numFeedbacksWithComment.length}</p>
                     </div>
 
                   </div>

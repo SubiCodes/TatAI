@@ -66,10 +66,6 @@ const guideSchema = new mongoose.Schema({
     additionalLink: {
         type: String,
         required: false
-    },
-    feedBack:{
-        type: [{user:String, comment: String, rating: Number}],
-        required: false
     }
 }, {
     collection: 'Guides',
