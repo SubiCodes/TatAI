@@ -5,6 +5,7 @@ import { CLOUDINARY_SECRET_KEY } from '../config/env.js';
 
 import UserInfo from '../models/user.model.js';
 import Guide from '../models/guide.model.js';
+import Feedback from '../models/feedback.model.js';
 
 cloudinary.config({
     cloud_name: CLOUDINARY_CLOUD_NAME,
@@ -115,6 +116,8 @@ export const getGuides = async (req, res) => {
 export const deleteGuide = async (req, res) => {
     const _id = req.params._id;
     try {
+        
+        await Feedback.deleteMany({ guideId: _id });
         const guide = await Guide.findByIdAndDelete(_id);
         if (!guide) {
             return res.status(404).json({success: false, error: "Guide not found"});
@@ -126,53 +129,121 @@ export const deleteGuide = async (req, res) => {
 };
 
 export const addFeedback = async (req, res) => {
-    try {
-        const { guideId, userId, comment, rating } = req.body;
-        
-        // Validate required fields
-        if (!guideId || !userId || !comment || rating === undefined) {
-            return res.status(400).json({
-            success: false,
-            message: "Missing required fields: guideId, userId, comment, and rating are required"
-            });
-        }
-        
-        // Validate rating is between 0 and 5
-        if (rating < 0 || rating > 5) {
-            return res.status(400).json({
-            success: false,
-            message: "Rating must be between 0 and 5"
-            });
-        }
-        
-        const guide = await Guide.findById(guideId);
+  try {
+    const { guideId, userId, comment, rating } = req.body;
 
-        if (!guide) {
-        return res.status(404).json({
-            success: false,
-            message: "Guide not found"
-        });
-        }
-
-        guide.feedBack.push({
-        user: userId,
-        comment,
-        rating
-        });
-
-        await guide.save();
-        
-        return res.status(200).json({
-            success: true,
-            message: "Feedback added successfully",
-            data: guide
-        });
-    } catch (error) {
-      console.error("Error adding feedback:", error);
-      return res.status(500).json({
+    if (!guideId || !userId) {
+      return res.status(400).json({
         success: false,
-        message: "Error adding feedback",
-        error: error.toString()
+        message: "Missing required fields: guideId and userId are required",
       });
     }
+
+    if (rating !== undefined && (rating < 0 || rating > 5)) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 0 and 5",
+      });
+    }
+
+    const guide = await Guide.findById(guideId);
+    if (!guide) {
+      return res.status(404).json({
+        success: false,
+        message: "Guide not found",
+      });
+    }
+
+    let existingFeedback = await Feedback.findOne({ guideId, userId });
+
+    if (existingFeedback) {
+      // Case: User already gave a comment
+      if (existingFeedback.comment && comment) {
+        return res.status(400).json({
+          success: false,
+          message: "You have already commented on this guide.",
+        });
+      }
+
+      // Case: Update existing feedback with missing field
+      if (!existingFeedback.rating && rating !== undefined) {
+        existingFeedback.rating = rating;
+      }
+
+      if (!existingFeedback.comment && comment) {
+        existingFeedback.comment = comment;
+      }
+
+      await existingFeedback.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Feedback updated successfully.",
+        data: existingFeedback,
+      });
+    }
+
+    // New feedback
+    if (!comment && rating === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide at least a comment or a rating.",
+      });
+    }
+
+    const newFeedback = await Feedback.create({
+      guideId,
+      userId,
+      comment,
+      rating,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Feedback added successfully.",
+      data: newFeedback,
+    });
+
+  } catch (error) {
+    console.error("Error adding feedback:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error adding feedback",
+      error: error.toString(),
+    });
+  }
 };
+
+export const getFeedback = async (req, res) => {
+    const { _id } = req.params;
+    try {
+        const feedback = await Feedback.find({ guideId: _id});
+
+        if (!feedback || feedback.length === 0) {
+            return res.status(404).json({ success: false, error: "Feedback not found" });
+        }
+
+        res.status(200).json({ success: true, data: feedback });
+    } catch (error) {
+        res.status(500).json({ success: false, error: `Error: ${error.message}` });
+    }
+};
+
+export const hideFeedback = async (req, res) => {
+    const { _id } = req.params;
+    
+    try {
+        const feedback = await Feedback.findById(_id);
+
+        if (!feedback) {
+            return res.status(404).json({ success: false, error: "Feedback not found" });
+        }
+
+        feedback.hidden = !feedback.hidden; // Toggle the hidden status
+        await feedback.save();
+
+        res.status(200).json({ success: true, data: feedback });
+    } catch (error) {
+        res.status(500).json({ success: false, error: `Error: ${error.message}` });
+    }
+}

@@ -1,4 +1,6 @@
 import User from '../models/user.model.js';
+import Feedback from '../models/feedback.model.js';
+import Guide from '../models/guide.model.js';
 import jwt from 'jsonwebtoken';
 
 import bcrypt from 'bcryptjs';
@@ -40,22 +42,36 @@ export const addAccount = async (req, res) => {
 
 export const deleteAccount = async (req, res) => {
     const { _id } = req.params;
-  
+
     try {
-        const user = await User.findOne({_id: _id});
-  
+        // Find the user by ID
+        const user = await User.findOne({ _id: _id });
+
         if (!user) {
-            return res.status(404).json({success: false, message: "User not found.",});
-        };
-  
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+
+        // Delete all guides posted by the user
+        await Guide.deleteMany({ userID: _id });
+
+        // Delete all feedback posted by the user
+        await Feedback.deleteMany({ userId: _id });
+
+        // Finally, delete the user
         await user.deleteOne();
-  
-        return res.status(200).json({ success: true, message: "User deleted successfully.", });
+
+        return res.status(200).json({
+            success: true,
+            message: "User and associated posts/feedbacks deleted successfully.",
+        });
     } catch (error) {
         return res.status(500).json({
-        success: false,
-        message: "An error occurred while deleting the user.",
-        error: error.message,
+            success: false,
+            message: "An error occurred while deleting the user.",
+            error: error.message,
         });
     }
 };

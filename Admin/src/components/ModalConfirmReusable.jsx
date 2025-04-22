@@ -7,7 +7,7 @@ import ModalMessageReusable from './ModalMessageReusable.jsx';
 const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResult, resetPage }, ref) => {
 
     const dialogRef = useRef(null);
-    const modalRef = useRef(null);
+    const modalRef = useRef();
 
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
