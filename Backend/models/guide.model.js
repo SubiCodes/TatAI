@@ -33,7 +33,6 @@ const guideSchema = new mongoose.Schema({
     },
     coverImg: {
         type: { url: String, public_id: String },
-        default: "",
         required: true
     },
     toolsNeeded: {

@@ -123,4 +123,56 @@ export const deleteGuide = async (req, res) => {
     } catch (error) {
         res.status(500).json({success: false, error: `Error: ${error.message}`});
     }
-}
+};
+
+export const addFeedback = async (req, res) => {
+    try {
+        const { guideId, userId, comment, rating } = req.body;
+        
+        // Validate required fields
+        if (!guideId || !userId || !comment || rating === undefined) {
+            return res.status(400).json({
+            success: false,
+            message: "Missing required fields: guideId, userId, comment, and rating are required"
+            });
+        }
+        
+        // Validate rating is between 0 and 5
+        if (rating < 0 || rating > 5) {
+            return res.status(400).json({
+            success: false,
+            message: "Rating must be between 0 and 5"
+            });
+        }
+        
+        const guide = await Guide.findById(guideId);
+
+        if (!guide) {
+        return res.status(404).json({
+            success: false,
+            message: "Guide not found"
+        });
+        }
+
+        guide.feedBack.push({
+        user: userId,
+        comment,
+        rating
+        });
+
+        await guide.save();
+        
+        return res.status(200).json({
+            success: true,
+            message: "Feedback added successfully",
+            data: guide
+        });
+    } catch (error) {
+      console.error("Error adding feedback:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error adding feedback",
+        error: error.toString()
+      });
+    }
+};
