@@ -33,7 +33,6 @@ function EditProfile() {
     const [loading, setLoading] = useState(true);
     const [errorFetching, setErrorFectching] = useState(false);
     const [errorSaving, setErrorSaving] = useState(false);
-    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
     const [changingData, setChangingData] = useState(false);
 
@@ -52,14 +51,6 @@ function EditProfile() {
     const today = new Date();
     const eighteenYearsAgo = new Date();
     eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
-
-    const disabledDays = [
-        { from: new Date(eighteenYearsAgo.getTime() + 86400000), to: new Date(2100, 0, 1) }
-    ];
-
-    const toggleDatePicker = () => {
-        setIsDatePickerOpen(!isDatePickerOpen);
-    };
 
     const profileIcons = {
         'empty_profile': empty_profile,
@@ -214,29 +205,17 @@ function EditProfile() {
             <div className='w-full flex items-center justify-center'>
                 <fieldset className="fieldset">
                     <legend className="fieldset-legend">Birthdate</legend>
-                    <button 
-                            onClick={toggleDatePicker}
-                            className="input input-border w-lg text-left bg-[#F8F8FF] border-1 rounded-lg hover:cursor-pointer"
-                        >
-                            <span className='text-left font-normal'> {date ? date.toLocaleDateString() : "Pick a date"}</span>
-                            <span className='flex-1'></span>
-                            <span className='text-right'><Calendar size={18}/></span>
-                        </button>
-                        {isDatePickerOpen && (
-                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 translate-y-0 mb-1 bg-white shadow-lg rounded-lg z-50 overflow-hidden">
-                                <DayPicker 
-                                    className="react-day-picker" 
-                                    mode="single" 
-                                    selected={date} 
-                                    disabled={disabledDays}
-                                    defaultMonth={eighteenYearsAgo}
-                                    onSelect={(selectedDate) => {
-                                        setDate(selectedDate);
-                                        setIsDatePickerOpen(false);
-                                    }}
-                                />
-                            </div>
-                        )}
+                    <input
+                            type="date"
+                            className="input w-lg border-1 rounded-md bg-[#F8F8FF]"
+                            value={date ? date.toISOString().split("T")[0] : ""}
+                            onChange={(e) => {
+                                const selectedDate = new Date(e.target.value);
+                                setDate(selectedDate);
+                            }}
+                            max={eighteenYearsAgo.toISOString().split("T")[0]}
+                            min="1900-01-01" // optional: earliest allowed date
+                            />
                 </fieldset>
             </div>
 

@@ -144,7 +144,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                                 <img src={poster && poster.profileIcon ? profileIcons[poster.profileIcon] : profileIcons['empty_profile']} />
                                 </div>  
                             </div>
-                            <h1 className='text-xl font-bold text-gray-600'>by: {guide.uploaderName}</h1>
+                            <h1 className='text-xl font-bold text-gray-600'>{guide.uploaderName}</h1>
                         </div>
 
                         <div className='w-full h-auto flex flex-col items-center justify-center'>

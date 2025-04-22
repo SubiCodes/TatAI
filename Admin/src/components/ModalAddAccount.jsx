@@ -15,8 +15,6 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
     const confirmRef = useRef(null);
     const dialogRef = useRef(null); 
 
-    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [date, setDate] = useState();
@@ -58,10 +56,6 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
     const eighteenYearsAgo = new Date();
     eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
 
-    const disabledDays = [
-        { from: new Date(eighteenYearsAgo.getTime() + 86400000), to: new Date(2100, 0, 1) }
-    ];
-
     // Expose methods to the parent component via ref
     useImperativeHandle(ref, () => ({
         open: () => {
@@ -93,10 +87,7 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
         }
     };
 
-    const toggleDatePicker = () => {
-        setIsDatePickerOpen(!isDatePickerOpen);
-    };
-
+    
     const checkErrors = () => {
         const newErrors = [];
       
@@ -219,31 +210,17 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
             <div className='flex flex-col '>
                 <fieldset className="fieldset relative">
                     <legend className="fieldset-legend font-semibold">Birthdate</legend>
-                   
-                    <button 
-                            onClick={toggleDatePicker}
-                            className="input input-border text-left border-gray-600 border-1 rounded-lg hover:cursor-pointer"
-                        >
-                            <span className='text-left font-normal'> {date ? date.toLocaleDateString() : "Pick a date"}</span>
-                            <span className='flex-1'></span>
-                            <span className='text-right'><Calendar size={18}/></span>
-                        </button>
-                        {isDatePickerOpen && (
-                            <div className="absolute left-0 top-0 mb-1 bg-white shadow-lg rounded-lg z-50 overflow-hidden">
-                                <DayPicker 
-                                    className="react-day-picker" 
-                                    mode="single" 
-                                    selected={date} 
-                                    disabled={disabledDays}
-                                    defaultMonth={eighteenYearsAgo}
-                                    onSelect={(selectedDate) => {
-                                        setDate(selectedDate);
-                                        setIsDatePickerOpen(false);
-                                    }}
-                                />
-                            </div>
-                        )}
-
+                        <input
+                            type="date"
+                            className="input border-gray-600 border-1 rounded-lg font-normal"
+                            value={date ? date.toISOString().split("T")[0] : ""}
+                            onChange={(e) => {
+                                const selectedDate = new Date(e.target.value);
+                                setDate(selectedDate);
+                            }}
+                            max={eighteenYearsAgo.toISOString().split("T")[0]}
+                            min="1900-01-01" // optional: earliest allowed date
+                            />
                 </fieldset>
             </div>
             

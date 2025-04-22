@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { URI } from '../constants/URI.js';
+import tataiTextLogo from '../Images/tatai-text-logo.png';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const [activeDropdown, setActiveDropdown] = useState('');
@@ -103,11 +104,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       className={`bg-white text-black transition-all duration-300 ease-in-out text-sm border-2 rounded-md border-[rgba(0,0,0,0.08)]
         ${isOpen ? 'w-64' : 'w-16'}`}
     >
-      <div className={`p-4 flex items-center ${isOpen ? 'justify-between' : 'justify-center'} `}>
-        <h1 className={`font-bold overflow-hidden transition-all duration-300 text-lg text-nowrap text-[#3B40E8]
+      <div className={`p-4 flex items-center ${isOpen ? 'justify-between' : 'justify-center'} w-full flex items-center `}>
+        <div className={`font-bold overflow-hidden transition-all duration-300 text-lg text-nowrap text-[#3B40E8] w-full flex items-center justify-center
           ${isOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-          TatAi Admin
-        </h1>
+          <img src={tataiTextLogo} alt="Tatai Logo" className={`h-8 max-w-34 ${isOpen ? 'opacity-100' : 'opacity-0 w-0'}`} />
+        </div>
         <button 
           onClick={() => setIsOpen(!isOpen)}
           className="hover:bg-[#F3F5F7] p-2 rounded-lg hover:cursor-pointer"
