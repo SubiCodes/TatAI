@@ -244,7 +244,7 @@ function Guides() {
              console.log('avgRating:', avgRating);
              console.log('numFeedbacksWithComment:', numFeedbacksWithComment);
             return (
-            <div key={guide._id} className="card bg-gray-50 border-1 border-gray-400 rounded-lg w-full sm:w-96 md:w-80 lg:w-76 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
+            <div key={guide._id} className="card bg-gray-50 border-1 border-gray-400 rounded-lg w-72 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
               <figure className="px-6 pt-10 h-64 w-full flex justify-center items-center rounded-xl overflow-hidden">
                 <img
                   src={guide.coverImg.url}
@@ -281,10 +281,10 @@ function Guides() {
                 </div>
                 
                 <div className="w-full flex justify-center items-center mt-4 gap-8">
-                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => { setSelectedGuide(guide._id); openViewRef();}}>
+                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => { setSelectedGuide(guide._id); openViewRef();}}>
                     View Guide
                   </button>
-                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg' onClick={() => {openDeleteRef()}}>
+                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => {openDeleteRef()}}>
                     Delete Guide
                   </button>
                 </div>
