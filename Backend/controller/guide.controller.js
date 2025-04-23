@@ -128,6 +128,22 @@ export const deleteGuide = async (req, res) => {
     }
 };
 
+export const updateGuideStatus = async (req, res) => {
+    const { _id } = req.params;
+    const { status } = req.body;
+    try {
+        const guide = await Guide.findById(_id);
+        if (!guide) {
+            return res.status(404).json({success: false, error: "Guide not found"});
+        }
+        guide.status = status;
+        await guide.save();
+        res.status(200).json({success: true, data: guide});
+      } catch (error) {
+        res.status(500).json({success: false, error: `Error: ${error.message}`});
+      }
+}
+
 export const addFeedback = async (req, res) => {
   try {
     const { guideId, userId, comment, rating } = req.body;

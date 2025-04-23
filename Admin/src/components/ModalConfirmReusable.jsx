@@ -46,6 +46,8 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
             setLoading(false);
             dialogRef.current.close();
         }
+
+        
     };
     
 

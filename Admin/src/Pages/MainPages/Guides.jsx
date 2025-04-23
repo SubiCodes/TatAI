@@ -190,7 +190,7 @@ function Guides() {
                 <div className='w-full flex justify-between items-start flex-col h-auto gap-4 py-2'>
                   <h1 className='text-md font-semibold text-start'>Filter by status</h1>
                   <div className='w-full flex justify-start items-start flex-col gap-4 overflow-ellipsis '>
-                    {['all', 'accepted', 'pending'].map((status) => (
+                    {['all', 'accepted', 'rejected', 'pending'].map((status) => (
                       <div key={status} className='flex flex-row items-center gap-2'>
                         <input
                           type="radio"
