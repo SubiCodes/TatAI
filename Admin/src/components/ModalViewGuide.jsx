@@ -1,7 +1,9 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import PropagateLoader from 'react-spinners/PropagateLoader';
-import { X, ShieldQuestion } from 'lucide-react';
+import { X, ShieldQuestion, Eye, EyeOff } from 'lucide-react';
+import ModalConfirmReusable from './ModalConfirmReusable.jsx';
+import Swal from 'sweetalert2'
 
 import empty_profile from '../Images/profile-icons/empty_profile.png'
 import boy_1 from '../Images/profile-icons/boy_1.png'
@@ -16,12 +18,12 @@ import lgbt_1 from '../Images/profile-icons/lgbt_1.png'
 import lgbt_2 from '../Images/profile-icons/lgbt_2.png'
 import lgbt_3 from '../Images/profile-icons/lgbt_3.png'
 import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
-
 // Using forwardRef to make the modal accessible from parent components
 const ModalViewGuide = forwardRef(({ guideID }, ref) => {
     const dialogRef = useRef(null);
+    const modalConfirmRef = useRef();
     const [isOpen, setIsOpen] = useState(false);
-    
+    const [fetchingComments, setFetchingComments] = useState(false);
     
     // Expose methods to the parent component via ref
     useImperativeHandle(ref, () => ({
@@ -50,8 +52,10 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
     const [poster, setPoster] = useState(null);
     const [feedback, setFeedback] = useState([]);
     const [feedbackUsers, setFeedbackUsers] = useState({});
+    const [changeStatusTo, setChangeStatusTo] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [averageRating, setAverageRating] = useState({ rating: 0, roundedRating: 0, count: 0 });
 
     const getGuide = async () => {
         try {
@@ -70,25 +74,28 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
 
     const getUserData = async () => {
         try {
+            setFetchingComments(true);
             const getPoster = await axios.get(`${import.meta.env.VITE_URI}user/${guide.userID}`);
             setPoster(getPoster.data.data);
             console.log(getPoster.data.data);
          } catch (error) {
             console.error(error);
             setError(true);
+         } finally {
+            setFetchingComments(false);
          }
     };
 
     const getFeedback = async () => {
         try {
-          setLoading(true);
+        setFetchingComments(true);
           const res = await axios.get(`${import.meta.env.VITE_URI}guide/getFeedback/${guideID}`);
           console.log(res.data.data);
           setFeedback(res.data.data);
         } catch (error) {
           console.error(error);
         } finally {
-          setLoading(false);
+            setFetchingComments(false);
         }
     }
 
@@ -110,11 +117,45 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
         } catch (error) {
             console.log(error);
         }
+    };
+
+    const hideComment = async (commentId) => {
+        try {
+            setFetchingComments(true);
+            const res = await axios.put(`${import.meta.env.VITE_URI}guide/hideFeedback/${commentId}`);
+            console.log(res.data.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setFetchingComments(false);
+        }
+    };
+
+    const changeGuideStatus = async (guideID, status) => {
+        setLoading(true);
+        try {
+            const res = await axios.put(`${import.meta.env.VITE_URI}guide/guideStatus/${guideID}`, { status: status });
+            console.log(res.data.data);
+            getGuide();
+            return `Successfully updated guide status to ${changeStatusTo}.`;
+        } catch (error) {
+            console.error(error);
+            setError(true);
+            return `Error updating guide status to${changeStatusTo}: ${error.message}`
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const openConfirmationModal = () => {
+        modalConfirmRef.current?.open();
+        console.log("Modal opened");
     }
+
     
     const calculateAverageRating = () => {
         if (!feedback || feedback.length === 0) {
-          return { rating: 0, count: 0 };
+          return { rating: 0, roundedRating: 0, count: 0 };
         }
     
         const totalRating = feedback.reduce((sum, item) => sum + item.rating, 0);
@@ -144,8 +185,6 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
         'lgbt_4': lgbt_4
     };
 
-
-
     useEffect(() => {
         if (guide) {
             getUserData();
@@ -160,7 +199,12 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
 
     useEffect(() => {
         if (feedback.length > 0) {
-            getFeedbackUserData(); 
+            getFeedbackUserData();
+            // Calculate and update average rating whenever feedback changes
+            const newRating = calculateAverageRating();
+            setAverageRating(newRating);
+        } else {
+            setAverageRating({ rating: 0, roundedRating: 0, count: 0 });
         }
     }, [feedback]);
 
@@ -171,9 +215,9 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
     }, [isOpen, guideID]);
 
     return  (
-        <dialog
+            <dialog
             ref={dialogRef}
-            className="pb-6 pt-2 w-[60%] max-w-[90vw] max-h-[90%] rounded-lg text-start bg-white shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 overflow-auto"
+            className="p-12 w-[60%] max-h-[90%] text-start rounded-lg bg-[#FAF9F6] shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             onClose={() => setIsOpen(false)}
         >
             <div className="w-full h-10 grid grid-cols-3 items-center">
@@ -316,34 +360,40 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                                 })}
                         </div>
 
+                            <div className="w-full h-auto flex flex-col items-center justify-center mb-12 gap-8">
+                                <h1 className="text-4xl font-bold">Status: <span className='text-primary font-normal'>{guide.status.charAt(0).toUpperCase() + guide.status.slice(1)}</span></h1>
+                                <div className='w-full h-auto flex flex-col gap-4 mt-4 items-center justify-center mb-24'>
+                                    <span className='text-lg'>Update this guide's status?</span>
+                                    <div className="flex flex-row gap-4 items-center justify-center"> 
+                                        <button className="w-auto h-8 bg-green-400 px-4 py-2 flex items-center justify-center rounded-lg cursor-pointer text-white font-bold" onClick={() => {setChangeStatusTo('accepted'); openConfirmationModal()}}>Accept</button>
+                                        <button className="w-auto h-8 bg-red-400 px-4 py-2 flex items-center justify-center rounded-lg cursor-pointer text-white font-bold" onClick={() => {setChangeStatusTo('rejected'); openConfirmationModal()}}>Reject</button>
+                                        <button className="w-auto h-8 bg-gray-400 px-4 py-2 flex items-center justify-center rounded-lg cursor-pointer text-white font-bold" onClick={() => {setChangeStatusTo('pending'); openConfirmationModal()}}>Pending</button>
+                                    </div>
+                                </div>
+                            </div>
+ 
                         <div className="w-full h-16 flex flex-col items-center justify-center">
                             <h1 className="text-4xl font-bold">Reviews</h1>
                         </div>
 
                         <div className="w-full flex flex-col items-center justify-center gap-2 mb-12">
-                            {guide && (() => {
-                                const ratingData = calculateAverageRating();
-                                return (
-                                    <>
-                                        <div className="rating rating-xl rating-half pointer-events-none">
-                                            <input type="radio" name="rating-display" className="rating-hidden" defaultChecked={ratingData.roundedRating === 0} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 0.5} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 1.0} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 1.5} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 2.0} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 2.5} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 3.0} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 3.5} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 4.0} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" defaultChecked={ratingData.roundedRating === 4.5} />
-                                            <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" defaultChecked={ratingData.roundedRating === 5.0} />
-                                        </div>
-                                        <span className="text-sm">{ratingData.rating.toFixed(1)} ({ratingData.count} reviews)</span>
-                                    </>
-                                );
-                            })()}
+                            <div className="rating rating-xl rating-half pointer-events-none">
+                                <input type="radio" name="rating-display" className="rating-hidden" checked={averageRating.roundedRating === 0} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={averageRating.roundedRating === 0.5} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={averageRating.roundedRating === 1.0} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={averageRating.roundedRating === 1.5} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={averageRating.roundedRating === 2.0} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={averageRating.roundedRating === 2.5} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={averageRating.roundedRating === 3.0} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={averageRating.roundedRating === 3.5} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={averageRating.roundedRating === 4.0} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={averageRating.roundedRating === 4.5} readOnly />
+                                <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={averageRating.roundedRating === 5.0} readOnly />
+                            </div>
+                            <span className="text-sm">{averageRating.rating.toFixed(1)} ({averageRating.count} reviews)</span>
                         </div>
-
+                        
+                        {!fetchingComments ? (
                         <div className="w-full h-auto flex flex-col gap-4 mb-12">
                             {feedback.map((comment) => {
                             const user = feedbackUsers[comment.userId];
@@ -357,9 +407,8 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                             }
 
                             return (
-                                <>
-                                <div className='flex flex-col mb-6 max-w-1/2'>
-                                    <div key={comment._id} className="flex flex-row gap-4 mb-6">
+                                <div key={comment._id} className='flex flex-col mb-6 max-w-1/2'>
+                                    <div className="flex flex-row gap-4 mb-6">
                                         <div className="flex h-full">
                                             <img
                                             src={profileIcons[user.profileIcon]} // Use the profile icon from the mapping
@@ -368,9 +417,30 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                                             />
                                         </div>
                                         <div className="flex flex-row h-4">
-                                            <div className="flex flex-col h-4">
+                                            <div className="flex flex-col">
                                                 <h3 className='text-md font-semibold'>{user.firstName} {user.lastName}</h3>
                                                 <p className='text-sm text-gray-500'>{user.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-center ml-4">
+                                            <div className="dropdown w-auto">
+                                                <div tabIndex={0} role="button" className="">
+                                                    {comment.hidden ? (
+                                                        <EyeOff size={20} className="text-gray-400" />
+                                                    ) : (
+                                                    <Eye size={20}/>)}
+                                                </div>
+                                                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+                                                    <li>
+                                                        <a className="flex items-center gap-2" onClick={() => {hideComment(comment._id); comment.hidden = !comment.hidden;}}>
+                                                            {comment.hidden ? (
+                                                                <Eye size={20} className="text-gray-400" />
+                                                            ) : (
+                                                                <EyeOff size={20}/>)}
+                                                            {comment.hidden ? "Unhide" : "Hide"}
+                                                        </a>
+                                                    </li>
+                                                </ul>
                                             </div>
                                         </div>
                                     
@@ -385,13 +455,21 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                                         <p className='text-sm text-gray-700'>{new Date(comment.createdAt).toLocaleString()}</p>
                                     </div>
                                 </div>
-                                </>
                             );
                             })}
                         </div>
+                        ) : (
+                            <div className="w-full h-48 flex items-center justify-center flex-col gap-4">
+                                <h1 className="text-2xl font-bold">Loading comments...</h1>
+                                <PropagateLoader color="#36d7b7" size={15} />
+                            </div>
+                        )}
                     </div>
-                ) : null}
+                ) : <div className="w-full h-48 flex items-center justify-center flex-col gap-4">
+                        <h1 className="text-2xl font-bold text-gray-400">No comments yet.</h1>
+                    </div>}
             </div>
+            <ModalConfirmReusable ref={modalConfirmRef} onSubmit={() => changeGuideStatus(guide?._id, changeStatusTo)} toConfirm={`Change guide status to ${changeStatusTo}?`} title={"Update guide status"} titleResult={"Creating guide result"} shouldReload={true} resetPage={'/pending-guides'}/>
         </dialog>
     );
 });
