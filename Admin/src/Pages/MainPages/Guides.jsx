@@ -23,6 +23,8 @@ function Guides() {
   const [isLatestFirst, setIsLatestFirst] = useState(true);
   const [shownGuidesStatus, setShownGuidesStatus] = useState('all');
 
+  const [selectedGuide, setSelectedGuide] = useState(null);
+
   const getGuide = async () => {
     try {
       setLoading(true);
@@ -279,7 +281,7 @@ function Guides() {
                 </div>
                 
                 <div className="w-full flex justify-center items-center mt-4 gap-8">
-                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => {openViewRef();}}>
+                  <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => { setSelectedGuide(guide._id); openViewRef();}}>
                     View Guide
                   </button>
                   <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg' onClick={() => {openDeleteRef()}}>
@@ -289,7 +291,7 @@ function Guides() {
               </div>
               <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide ${guide.title} by ${guide.uploader}?`} titleResult={"Guide Deletion"} onSubmit={() => {deleteGuide(guide._id, imageIDs);
               }} resetPage={'/pending-guides'}/>
-              <ModalViewGuide ref={openGuideRef} guideID={guide._id}/>
+              <ModalViewGuide ref={openGuideRef} guideID={selectedGuide}/>
             </div>            
              );
              
