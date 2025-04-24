@@ -345,7 +345,7 @@ function Dashboard() {
 
                 <div className="flex-1"/>
                 <div className="w-full h-[1px] bg-gray-300"/>
-                <span className="text-center text-primary">View All</span>
+                <span className="text-center text-primary mt-2">View All</span>
 
             </div>
 
