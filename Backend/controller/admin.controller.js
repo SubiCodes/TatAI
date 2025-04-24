@@ -202,4 +202,105 @@ export const editAdminData = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({success: false, message: "Cant update admin data.", error: error.message})
     }
-}
+};
+
+// dashboard data's
+
+export const getCount = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments(); // total number of users
+        const acceptedGuides = await Guide.countDocuments({ status: 'accepted' }); // guides with status 'accepted'
+        const pendingGuides = await Guide.countDocuments({ status: 'pending' }); // guides with status 'pending'
+
+        return res.status(200).json({
+        success: true,
+        data: {
+            userTotal: totalUsers,
+            liveGuides: acceptedGuides,
+            pendingGuides: pendingGuides
+        }
+        });
+    } catch (error) {
+        return res.status(500).json({success: false, message: "Cant get count data for dashboard.", error: error.message});
+    }
+};
+
+export const getLiveGuidesCount = async (req, res) => {
+    try {
+        const repair = await Guide.countDocuments({ type: 'repair' });
+        const tool = await Guide.countDocuments({ type: 'tool' });
+        const diy = await Guide.countDocuments({ type: 'diy' });
+        const cooking = await Guide.countDocuments({ type: 'cooking' });
+        
+        return res.status(200).json({
+        success: true,
+        data: {
+            repair: repair,
+            tool: tool,
+            diy: diy,
+            cooking: cooking
+        }
+        });
+    } catch (error) {
+        return res.status(500).json({success: false, message: "Cant get live guide count data for dashboard.", error: error.message});
+    }
+};
+
+export const getRatingsCount = async (req, res) => {
+    try {
+        const five = await Feedback.countDocuments({ rating: 5 });
+        const four = await Feedback.countDocuments({ rating: 4  });
+        const three = await Feedback.countDocuments({ rating: 3  });
+        const two = await Feedback.countDocuments({ rating: 2  });
+        const one = await Feedback.countDocuments({ rating: 1  });
+        
+        const totalCount = five + four + three + two + one;
+
+        const average = totalCount === 0 
+            ? 0 
+            : ((5 * five + 4 * four + 3 * three + 2 * two + 1 * one) / totalCount).toFixed(2);
+
+        const averageRaw = (5 * five + 4 * four + 3 * three + 2 * two + 1 * one) / totalCount;
+        const roundedRating = Math.round(averageRaw * 2) / 2; // Round to nearest 0.5 
+
+        return res.status(200).json({
+        success: true,
+        data: {
+            five: five,
+            four: four,
+            three: three,
+            two: two,
+            one: one,
+            average: average,
+            roundedRating: roundedRating
+        }
+        });
+    } catch (error) {
+        return res.status(500).json({success: false, message: "Cant get live guide count data for dashboard.", error: error.message});
+    }
+};
+
+
+export const getLatestFeedback = async (req, res) => {
+    try {
+      const latestFeedback = await Feedback.findOne({ comment: { $exists: true, $ne: "" } })
+        .sort({ createdAt: -1 });
+      return res.status(200).json({ success: true, data: latestFeedback });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+export const getLatestGuides = async (req, res) => {
+    try {
+      const latestGuides = await Guide.find()
+        .sort({ createdAt: -1 }) 
+        .limit(2);                
+  
+      return res.status(200).json({ success: true, data: latestGuides });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, message: "Server error" });
+    }
+};

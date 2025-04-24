@@ -24,13 +24,43 @@ function Guides() {
   const [shownGuidesStatus, setShownGuidesStatus] = useState('all');
 
   const [selectedGuide, setSelectedGuide] = useState(null);
+  const [selectedGuideImgs, setSelectedGuideImgs] = useState();
+
+  const getGuideUploaderName = async (guideUserID) => {
+    try {
+      setLoading(true);
+      if (!guideUserID) {
+        return;
+      }
+      const res = await axios.get(`${import.meta.env.VITE_URI}user/${guideUserID}`);
+      console.log("Guide Uploader:", res.data.data);
+  
+      // Safely handle cases where user data may be missing
+      const uploader = res.data.data;
+      if (!uploader || !uploader.firstName || !uploader.lastName) {
+        return { firstName: "Unknown", lastName: "" };
+      }
+  
+      return uploader;
+    } catch (error) {
+      console.log("Error fetching uploader:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getGuide = async () => {
     try {
       setLoading(true);
       const res = await axios.get(`${import.meta.env.VITE_URI}guide`);
-      console.log(res.data.data);
-      setGuides(res.data.data);
+      const guidesWithUploaderNames = await Promise.all(res.data.data.map(async (guide) => {
+        const uploader = await getGuideUploaderName(guide.userID);
+        // Check if uploader returned an object and add the uploaderName field
+        return { ...guide, uploaderName: `${uploader.firstName} ${uploader.lastName}` };
+      }));
+
+      setGuides(guidesWithUploaderNames);
+      
     } catch (error) {
       console.error(error);
     } finally {
@@ -284,12 +314,12 @@ function Guides() {
                   <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => { setSelectedGuide(guide._id); openViewRef();}}>
                     View Guide
                   </button>
-                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => {openDeleteRef()}}>
+                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => {setSelectedGuide(guide._id); setSelectedGuideImgs(imageIDs); openDeleteRef()}}>
                     Delete Guide
                   </button>
                 </div>
               </div>
-              <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide ${guide.title} by ${guide.uploader}?`} titleResult={"Guide Deletion"} onSubmit={() => {deleteGuide(guide._id, imageIDs);
+              <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide ${guide.title} by ${guide.uploader}?`} titleResult={"Guide Deletion"} onSubmit={() => {deleteGuide(selectedGuide, selectedGuideImgs);
               }} resetPage={'/pending-guides'}/>
               <ModalViewGuide ref={openGuideRef} guideID={selectedGuide}/>
             </div>            
