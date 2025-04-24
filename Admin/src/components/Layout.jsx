@@ -10,7 +10,7 @@ const Layout = () => {
   return (
     <div className="flex h-screen w-screen flex-row">
         <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-        <div className="flex flex-col h-screen w-screen overflow-y-auto">
+        <div className="flex flex-col h-screen w-screen overflow-y-auto bg-[#F5F7FA] ">
           <Outlet />
         </div>
     </div>
