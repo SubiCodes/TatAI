@@ -32,23 +32,22 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
     };
 
     const handleSubmit = async () => {
-        
         setLoading(true);
+      
         try {
-            const result = await onSubmit();
-            setStatus(result);
-            modalRef.current.open();
+          const result = await onSubmit(); 
+          console.log("onSubmit result:", result); 
+          setStatus(result);
+          modalRef.current.open(); 
         } catch (error) {
-            setStatus('Something went wrong.');
-            console.error(error);
-            modalRef.current.open();
+          console.error("Submission error:", error);
+          setStatus("Something went wrong.");
+          modalRef.current.open(); 
         } finally {
-            setLoading(false);
-            dialogRef.current.close();
+          setLoading(false);
+          dialogRef.current.close(); 
         }
-
-        
-    };
+      };
     
 
     return (
