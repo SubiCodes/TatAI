@@ -35,9 +35,7 @@ function Dashboard() {
     const [ratingsCount, setRatingsCount] = useState();
     const roundedRating = Number(ratingsCount?.roundedRating);
     const [latestFeedback, setLatestFeedback] = useState();
-    const [feedbackerData, setFeedbackerData] = useState();
     const [latestGuides, setLatestGuides] = useState();
-    const [feedbackByGuide, setFeedbackByGuide] = useState({});
   
     //Data Fetch
     const getUserGuideCount = async () => {
@@ -89,86 +87,31 @@ function Dashboard() {
         console.log(res.data.data);
         setLatestFeedback(res.data.data);
       } catch (error) {
-        console.log(error.message);
-        setErrorFetching(true);
-      } finally {
-        setFetchingData(false)
-      }
-    };
-
-    const getUserDataFromFeedback = async () => {
-      try {
-        setFetchingData(true);
-        if (!latestFeedback?.userId) {
-          return;
-        };
-        const res = await axios.get(`${import.meta.env.VITE_URI}user/${latestFeedback?.userId}`);
-        console.log("user data", res.data.data);
-        setFeedbackerData(res.data.data);
-      } catch (error) {
-        console.log(error.message);
-        setErrorFetching(true);
-      } finally {
-        setFetchingData(false)
-      }
-    };
-
-    const getGuideUploaderName = async (guideUserID) => {
-      try {
-        setFetchingData(true);
-        if (!guideUserID) {
-          return;
-        }
-        const res = await axios.get(`${import.meta.env.VITE_URI}user/${guideUserID}`);
-        console.log("Guide Uploader:", res.data.data);
+        console.log("Could not fetch latest feedback:", error.message);
     
-        // Safely handle cases where user data may be missing
-        const uploader = res.data.data;
-        if (!uploader || !uploader.firstName || !uploader.lastName) {
-          return { firstName: "Unknown", lastName: "" }; // Fallback to unknown if data is missing
+        // Optional: Only set error if it's not 404
+        if (error.response?.status !== 404) {
+          setErrorFetching(true);
         }
     
-        return uploader;
-      } catch (error) {
-        console.log("Error fetching uploader:", error.message);
-        setErrorFetching(true); // You might want to centralize error handling here.
+        // Still clear latest feedback on 404
+        setLatestFeedback([]);
       } finally {
         setFetchingData(false);
       }
     };
-    
+
     const getLatestGuide = async () => {
       try {
         setFetchingData(true);
         const res = await axios.get(`${import.meta.env.VITE_URI}admin/latest-guides`);
-        console.log("Latest guides:", res.data.data);
-    
-        // Map over guides and fetch uploader names in parallel
-        const guidesWithUploaderNames = await Promise.all(res.data.data.map(async (guide) => {
-          const uploader = await getGuideUploaderName(guide.userID);
-          // Check if uploader returned an object and add the uploaderName field
-          return { ...guide, uploaderName: `${uploader.firstName} ${uploader.lastName}` };
-        }));
-    
-        setLatestGuides(guidesWithUploaderNames);
+        console.log("Latest guides:", res.data.data);    
+        setLatestGuides(res.data.data);
       } catch (error) {
         console.log("Error fetching guides:", error.message);
         setErrorFetching(true);
       } finally {
         setFetchingData(false); // Ensure this is called even in case of errors
-      }
-    };
-
-    const getFeedback = async (guideId) => {
-      try {
-        setFetchingData(true);
-        const res = await axios.get(`${import.meta.env.VITE_URI}guide/getFeedback/${guideId}`);
-        console.log(res.data.data);
-        return res.data.data;
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setFetchingData(false);
       }
     };
 
@@ -181,28 +124,6 @@ function Dashboard() {
       getLatestGuide();
     }, []);
 
-    useEffect(() => {
-      getUserDataFromFeedback();
-    }, [latestFeedback]);
-
-
-    useEffect(() => {
-      const fetchFeedbackForAllGuides = async () => {
-        const feedbackMap = {};
-        
-        for (const guide of latestGuides) {
-          const feedback = await getFeedback(guide._id);
-          feedbackMap[guide._id] = feedback;
-        }
-        
-        setFeedbackByGuide(feedbackMap);
-      };
-        
-      if (latestGuides?.length > 0) {
-        fetchFeedbackForAllGuides();
-      }
-    }, [latestGuides]);
-  
 
   
   //Options and Config
@@ -433,34 +354,43 @@ function Dashboard() {
 
               <div className="w-full h-1/2 flex flex-col  bg-white shadow-md rounded-lg px-6 py-8 gap-2">
                 <h2 className="text-2xl text-start self-start font-bold mb-4">Comments</h2>
+                {!latestFeedback ? (
+                  <div className='w-full h-full flex items-center justify-center'>
+                    <h1 className='text-gray-400'>No comments yet.</h1>
+                  </div>
+                ) : (
+                  
+                
                 <div className='flex flex-col mb-6 max-w-full'>
-                  <div className="flex flex-row gap-4 mb-6">
+                  <div className="flex flex-row gap-4 mb-4">
+
                     <div className="flex h-full">
                       <img
-                        src={profileIcons[feedbackerData?.profileIcon]}
+                        src={profileIcons[latestFeedback?.userInfo.profileIcon]}
                         alt="User Icon"
                         className="w-12 h-auto rounded-full"
                       />
                     </div>
                     <div className="flex flex-row h-4">
                       <div className="flex flex-col">
-                        <h3 className='text-md font-semibold'>{`${feedbackerData?.firstName} ${feedbackerData?.lastName}`}</h3>
-                        <p className='text-sm text-gray-500'>{feedbackerData?.email}</p>
+                        <h3 className='text-md font-semibold'>{`${latestFeedback?.userInfo.name}`}</h3>
+                        <p className='text-sm text-gray-500'>{latestFeedback?.userInfo.email}</p>
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-row gap-4">
                     <div className='w-full'>
-                      <h1 className="text-lg line-clamp-3">{latestFeedback?.comment}</h1>
+                      <h1 className="text-lg line-clamp-2">{latestFeedback?.comment}</h1>
                     </div>
                   </div>
                   <div className="flex flex-row gap-4">
-                    <h3 className='text-sm text-gray-700'>Rating: {latestFeedback?.rating}</h3>
+                    <h3 className='text-sm text-gray-700'>Rating: {!latestFeedback?.rating ? "None" : `${latestFeedback.rating}`} </h3>
                     <p className='text-sm text-gray-700'>{new Date().toLocaleString()}</p>
                   </div>
                 </div>
+              )}
 
-                <div className="flex-1"/>
+                <div className='flex-1'/>
                 <div className="w-full h-[1px] bg-gray-300"/>
                 <span className="text-center text-primary">View All</span>
               </div>
@@ -473,12 +403,6 @@ function Dashboard() {
 
               <div className="w-full h-full flex flex-row gap-8 justify-center">
               {latestGuides && latestGuides.map((guide) => {
-              const feedback = feedbackByGuide[guide._id] || [];
-              const feedbackWithRating = feedback.filter(item => item.rating != null);
-              const numFeedbacksWithComment = feedback.filter(item => item.comment != null);
-              const numRatings = feedbackWithRating.length;
-              const totalRating = feedbackWithRating.reduce((sum, item) => sum + (item.rating || 0), 0);
-              const avgRating = numRatings > 0 ? (totalRating / numRatings).toFixed(1) : "0.0";
                 return (
                 <div key={guide._id} className="card bg-white border-1 border-gray-400 rounded-lg w-72 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
                   <figure className="px-6 pt-10 h-64 w-full flex justify-center items-center rounded-xl overflow-hidden">
@@ -499,18 +423,18 @@ function Dashboard() {
                     <div className="w-full flex justify-between items-start flex-col h-auto gap-2 py-2">
                       <div className="w-full flex justify-start items-start flex-row gap-4 overflow-ellipsis mb-2">
                         <p className="text-gray-500 text-md truncate w-full text-start flex flex-row gap-2">
-                          Posted by: <span className="font-bold">{guide.uploaderName}</span>
+                          Posted by: <span className="font-bold">{guide.posterInfo.name}</span>
                         </p>
                       </div>
 
                       <div className="w-full flex justify-start items-start flex-row gap-4">
                         <div className='flex flex-row items-center gap-1'>
                           <Star className='text-primary' size={16}/>
-                          <p className='text-md text-gray-500 font-semibold'>{avgRating}</p>
+                          <p className='text-md text-gray-500 font-semibold'>{guide.feedbackInfo.averageRating}</p>
                         </div>
                         <div className='flex flex-row items-center gap-1'>
                           <MessageSquareText className='text-primary' size={16}/>
-                          <p className='text-md text-gray-500 font-semibold'>{numFeedbacksWithComment.length}</p>
+                          <p className='text-md text-gray-500 font-semibold'>{guide.feedbackInfo.commentCount}</p>
                         </div>
                       </div>
                     </div>
