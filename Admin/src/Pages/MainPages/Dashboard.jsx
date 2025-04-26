@@ -16,14 +16,16 @@ import lgbt_4 from '../../Images/profile-icons/lgbt_4.png'
 // Using forwardRef to make the modal accessible from paren
 
 import { Star, MessageSquareText } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import PropagateLoader from "react-spinners/PropagateLoader.js";
+import ModalViewComments from '../../components/ModalViewComments.jsx';
 
 function Dashboard() {
 
     const navigate = useNavigate();
+    const commentsRef = useRef();
 
     //Dependency States
     const [fetchingData, setFetchingData] = useState(false);
@@ -392,7 +394,8 @@ function Dashboard() {
 
                 <div className='flex-1'/>
                 <div className="w-full h-[1px] bg-gray-300"/>
-                <span className="text-center text-primary">View All</span>
+                <span className="text-center text-primary cursor-pointer hover:underline" onClick={() => {commentsRef?.current.open()}}>View All</span>
+                <ModalViewComments ref={commentsRef}/>
               </div>
               
             </div>

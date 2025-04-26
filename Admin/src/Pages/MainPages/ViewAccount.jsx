@@ -29,7 +29,6 @@ function ViewAccount() {
     const openGuideRef = useRef();
 
     const [loading, setLoading] = useState(true);
-    const [fetchingComments, setFetchingComments] = useState(true);
     const [activePage, setActivePage] = useState('guides');
 
     const [guides, setGuides] = useState();
@@ -66,28 +65,23 @@ function ViewAccount() {
 
     const getComments = async () => {
         try {
-            setFetchingComments(true);
+
             const res = await axios.get(`${import.meta.env.VITE_URI}guide/getUserFeedback/${id}`);
             setComments(res.data.data);
             console.log(res.data.data);
         } catch (error) {
           console.error(error);
-        } finally {
-            setFetchingComments(false);
         }
       };
 
     const hideComment = async (commentId) => {
         try {
-            setFetchingComments(true);
             const res = await axios.put(`${import.meta.env.VITE_URI}guide/hideFeedback/${commentId}`);
             getComments();
             console.log(res.data.data);
         } catch (error) {
             console.log(error);
-        } finally {
-            setFetchingComments(false);
-        }
+        } 
     };      
 
     const deleteGuide = async () => {

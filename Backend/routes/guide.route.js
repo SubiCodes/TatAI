@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload, deleteImageByUrl, createGuide, getGuides, getGuide, getUserGuides, deleteGuide, updateGuideStatus, addFeedback, getFeedback, getUserFeedback, hideFeedback } from "../controller/guide.controller.js";
+import { upload, deleteImageByUrl, createGuide, getGuides, getGuide, getUserGuides, deleteGuide, updateGuideStatus, addFeedback, getFeedback, getUserFeedback, getAllComments, hideFeedback } from "../controller/guide.controller.js";
 
 const guideRouter = Router();
 
@@ -12,6 +12,7 @@ guideRouter.post('/addFeedback', addFeedback);
 guideRouter.put('/guideStatus/:_id', updateGuideStatus);
 guideRouter.get('/getFeedback/:_id', getFeedback);
 guideRouter.get('/getUserFeedback/:_id', getUserFeedback);
+guideRouter.get('/getAllComments', getAllComments);
 guideRouter.put('/hideFeedback/:_id', hideFeedback);
 guideRouter.get('/:_id', getGuide);
 guideRouter.post('/:_id', deleteGuide);
