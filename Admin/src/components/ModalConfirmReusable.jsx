@@ -60,7 +60,7 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
             <>
             <h2 className="text-xl font-semibold mb-4">{title}</h2>
             <div className="mb-8 text-gray-600 text-sm text-start">
-                <span className="text-gray-800 text-sm font-semibold">{toConfirm}</span> 
+                <span className="text-gray-800 text-sm font-semibold text-wrap">{toConfirm}</span> 
             </div>
             <div className="w-full flex justify-end gap-2">
                 <button onClick={closeModal} className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 hover:cursor-pointer transition duration-300">

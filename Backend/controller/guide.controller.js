@@ -211,6 +211,81 @@ export const getGuides = async (req, res) => {
   }
 };
 
+export const getUserGuides = async (req, res) => {
+  try {
+    const { _id } = req.params; // Assuming the userID is passed as a route parameter
+
+    // Find guides based on the filter
+    const latestGuides = await Guide.find({ userID: _id }).sort({ createdAt: -1 });
+    
+    // If no guides found, return an empty array
+    if (latestGuides.length === 0) {
+      return res.status(200).json({ 
+        success: true, 
+        data: [] 
+      });
+    }
+    
+    const userIds = latestGuides.map(guide => guide.userID);
+    const guideIds = latestGuides.map(guide => guide._id);
+    
+    // Find all users whose IDs match those in the guides
+    const posters = await UserInfo.find({ _id: { $in: userIds } }, 'firstName lastName profileIcon');
+    
+    const allFeedback = await Feedback.find({ 
+      guideId: { $in: guideIds },  
+    });
+    
+    // Process feedback data manually
+    const feedbackMap = {};
+    
+    guideIds.forEach(guideId => {
+      const guideFeedback = allFeedback.filter(fb => fb.guideId.toString() === guideId.toString());
+      
+      // Count comments (feedback entries with non-empty comments)
+      const commentCount = guideFeedback.filter(fb => fb.comment && fb.comment.trim() !== '').length;
+      
+      // Calculate average rating (only for feedback entries with ratings)
+      const ratingsOnly = guideFeedback.filter(fb => typeof fb.rating === 'number');
+      const averageRating = ratingsOnly.length > 0 
+        ? ratingsOnly.reduce((sum, fb) => sum + fb.rating, 0) / ratingsOnly.length
+        : 0;
+      
+      feedbackMap[guideId.toString()] = {
+        averageRating: parseFloat(averageRating.toFixed(1)), // Round to 1 decimal place
+        commentCount,
+        ratingCount: ratingsOnly.length
+      };
+    });
+    
+    // Create user map for easy lookup
+    const posterMap = {};
+    posters.forEach(poster => {
+      posterMap[poster._id.toString()] = {
+        name: `${poster.firstName} ${poster.lastName}`,
+        profileIcon: poster.profileIcon
+      };
+    });
+    
+    // Add the poster and feedback info to each guide
+    const guidesWithData = latestGuides.map(guide => {
+      const guideObj = guide.toObject();
+      const userIdStr = guide.userID.toString();
+      const guideIdStr = guide._id.toString();
+      
+      return {
+        ...guideObj,
+        posterInfo: posterMap[userIdStr] || null,
+        feedbackInfo: feedbackMap[guideIdStr] || { averageRating: 0, commentCount: 0, ratingCount: 0 }
+      };
+    });
+    return res.status(200).json({ success: true, data: guidesWithData });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export const deleteGuide = async (req, res) => {
     const _id = req.params._id;
     try {
@@ -268,25 +343,13 @@ export const addFeedback = async (req, res) => {
       });
     }
 
+    // Check if user already gave feedback on this guide
     let existingFeedback = await Feedback.findOne({ guideId, userId });
 
     if (existingFeedback) {
-      // Case: User already gave a comment
-      if (existingFeedback.comment && comment) {
-        return res.status(400).json({
-          success: false,
-          message: "You have already commented on this guide.",
-        });
-      }
-
-      // Case: Update existing feedback with missing field
-      if (!existingFeedback.rating && rating !== undefined) {
-        existingFeedback.rating = rating;
-      }
-
-      if (!existingFeedback.comment && comment) {
-        existingFeedback.comment = comment;
-      }
+      // Update existing feedback
+      if (comment !== undefined) existingFeedback.comment = comment;
+      if (rating !== undefined) existingFeedback.rating = rating;
 
       await existingFeedback.save();
 
@@ -297,7 +360,7 @@ export const addFeedback = async (req, res) => {
       });
     }
 
-    // New feedback
+    // If no feedback exists, create a new one
     if (!comment && rating === undefined) {
       return res.status(400).json({
         success: false,
@@ -372,6 +435,45 @@ export const getFeedback = async (req, res) => {
       res.status(200).json({ success: true, data: feedbackWithUsers });
   } catch (error) {
       res.status(500).json({ success: false, error: `Error: ${error.message}` });
+  }
+};
+
+export const getUserFeedback = async (req, res) => {
+  const { _id } = req.params; // only userId is needed now
+  try {
+    // Get all feedbacks for the specific user that have a comment
+    const feedback = await Feedback.find({
+      userId: _id,
+      comment: { $exists: true, $ne: "" } // comment must exist and not be empty
+    }).sort({ createdAt: -1 });
+
+    if (!feedback || feedback.length === 0) {
+      return res.status(404).json({ success: false, error: "Feedback not found" });
+    }
+
+    // Fetch user information once
+    const user = await UserInfo.findById(_id, 'firstName lastName profileIcon email');
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    // Add user info to each feedback
+    const feedbackWithUser = feedback.map(fb => {
+      const fbObj = fb.toObject();
+      return {
+        ...fbObj,
+        userInfo: {
+          name: `${user.firstName} ${user.lastName}`,
+          profileIcon: user.profileIcon,
+          email: user.email
+        }
+      };
+    });
+
+    res.status(200).json({ success: true, data: feedbackWithUser });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error: ${error.message}` });
   }
 };
 
