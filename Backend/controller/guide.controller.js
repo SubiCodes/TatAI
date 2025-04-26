@@ -348,10 +348,20 @@ export const addFeedback = async (req, res) => {
 
     if (existingFeedback) {
       // Update existing feedback
-      if (comment !== undefined) existingFeedback.comment = comment;
-      if (rating !== undefined) existingFeedback.rating = rating;
+      const updateData = {};
+      
+      if (comment !== undefined) updateData.comment = comment;
+      if (rating !== undefined) updateData.rating = rating;
+      
+      // Update the createdAt timestamp to reflect the modification time
+      updateData.createdAt = new Date();
 
-      await existingFeedback.save();
+      // Use findOneAndUpdate to update the document with the new values
+      existingFeedback = await Feedback.findOneAndUpdate(
+        { guideId, userId },
+        updateData,
+        { new: true } // Return the updated document
+      );
 
       return res.status(200).json({
         success: true,
@@ -373,6 +383,7 @@ export const addFeedback = async (req, res) => {
       userId,
       comment,
       rating,
+      // createdAt will be automatically set to current time for new documents
     });
 
     return res.status(201).json({
@@ -472,6 +483,67 @@ export const getUserFeedback = async (req, res) => {
     });
 
     res.status(200).json({ success: true, data: feedbackWithUser });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error: ${error.message}` });
+  }
+};
+
+export const getAllComments = async (req, res) => {
+  try {
+    // Get all feedbacks that have a comment, sorted by newest first
+    const feedbacks = await Feedback.find({
+      comment: { $exists: true, $ne: "" }
+    }).sort({ createdAt: -1 });
+
+    // If no feedbacks with comments exist, return empty data array
+    if (!feedbacks || feedbacks.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    // Handle single feedback or multiple feedbacks
+    const userIds = [...new Set(feedbacks.map(feedback => 
+      feedback.userId ? feedback.userId.toString() : null
+    ).filter(id => id !== null))];
+
+    // If no valid userIds were found
+    if (userIds.length === 0) {
+      const feedbacksWithoutUsers = feedbacks.map(feedback => ({
+        ...feedback.toObject(),
+        userInfo: { name: "Unknown User", profileIcon: "", email: "" }
+      }));
+      return res.status(200).json({ success: true, data: feedbacksWithoutUsers });
+    }
+
+    // Fetch all relevant users in one query
+    const users = await UserInfo.find(
+      { _id: { $in: userIds } },
+      'firstName lastName profileIcon email'
+    );
+
+    // Create a map of users for quick lookup
+    const userMap = {};
+    users.forEach(user => {
+      userMap[user._id.toString()] = {
+        name: `${user.firstName} ${user.lastName}`,
+        profileIcon: user.profileIcon,
+        email: user.email
+      };
+    });
+
+    // Add user info to each feedback
+    const feedbacksWithUserInfo = feedbacks.map(feedback => {
+      const feedbackObj = feedback.toObject();
+      const userId = feedback.userId ? feedback.userId.toString() : null;
+      
+      return {
+        ...feedbackObj,
+        userInfo: userId && userMap[userId] 
+          ? userMap[userId] 
+          : { name: "Unknown User", profileIcon: "", email: "" }
+      };
+    });
+
+    res.status(200).json({ success: true, data: feedbacksWithUserInfo });
   } catch (error) {
     res.status(500).json({ success: false, error: `Error: ${error.message}` });
   }
