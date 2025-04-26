@@ -98,7 +98,7 @@ const ModalViewComments = forwardRef((_, ref) => {
     }
   };
 
-  const filteredComments = comments.filter((comment) => {
+  const filteredComments = comments?.filter((comment) => {
     // Filter by visibility status
     if (
       shownComments !== "all" &&
