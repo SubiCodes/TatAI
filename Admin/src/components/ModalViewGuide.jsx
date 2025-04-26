@@ -19,7 +19,7 @@ import lgbt_2 from '../Images/profile-icons/lgbt_2.png'
 import lgbt_3 from '../Images/profile-icons/lgbt_3.png'
 import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
 // Using forwardRef to make the modal accessible from parent components
-const ModalViewGuide = forwardRef(({ guideID }, ref) => {
+const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
     const dialogRef = useRef(null);
     const modalConfirmRef = useRef();
     const [isOpen, setIsOpen] = useState(false);
@@ -46,7 +46,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
             dialogRef.current.close();
             setIsOpen(false);
             if (refreshPage) {
-                window.location.href = "/pending-guides";
+                window.location.href = page;
             }
         }
     };
@@ -379,8 +379,8 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                 <div className='w-full flex flex-col items-start justify-start'>
                 {fetchingComments ? (
                     <div className='w-full flex flex-col items-center justify-center gap-4'>
-                    <h1 className='text-lg font-bold text-gray-400'>Loading Comments</h1>
-                    <PropagateLoader />
+                      <h1 className='text-lg font-bold text-gray-400'>Loading Comments</h1>
+                      <PropagateLoader />
                     </div>
                 ) : (
                         (() => {

@@ -211,12 +211,12 @@ function Guides() {
               <div className="card-body items-center text-center">
               <div className='w-full h-[1px] bg-gray-200'/>
                 <div className='w-full flex justify-between items-start flex-col h-auto gap-4'>
-                  <h2 className="card-title">{guide.title}</h2>
+                <h2 className="card-title w-full truncate text-center">{guide.title}</h2>
                 </div>
                 <div className='w-full flex justify-between items-start flex-col h-auto gap-2 py-2'>
 
                   <div className='w-full flex justify-start items-start flex-row gap-4 overflow-ellipsis mb-2'>
-                    <p className='text-gray-500 text-md truncate w-full text-start flex flex-row gap-2'>Posted by: <p className='font-bold'>{guide.posterInfo.name}</p></p>
+                    <p className='text-gray-500 text-md truncate w-full text-start flex flex-row gap-2 w-full truncate'>Posted by: <p className='font-bold'>{guide.posterInfo.name}</p></p>
                   </div>
 
                   <div className='w-full flex justify-start items-start flex-row gap-4'>
@@ -246,10 +246,9 @@ function Guides() {
               </div>
               <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide '${selectedGuide?.title}' by ${selectedGuide?.posterInfo.name}?`} titleResult={"Deleting guide"}
                 onSubmit={deleteGuide} resetPage={'/pending-guides'}/>
-              <ModalViewGuide ref={openGuideRef} guideID={selectedGuide?._id}/>
+              <ModalViewGuide ref={openGuideRef} guideID={selectedGuide?._id} page={`/pending-guides`}/>
             </div>            
              );
-            //  onSubmit={() => {deleteGuide(selectedGuide?._id, selectedGuideImgs)
           })}
 
         </div>

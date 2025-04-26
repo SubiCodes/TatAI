@@ -10,6 +10,7 @@ import Users from './Pages/MainPages/Users.jsx';
 import Guides from './Pages/MainPages/Guides.jsx';
 import Settings from './Pages/MainPages/Settings/Settings.jsx';
 import ForgotPassword from './Pages/MainPages/Settings/ForgotPassword.jsx';
+import ViewAccount from './Pages/MainPages/ViewAccount.jsx';
 
 function App() {
   
@@ -22,6 +23,7 @@ function App() {
         
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/view-account/:id" element={<ViewAccount />} />
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />

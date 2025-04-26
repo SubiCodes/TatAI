@@ -417,13 +417,13 @@ function Dashboard() {
                     <div className="w-full h-[1px] bg-gray-200" />
                     
                     <div className="w-full flex justify-between items-start flex-col h-auto gap-4">
-                      <h2 className="card-title">{guide.title}</h2>
+                      <h2 className="card-title w-full truncate">{guide.title}</h2>
                     </div>
 
                     <div className="w-full flex justify-between items-start flex-col h-auto gap-2 py-2">
                       <div className="w-full flex justify-start items-start flex-row gap-4 overflow-ellipsis mb-2">
                         <p className="text-gray-500 text-md truncate w-full text-start flex flex-row gap-2">
-                          Posted by: <span className="font-bold">{guide.posterInfo.name}</span>
+                          Posted by: <span className="font-bold w-full truncate">{guide.posterInfo.name}</span>
                         </p>
                       </div>
 
