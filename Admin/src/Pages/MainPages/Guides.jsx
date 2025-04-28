@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 
-
-import ModalAddGuide from '../../components/ModalAddGuide.jsx'
 import ModalViewGuide from '../../components/ModalViewGuide.jsx';
 import { Star, MessageSquareText, SlidersHorizontal, Search } from 'lucide-react';
-import axios from 'axios';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import ModalConfirmReusable from '../../components/ModalConfirmReusable.jsx';
 
+import guideStore from '../../stores/guide.store.js';
+import { useNavigate } from 'react-router-dom';
+
 function Guides() {
-  const addGuideRef = useRef();
+
+  const { guides, fetchGuides, deleteGuide, isLoading, error } = guideStore();
+
   const deleteGuideRef = useRef();
   const openGuideRef = useRef();
 
-  const [loading, setLoading] = useState(true);
-  const [guides, setGuides] = useState([]);
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [shownGuides, setShownGuides] = useState('all');
@@ -24,23 +25,9 @@ function Guides() {
 
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [selectedGuideImgs, setSelectedGuideImgs] = useState();
-;
 
-  const getGuide = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_URI}guide`);
-      setGuides(res.data.data);
-      console.log(res.data.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const filteredGuides = guides
-  .filter((guide) => {
+  const filteredGuides = guides?.filter((guide) => {
     if (shownGuides !== 'all' && guide.type !== shownGuides) return false;
     if (shownGuidesStatus !== 'all' && guide.status !== shownGuidesStatus) return false;
 
@@ -67,56 +54,45 @@ function Guides() {
     openGuideRef.current.open();
   };
 
-  const deleteGuide = async () => {
-    try {
-      // Delete images first
-      for (const imageID of selectedGuideImgs) {
-        try {
-          const deleteRes = await axios.post(`${import.meta.env.VITE_URI}guide/deleteImage`, { public_id: imageID });
-          console.log(deleteRes.data);
-        } catch (deleteError) {
-          console.error('Error deleting image:', deleteError);
-        }
-      }
-      
-      // Delete the guide
-      const res = await axios.post(`${import.meta.env.VITE_URI}guide/${selectedGuide?._id}`);
-      console.log(res.data.data);
-      
-      // Update local state by removing the deleted guide
-      setGuides(prevGuides => prevGuides.filter(guide => guide._id !== selectedGuide?._id));
-      
-      // Clear selection if needed
-      setSelectedGuide(null);
-      setSelectedGuideImgs([]);
-      
-      return `Successfully deleted ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`;
-    } catch (error) {
-      console.error(error);
-      return `Something went wrong while deleting ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`;
-    }
+  const handleDeleteGuide = async () => {
+    const res = await deleteGuide(selectedGuide, selectedGuideImgs);
+    console.log(res);
+    // Reset selection after deletion
+    setSelectedGuide(null);
+    setSelectedGuideImgs([]);
+    return res;
   };
 
   useEffect(() => {
-    getGuide();
-  }, [])
+    fetchGuides();
+  }, [fetchGuides]);
+
+  if (isLoading) {
+    <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
+    <h1 className='text-2xl font-bold'>Fetching Guides</h1>
+    <PropagateLoader color="#3B82F6" size={18} className='ml-4' />
+    </div>
+  }
+
+
+  if (error) {
+    <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
+      <h1 className='text-2xl font-bold'>Error Fetching Guides</h1>
+      <h1 className='text-lg text-red-400 font-bold'></h1>
+    </div>
+  }
 
   return (
     <div className='w-full h-full p-8 bg-[#F5F7FA] overflow-auto flex flex-col gap-8'>
 
       <div className='w-full flex flex-row justify-between items-center'>
         <h1 className='text-2xl font-bold'>Guides</h1>
-        <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => addGuideRef.current.open()}>
+        <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg' onClick={() => navigate('/add-guide')}>
           Create New Guide
         </button>
       </div>
 
-      {loading ? (
-        <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
-          <h1 className='text-2xl font-bold'>Fetching Guides</h1>
-          <PropagateLoader color="#3B82F6" size={18} className='ml-4' />
-        </div>
-      ) : (
+ 
         <>
        <div className="w-sm flex items-center border border-gray-400 rounded-lg px-4">
           <Search className="mr-2" />
@@ -227,18 +203,18 @@ function Guides() {
                 <div className='w-full flex justify-between items-start flex-col h-auto gap-2 py-2'>
 
                   <div className='w-full flex justify-start items-start flex-row gap-4 overflow-ellipsis mb-2'>
-                    <p className='text-gray-500 text-md truncate w-full text-start flex flex-row gap-2 w-full truncate'>Posted by: <p className='font-bold'>{guide.posterInfo.name}</p></p>
+                    <p className='text-gray-500 text-md truncate w-full text-start flex flex-row gap-2'>Posted by: <p className='font-bold'>{guide?.posterInfo?.name}</p></p>
                   </div>
 
                   <div className='w-full flex justify-start items-start flex-row gap-4'>
 
                     <div className='flex flex-row items-center gap-1'>
                       <Star className='text-primary' size={16}/>
-                      <p className='text-md text-gray-500 font-semibold'>{guide.feedbackInfo.averageRating}</p>
+                      <p className='text-md text-gray-500 font-semibold'>{guide.feedbackInfo?.averageRating}</p>
                     </div>
                     <div className='flex flex-row items-center gap-1'>
                       <MessageSquareText className='text-primary' size={16}/>
-                      <p className='text-md text-gray-500 font-semibold'>{guide.feedbackInfo.commentCount}</p>
+                      <p className='text-md text-gray-500 font-semibold'>{guide.feedbackInfo?.commentCount}</p>
                     </div>
 
                   </div>
@@ -255,8 +231,13 @@ function Guides() {
                   </button>
                 </div>
               </div>
-              <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide '${selectedGuide?.title}' by ${selectedGuide?.posterInfo.name}?`} titleResult={"Deleting guide"}
-                onSubmit={deleteGuide}/>
+              <ModalConfirmReusable 
+                ref={deleteGuideRef} 
+                title={"Delete Guide"} 
+                toConfirm={`Are you sure you want to delete guide '${selectedGuide?.title}' by ${selectedGuide?.posterInfo.name}?`} 
+                titleResult={"Guide Deleted"}
+                onSubmit={handleDeleteGuide}
+              />
               <ModalViewGuide ref={openGuideRef} guideID={selectedGuide?._id} page={`/pending-guides`}/>
             </div>            
              );
@@ -264,8 +245,6 @@ function Guides() {
 
         </div>
         </>
-      )}
-      <ModalAddGuide ref={addGuideRef} titleResult={"Guide post result"}/>
       
     </div>
   )

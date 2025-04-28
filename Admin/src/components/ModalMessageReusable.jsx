@@ -3,9 +3,6 @@ import React, { useRef, useImperativeHandle, forwardRef,  } from 'react';
 // Using forwardRef to make the modal accessible from parent components
 const ModalMessageReusable = forwardRef(({ modalTitle, modalText, shouldReload, resetPage }, ref) => {
     const dialogRef = useRef(null);
-    
-    
-    // Expose methods to the parent component via ref
     useImperativeHandle(ref, () => ({
         open: () => {
         if (dialogRef.current) {
@@ -43,4 +40,5 @@ const ModalMessageReusable = forwardRef(({ modalTitle, modalText, shouldReload, 
         </dialog>
     );
     });
+
 export default ModalMessageReusable;
