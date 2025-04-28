@@ -84,8 +84,6 @@ const guideStore = create((set) => ({
           );
     
           const newGuide = res.data.guide;
-    
-          // Update store
           set((state) => ({
             guides: [newGuide, ...state.guides]
           }));
@@ -118,7 +116,8 @@ const guideStore = create((set) => ({
           const res = await axios.put(`${import.meta.env.VITE_URI}guide/guideStatus/${guideID}`, { status: status });
           console.log(res.data.data);
           const newGuide = await axios.get(`${import.meta.env.VITE_URI}guide/${guideID}`);
-          set({ isLoading: true, guide: newGuide.data.data });
+          const newGuideList = await axios.get(`${import.meta.env.VITE_URI}guide`);
+          set({ isLoading: true, guide: newGuide.data.data, guides: newGuideList.data.data });
           return `Successfully updated guide status to ${status}.`;
       } catch (error) {
           console.error(error);
