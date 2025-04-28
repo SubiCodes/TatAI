@@ -348,7 +348,7 @@ function BarChart() {
         </table>
       </div>
       <ModalMessage ref={modalRef} modalTitle={modalContent.title} modalText={modalContent.text}/>
-      <ModalAddAccount ref={addUserModalRef} isSuperAdmin={isSuperAdmin} shouldReload={false}/>
+      <ModalAddAccount ref={addUserModalRef} isSuperAdmin={isSuperAdmin} shouldReload={true}/>
     </div>
   );
 }

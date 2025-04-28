@@ -11,6 +11,7 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
 
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
+    const [shouldReload, setShouldReload] = useState(false);
     
     useImperativeHandle(ref, () => ({
         open: () => {
@@ -33,7 +34,7 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
 
     const handleSubmit = async () => {
         setLoading(true);
-      
+        checkIfReload();
         try {
           const result = await onSubmit(); 
           console.log("onSubmit result:", result); 
@@ -48,6 +49,12 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
           dialogRef.current.close(); 
         }
       };
+
+    const checkIfReload = async () => {
+        if (resetPage) {
+            setShouldReload(true);
+        };
+    }
     
 
     return (
@@ -81,7 +88,7 @@ const ModalConfirmReusable = forwardRef(({ onSubmit, toConfirm, title, titleResu
         )}
             
         </dialog>
-        <ModalMessageReusable ref={modalRef} modalTitle={titleResult} modalText={status} shouldReload={true} resetPage={resetPage}/>
+        <ModalMessageReusable ref={modalRef} modalTitle={titleResult} modalText={status} shouldReload={shouldReload} resetPage={resetPage}/>
         </>
     );
     });

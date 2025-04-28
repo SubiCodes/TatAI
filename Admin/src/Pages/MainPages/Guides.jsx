@@ -69,20 +69,31 @@ function Guides() {
 
   const deleteGuide = async () => {
     try {
+      // Delete images first
       for (const imageID of selectedGuideImgs) {
         try {
           const deleteRes = await axios.post(`${import.meta.env.VITE_URI}guide/deleteImage`, { public_id: imageID });
-          console.log(deleteRes.data); // Log the result of the deletion
+          console.log(deleteRes.data);
         } catch (deleteError) {
           console.error('Error deleting image:', deleteError);
         }
       }
+      
+      // Delete the guide
       const res = await axios.post(`${import.meta.env.VITE_URI}guide/${selectedGuide?._id}`);
       console.log(res.data.data);
-      return `Successfully deleted ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`
+      
+      // Update local state by removing the deleted guide
+      setGuides(prevGuides => prevGuides.filter(guide => guide._id !== selectedGuide?._id));
+      
+      // Clear selection if needed
+      setSelectedGuide(null);
+      setSelectedGuideImgs([]);
+      
+      return `Successfully deleted ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`;
     } catch (error) {
       console.error(error);
-      return `Something went wrong while deleting ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`
+      return `Something went wrong while deleting ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`;
     }
   };
 
@@ -245,7 +256,7 @@ function Guides() {
                 </div>
               </div>
               <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide '${selectedGuide?.title}' by ${selectedGuide?.posterInfo.name}?`} titleResult={"Deleting guide"}
-                onSubmit={deleteGuide} resetPage={'/pending-guides'}/>
+                onSubmit={deleteGuide}/>
               <ModalViewGuide ref={openGuideRef} guideID={selectedGuide?._id} page={`/pending-guides`}/>
             </div>            
              );
