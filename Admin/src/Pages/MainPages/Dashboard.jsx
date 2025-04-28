@@ -21,11 +21,15 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import PropagateLoader from "react-spinners/PropagateLoader.js";
 import ModalViewComments from '../../components/ModalViewComments.jsx';
+import ModalViewGuide from '../../components/ModalViewGuide.jsx';
+import ModalConfirmReusable from '../../components/ModalConfirmReusable.jsx';
 
 function Dashboard() {
 
     const navigate = useNavigate();
     const commentsRef = useRef();
+    const openGuideRef = useRef();
+    const deleteGuideRef = useRef();
 
     //Dependency States
     const [fetchingData, setFetchingData] = useState(false);
@@ -38,7 +42,35 @@ function Dashboard() {
     const roundedRating = Number(ratingsCount?.roundedRating);
     const [latestFeedback, setLatestFeedback] = useState();
     const [latestGuides, setLatestGuides] = useState();
-  
+    const [selectedGuide, setSelectedGuide] = useState();
+    const [selectedGuideImgs, setSelectedGuideImgs] = useState();
+
+    //action functions
+    const openViewRef = () => {
+      openGuideRef.current.open();
+    };
+    const openDeleteRef = () => {
+      deleteGuideRef.current.open();
+    };
+    const deleteGuide = async () => {
+      try {
+        for (const imageID of selectedGuideImgs) {
+          try {
+            const deleteRes = await axios.post(`${import.meta.env.VITE_URI}guide/deleteImage`, { public_id: imageID });
+            console.log(deleteRes.data); // Log the result of the deletion
+          } catch (deleteError) {
+            console.error('Error deleting image:', deleteError);
+          }
+        }
+        const res = await axios.post(`${import.meta.env.VITE_URI}guide/${selectedGuide?._id}`);
+        console.log(res.data.data);
+        return `Successfully deleted ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`
+      } catch (error) {
+        console.error(error);
+        return `Something went wrong while deleting ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`
+      }
+    };
+
     //Data Fetch
     const getUserGuideCount = async () => {
       try {
@@ -406,6 +438,9 @@ function Dashboard() {
 
               <div className="w-full h-full flex flex-row gap-8 justify-center">
               {latestGuides && latestGuides.map((guide) => {
+                 const coverImgPublicId = guide.coverImg.public_id;
+                 const stepImgPublicIds = guide.stepImg && Array.isArray(guide.stepImg) ? guide.stepImg.map(img => img.public_id) : [];
+                 const imageIDs = coverImgPublicId ? [coverImgPublicId, ...stepImgPublicIds] : stepImgPublicIds;
                 return (
                 <div key={guide._id} className="card bg-white border-1 border-gray-400 rounded-lg w-72 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
                   <figure className="px-6 pt-10 h-64 w-full flex justify-center items-center rounded-xl overflow-hidden">
@@ -443,15 +478,19 @@ function Dashboard() {
                     </div>
 
                     <div className="w-full flex justify-center items-center mt-4 gap-8">
-                      <button className="text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs">
+                      <button className="text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs"  onClick={() => { setSelectedGuide(guide); openViewRef();}}
+                      >
                         View Guide
                       </button>
-                      <button className="text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs">
+                      <button className="text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs" onClick={() => {setSelectedGuide(guide); setSelectedGuideImgs(imageIDs); openDeleteRef();
+                      }}>
                         Delete Guide
                       </button>
                     </div>
                   </div>
-
+                  <ModalViewGuide ref={openGuideRef} guideID={selectedGuide?._id} page={`/pending-guides`}/>
+                  <ModalConfirmReusable ref={deleteGuideRef} title={"Delete Guide"} toConfirm={`Are you sure you want to delete guide '${selectedGuide?.title}' by ${selectedGuide?.posterInfo.name}?`} titleResult={"Deleting guide"}
+                onSubmit={deleteGuide} resetPage={'/dashboard'}/>
                 </div>
                 );
               })}

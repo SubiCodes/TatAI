@@ -240,6 +240,21 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                                 </div>
                             </div>
                 )}
+
+                <div className="w-full h-auto flex flex-col items-center justify-center mt-8">
+                  <h2 className="text-2xl font-bold mb-4">
+                    {guide.type === 'repair' && null }
+                    {guide.type === 'diy' && "Materials"}
+                    {guide.type === 'tool' && null}
+                    {guide.type === 'cooking' && "Ingredients"}
+                  </h2>
+                </div>
+
+                {(guide.category === 'cooking' || guide.category === 'diy') && (
+                    <div className="w-full h-auto flex flex-col items-center justify-center">
+                      → {guide.materialsNeeded}
+                    </div>
+                )}
       
                 <div className="w-full h-auto flex flex-col items-center justify-center mt-8">
                   <h2 className="text-2xl font-bold mb-4">Procedures</h2>
