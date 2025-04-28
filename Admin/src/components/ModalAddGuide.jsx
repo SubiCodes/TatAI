@@ -391,7 +391,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                             {category !== 'tool' && (
                                 <>  
                                 <div className='w-full flex flex-col gap-2'>
-                                    <legend className="fieldset-legend text-base font-semibold">Tools needed:</legend>
+                                    <legend className="fieldset-legend text-base font-semibold">{category === 'cooking' ? "Kitchenware:" : "Tools Needed:"}</legend>
                                     <div className='w-full flex flex-row gap-2 justify-between items-center'>
                                         <input type="text" value={currentTool} placeholder="List the tools needed for this guide." className="input border-1 border-gray-200 rounded-sm  w-full"onChange={(e) => setCurrentTool(e.target.value)}  onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
@@ -455,7 +455,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                                 )}
                                 
                                 <div className="w-full flex flex-row gap-4 items-center">
-                                    <h1>Step {index + 1}:</h1>
+                                    <h1>{category === 'tool' ? "Use" : "Step"} {index + 1}:</h1>
                                     <input
                                     type="text"
                                     placeholder="Give this step a title."
@@ -474,7 +474,7 @@ const ModalAddGuide = forwardRef(({titleResult}, ref) => {
                                 </div>
                                 <div className="w-full flex flex-col gap-4">
                                     <fieldset className="border border-gray-200 p-2 rounded-sm">
-                                    <legend className="text-base px-1">Post a photo for this step.</legend>
+                                    <legend className="text-base px-1">Post a photo.</legend>
                                     <input
                                         type="file"
                                         className="file-input border-gray-200 border w-full h-auto rounded-sm"

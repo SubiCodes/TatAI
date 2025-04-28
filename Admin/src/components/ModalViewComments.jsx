@@ -304,8 +304,8 @@ const ModalViewComments = forwardRef((_, ref) => {
               </div>
             ))
           ) : (
-            <h1 className="text-xl text-gray-400">
-              This user has not posted any comments yet.
+            <h1 className="text-xl text-gray-400 ml-auto text-center">
+              No user has yet to submit a comment
             </h1>
           )}
           {/* <-- React fragment ends here */}
