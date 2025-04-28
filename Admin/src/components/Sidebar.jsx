@@ -51,16 +51,21 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   ];
 
   useEffect(() => {
-    // Set active page based on current location
     const currentPath = location.pathname;
-    
+  
+    // Check for /add-guide route and keep the 'Guides' active
+    if (currentPath === '/add-guide') {
+      setActivePage('Guides');
+      return;
+    }
+  
     // Check main navigation items
     const mainNavItem = navItems.find(item => item.link === currentPath);
     if (mainNavItem) {
       setActivePage(mainNavItem.title);
       return;
     }
-    
+  
     // Check dropdown items
     for (const item of navItems) {
       if (item.hasDropdown && item.dropdownItems) {

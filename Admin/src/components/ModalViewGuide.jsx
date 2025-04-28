@@ -18,8 +18,11 @@ import lgbt_1 from '../Images/profile-icons/lgbt_1.png'
 import lgbt_2 from '../Images/profile-icons/lgbt_2.png'
 import lgbt_3 from '../Images/profile-icons/lgbt_3.png'
 import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
+import guideStore from '../stores/guide.store.js';
+
+
 // Using forwardRef to make the modal accessible from parent components
-const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
+const ModalViewGuide = forwardRef(({ guideID }, ref) => {
     const dialogRef = useRef(null);
     const modalConfirmRef = useRef();
     const [isOpen, setIsOpen] = useState(false);
@@ -45,40 +48,14 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
         if (dialogRef.current) {
             dialogRef.current.close();
             setIsOpen(false);
-            if (refreshPage) {
-                window.location.href = page;
-            }
         }
     };
 
-    const [guide, setGuide] = useState();
+    const { guide, getGuide, changeGuideStatus, isLoading, error } = guideStore();
+
     const [feedback, setFeedback] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
     const [changeStatusTo, setChangeStatusTo] = useState('');
-    const [currentStatus, setCurrentStatus] = useState('');
-    const [refreshPage, setRefreshPage] = useState(false);
-
-    const getCurrentStatus = () => {
-        if (guide) {
-            setCurrentStatus(guide.status);
-        }
-    } 
-
-    const getGuide = async () => {
-        try {
-            setLoading(true);
-            const res = await axios.get(`${import.meta.env.VITE_URI}guide/${guideID}`);
-            console.log("guide", res.data.data);
-            setGuide(res.data.data);
-        } catch (error) {
-            console.error(error);
-            setError(true);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const getFeedback = async () => {
         try {
@@ -107,20 +84,10 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
         }
     };
 
-    const changeGuideStatus = async () => {
-        setLoading(true);
-        try {
-            const res = await axios.put(`${import.meta.env.VITE_URI}guide/guideStatus/${guide._id}`, { status: changeStatusTo });
-            console.log(res.data.data);
-            getGuide();
-            return `Successfully updated guide status to ${changeStatusTo}.`;
-        } catch (error) {
-            console.error(error);
-            setError(true);
-            return `Error updating guide status to${changeStatusTo}: ${error.message}`
-        } finally {
-            setLoading(false);
-        }
+    const changeStatus = async () => {
+      const res = changeGuideStatus(guide._id, changeStatusTo)
+      console.log('res from change status: ', res);
+      return res;
     };
 
     const openConfirmationModal = () => {
@@ -146,20 +113,10 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
 
     useEffect(() => {
         if (isOpen) {
-            getGuide();
+            getGuide(guideID);
             getFeedback();
         }
     }, [isOpen, guideID]);
-
-    useEffect(() => {
-        if (changeStatusTo !== currentStatus) {
-            setRefreshPage(true);
-        }
-    }, [changeStatusTo])
-
-    useEffect(() => {
-        getCurrentStatus();
-    }, [guide])
 
     return (
         <dialog
@@ -178,7 +135,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
           </div>
       
           <div className="px-16">
-            {loading ? (
+            {isLoading ? (
               <div className="w-full h-48 flex items-center justify-center flex-col gap-4">
                 <h1 className="text-2xl font-bold">Loading...</h1>
                 <PropagateLoader color="#36d7b7" size={15} />
@@ -232,7 +189,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                 {guide.type !== 'tool' && (
                             <div className="w-full h-auto flex flex-col items-center justify-center">
                                 <div className="w-full flex flex-row items-center justify-center flex-wrap gap-8 p-4">
-                                    {guide.toolsNeeded.map((material, index) => (
+                                    {guide.toolsNeeded?.map((material, index) => (
                                         <div key={index} className="h-auto flex items-center justify-center">
                                             <p className="text-lg whitespace-nowrap text-center">→ {material}</p>
                                         </div>
@@ -266,7 +223,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                 </div>
       
                 {guide?.stepTitles && guide.stepTitles.length > 0 ? (
-                  guide?.stepTitles.map((title, index) => (
+                  guide?.stepTitles?.map((title, index) => (
                     <div key={index} className="w-full h-auto flex flex-col gap-4 mt-12 items-start justify-center mb-16">
                       <div className="w-auto h-auto flex flex-col gap-6">
                         <div className="flex items-center gap-4">
@@ -308,7 +265,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
       
                 <div className="w-full h-auto flex flex-col gap-4 mt-4 items-center justify-center mb-24 flex-wrap">
                   {guide?.additionalLink &&
-                    guide.additionalLink.split(/[\s\n]+/).map((link, index) => {
+                    guide.additionalLink.split(/[\s\n]+/)?.map((link, index) => {
                       const cleanLink = link.trim();
                       if (cleanLink && (cleanLink.includes('http') || cleanLink.includes('www'))) {
                         return (
@@ -329,10 +286,10 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
       
                 <div className="w-full h-auto flex flex-col items-center justify-center mb-4 gap-8">
                   <h1 className="text-4xl font-bold">
-                    Status: <span className="text-primary font-normal">{guide?.status.charAt(0).toUpperCase() + guide?.status.slice(1)}</span>
+                    Status: <span className="text-primary font-normal">{guide?.status?.charAt(0).toUpperCase() + guide?.status?.slice(1)}</span>
                   </h1>
                   <div className="w-full h-auto flex flex-col gap-4 mt-4 items-center justify-center mb-24">
-                    <ModalConfirmReusable ref={modalConfirmRef} onSubmit={() => changeGuideStatus} toConfirm={`Change ${guide.title} status to ${changeStatusTo}`} title={'Change Guide Status'} titleResult={'Change status result'} />
+                    <ModalConfirmReusable ref={modalConfirmRef} onSubmit={() => changeStatus()}toConfirm={`Change ${guide.title} status to ${changeStatusTo}`} title={'Change Guide Status'} titleResult={'Change status result'} />
                     <span className="text-lg">Update this guide's status?</span>
                     <div className="flex flex-row gap-4 items-center justify-center">
                       <button
@@ -372,23 +329,23 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
       
                 <div className="w-full flex flex-col items-center justify-center mb-12">
                   <div className="rating rating-xl rating-half pointer-events-none mb-2">
-                    <input type="radio" name="rating-display" className="rating-hidden" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 0} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 0.5} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 1.0} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 1.5} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 2.0} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 2.5} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 3.0} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 3.5} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 4.0} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 4.5} readOnly />
-                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo.averageRating * 2) / 2 === 5.0} readOnly />
+                    <input type="radio" name="rating-display" className="rating-hidden" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 0} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 0.5} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 1.0} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 1.5} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 2.0} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 2.5} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 3.0} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 3.5} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 4.0} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-1 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 4.5} readOnly />
+                    <input type="radio" name="rating-display" className="mask mask-star-2 mask-half-2 bg-primary" checked={Math.round(guide?.feedbackInfo?.averageRating * 2) / 2 === 5.0} readOnly />
                   </div>
                     <span className="text-sm text-gray-400 flex flex-row gap-2">
-                        Average Rating: <span className='font-bold'>{guide?.feedbackInfo.averageRating}</span>
+                        Average Rating: <span className='font-bold'>{guide?.feedbackInfo?.averageRating}</span>
                     </span>
                     <span className="text-sm text-gray-400 flex flex-row gap-2">
-                        Total Rating:  <span className='font-bold'>{guide?.feedbackInfo.ratingCount}</span>
+                        Total Rating:  <span className='font-bold'>{guide?.feedbackInfo?.ratingCount}</span>
                     </span>
                 </div>
 
@@ -412,7 +369,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                             return <p className='text-gray-500'>No comments yet.</p>;
                         }
 
-                        return commentsWithText.map(comment => (
+                        return commentsWithText?.map(comment => (
                             <div key={comment._id} className='flex flex-col mb-6 max-w-2/3'>
                             <div className="flex flex-row gap-4 mb-4">
                                 <div className="flex h-full">
@@ -470,7 +427,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                             </div>
                             </div>
                         ));
-                        })()
+                        })
                     )}
                     </div>
 
