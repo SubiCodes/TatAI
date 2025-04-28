@@ -229,7 +229,7 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                   </h2>
                 </div>
 
-                {guide.category !== 'tool' && (
+                {guide.type !== 'tool' && (
                             <div className="w-full h-auto flex flex-col items-center justify-center">
                                 <div className="w-full flex flex-row items-center justify-center flex-wrap gap-8 p-4">
                                     {guide.toolsNeeded.map((material, index) => (
@@ -250,14 +250,19 @@ const ModalViewGuide = forwardRef(({ guideID, page }, ref) => {
                   </h2>
                 </div>
 
-                {(guide.category === 'cooking' || guide.category === 'diy') && (
-                    <div className="w-full h-auto flex flex-col items-center justify-center">
-                      → {guide.materialsNeeded}
+                {(guide.type === 'cooking' || guide.type === 'diy') && (
+                    <div className="w-full h-auto flex flex-row gap-4 justify-center p-4">
+                      <span className='font-bold text-lg'>
+                        → 
+                      </span>
+                      <span>
+                        {guide.materialsNeeded}
+                      </span>
                     </div>
                 )}
       
                 <div className="w-full h-auto flex flex-col items-center justify-center mt-8">
-                  <h2 className="text-2xl font-bold mb-4">Procedures</h2>
+                  <h2 className="text-2xl font-bold mb-4">{guide.type === 'tool' ? "Uses" : "Procedures"}</h2>
                 </div>
       
                 {guide?.stepTitles && guide.stepTitles.length > 0 ? (
