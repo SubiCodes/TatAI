@@ -18,11 +18,13 @@ import lgbt_2 from "../Images/profile-icons/lgbt_2.png";
 import lgbt_3 from "../Images/profile-icons/lgbt_3.png";
 import lgbt_4 from "../Images/profile-icons/lgbt_4.png";
 
+import guideStore from "../stores/guide.store.js";
+
 const ModalViewComments = forwardRef((_, ref) => {
+  const {comments, getComments, isLoading, error} = guideStore();
+
   const dialogRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(true);
 
   // Expose methods to the parent component via ref
   useImperativeHandle(ref, () => ({
@@ -63,27 +65,13 @@ const ModalViewComments = forwardRef((_, ref) => {
     lgbt_4: lgbt_4,
   };
 
-  //Data states
-  const [comments, setComments] = useState();
+  //
   const [searchTerm, setSearchTerm] = useState("");
   const [shownComments, setShownComments] = useState("all");
 
   //fetch datas
   const fetchComments = async () => {
-    try {
-      setLoading(true);
-      setError(false);
-      const res = await axios.get(
-        `${import.meta.env.VITE_URI}guide/getAllComments`
-      );
-      console.log(res.data.data);
-      setComments(res.data.data);
-    } catch (error) {
-      console.log(error);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
+    getComments();
   };
 
   const hideComment = async (commentId) => {
@@ -152,7 +140,7 @@ const ModalViewComments = forwardRef((_, ref) => {
         </span>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="w-full h-120 flex flex-col items-center justify-center gap-4">
           <h1 className="text-xl">Fetching data</h1>
           <PropagateLoader size={12} />

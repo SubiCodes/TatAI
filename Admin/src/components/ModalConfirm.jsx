@@ -77,7 +77,7 @@ const ModalConfirm = forwardRef(({ onSubmit, toConfirm, title, titleResult }, re
         )}
             
         </dialog>
-        <ModalMessage ref={modalRef} modalTitle={titleResult} modalText={status} shouldReload={true}/>
+        <ModalMessage ref={modalRef} modalTitle={titleResult} modalText={status} shouldReload={false}/>
         </>
     );
     });

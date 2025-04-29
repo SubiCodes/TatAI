@@ -22,45 +22,30 @@ import lgbt_4 from '../../Images/profile-icons/lgbt_4.png'
 import axios from 'axios'
 import PropagateLoader from 'react-spinners/PropagateLoader.js';
 
+import userStore from '../../stores/user.store.js';
+import guideStore from '../../stores/guide.store.js';
+
 function ViewAccount() {
+    const {getUserData, user} = userStore();
+    const {getUserGuides, guides, deleteGuide, isLoading} = guideStore();
+
     const { id } = useParams();
 
     const deleteGuideRef = useRef();
     const openGuideRef = useRef();
 
-    const [loading, setLoading] = useState(true);
     const [activePage, setActivePage] = useState('guides');
 
-    const [guides, setGuides] = useState();
     const [comments, setComments] = useState();
     const [selectedGuide, setSelectedGuide] = useState();
     const [selectedGuideImgs, setSelectedGuideImgs] = useState();
-    const [user, setUser] = useState();
 
     const getUser = async () => {
-        try {
-          setLoading(true);
-          const res = await axios.get(`${import.meta.env.VITE_URI}user/${id}`);
-          setUser(res.data.data);
-          console.log(res.data.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
+        getUserData(id);
       };
 
     const getGuide = async () => {
-        try {
-          setLoading(true);
-          const res = await axios.get(`${import.meta.env.VITE_URI}guide/user-guides/${id}`);
-          setGuides(res.data.data);
-          console.log(res.data.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
+        getUserGuides(id);
       };
 
     const getComments = async () => {
@@ -84,23 +69,9 @@ function ViewAccount() {
         } 
     };      
 
-    const deleteGuide = async () => {
-        try {
-        for (const imageID of selectedGuideImgs) {
-            try {
-            const deleteRes = await axios.post(`${import.meta.env.VITE_URI}guide/deleteImage`, { public_id: imageID });
-            console.log(deleteRes.data); // Log the result of the deletion
-            } catch (deleteError) {
-            console.error('Error deleting image:', deleteError);
-            }
-        }
-        const res = await axios.post(`${import.meta.env.VITE_URI}guide/${selectedGuide?._id}`);
-        console.log(res.data.data);
-        return `Successfully deleted ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`
-        } catch (error) {
-        console.error(error);
-        return `Something went wrong while deleting ${selectedGuide?.title} by ${selectedGuide?.posterInfo.name}`
-        }
+    const deletePostedGuide = async () => {
+        const res = deleteGuide(selectedGuide, selectedGuideImgs)
+        return res;
     };
 
     
@@ -135,7 +106,7 @@ function ViewAccount() {
         'lgbt_4': lgbt_4
       };
 
-      if (loading) {
+      if (isLoading) {
         return (
             <div className='w-screen h-screen flex flex-col items-center justify-center gap-4'>
                 <h1 className='text-4xl'>
@@ -273,7 +244,7 @@ function ViewAccount() {
                               title={"Delete Guide"}
                               toConfirm={`Are you sure you want to delete guide '${selectedGuide?.title}' by ${selectedGuide?.posterInfo.name}?`}
                               titleResult={"Deleting guide"}
-                              onSubmit={deleteGuide}
+                              onSubmit={deletePostedGuide}
                               resetPage={`/view-account/${id}`}
                             />
                             <ModalViewGuide

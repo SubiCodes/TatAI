@@ -21,9 +21,6 @@ const ModalMessage = forwardRef(({ modalTitle, modalText, shouldReload }, ref) =
     const closeModal = () => {
         if (dialogRef.current) {
             dialogRef.current.close();
-            if (shouldReload) {
-                window.location.href = "/users";
-            }
         }
     };
 

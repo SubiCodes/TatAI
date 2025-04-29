@@ -4,11 +4,13 @@ import { URI } from '../constants/URI.js';
 import { Ellipsis, Eye, CircleCheck, CircleX, PencilOff, OctagonMinus, Trash2, LockKeyhole, User } from 'lucide-react';
 import ModalConfirmStatusChange from './ModalConfirmStatusChange.jsx';
 import ModalConfirm from './ModalConfirm.jsx';
-import axios from 'axios';
 
 import { Link } from 'react-router-dom';
+import userStore from '../stores/user.store.js';
 
 function DropDown({user, isSuperAdmin}) {
+
+    const {changeUserRole, deleteUser} = userStore();
 
     const confirmationRef = useRef(null);
     const confirmationRefRole = useRef(null);
@@ -39,17 +41,8 @@ function DropDown({user, isSuperAdmin}) {
     };
 
     const changeRole = async () => {
-        try {
-            const res = await axios.post(`${URI}admin/role-change/${user._id}`, {role: newRole});
-            console.log(res);
-            return `Successfully updated ${user.email} to ${newRole}`;
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "Something went wrong.";
-            console.error("Delete failed:", errorMessage);
-            console.log(error.message);
-            console.log(user._id, newRole);
-            return errorMessage
-        }
+      const res = changeUserRole(user, newRole);
+      return res;
     }
 
     const confirmationDelete = async () => {
@@ -57,15 +50,8 @@ function DropDown({user, isSuperAdmin}) {
     };
 
     const deleteAccount = async () => {
-        try {
-            const res = await axios.post(`${URI}admin/delete-account/${user._id}`);
-            console.log(res);
-            return `Successfully Deleted ${user.email}`;
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "Something went wrong.";
-            console.error("Delete failed:", errorMessage);
-            return errorMessage
-        }
+      const res = deleteUser(user);
+      return res;
     }
 
     return (
