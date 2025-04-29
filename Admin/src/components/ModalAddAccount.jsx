@@ -6,10 +6,12 @@ import ModalConfirm from './ModalConfirm.jsx';
 import { DayPicker } from "react-day-picker";
 
 import { URI } from '../constants/URI.js';
-import axios from 'axios';
+import userStore from '../stores/user.store.js';
 
 // Using forwardRef to make the modal accessible from parent components
 const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
+
+    const {addUser} = userStore();
 
     const modalMessageRef = useRef(null);
     const confirmRef = useRef(null);
@@ -123,16 +125,9 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
     };
       
     const addAccount = async () => {
-        console.log(`${firstName, lastName, date, gender, role, email, password, confirmPassword}`);
-        try {
-            const res = await axios.post(`${URI}admin/add-account`, {firstName: firstName, lastName: lastName, gender: gender, birthday: date, email: email, password: password, role: role});
-            console.log(res);
-            return `Successfully Added ${email}`;
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "Something went wrong.";
-            console.error("Delete failed:", errorMessage);
-            return errorMessage;
-        }
+        const result = await addUser(firstName, lastName, gender, date, email, password, role);
+        clear();
+        return result;
     };
       
     const handleAddAccount = async () => {
@@ -151,6 +146,17 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
           console.error(error.message);
         }
     };
+
+    const clear = async () => {
+        setFirstName('');
+        setLastName('');
+        setGender('');
+        setDate();
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setRole('user');
+    }
 
     useEffect(() => {
         if(role === 'user') setRoleDisplay("User");

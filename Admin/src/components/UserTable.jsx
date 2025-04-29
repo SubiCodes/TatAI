@@ -23,7 +23,11 @@ import lgbt_2 from '../Images/profile-icons/lgbt_2.png'
 import lgbt_3 from '../Images/profile-icons/lgbt_3.png'
 import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
 
+import userStore from '../stores/user.store.js';
+
 function BarChart() {
+
+  const {fetchUsers, isLoading, users} = userStore();
 
   const addUserModalRef = useRef(null);
   const modalRef = useRef(null);
@@ -32,10 +36,7 @@ function BarChart() {
     text: ''
   });
 
-  const [users, setUsers] = useState([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [filterStatus, setFilterStatus] = useState('');
@@ -134,21 +135,10 @@ function BarChart() {
   });
 
   const getUser = async () => {
-    setLoading(true); 
-    try {
-      const res = await axios.get(`${URI}user`);
-      setUsers(res.data.data);
-    } catch (error) {
-      console.log(error);
-      setModalContent({ title: "Error fetching", text: error.message || "Unknown error" });
-      modalRef.current?.open(); // safer call
-    } finally {
-      setLoading(false);
-    }
+    fetchUsers()
   };
 
   const checkUserRole = async () => {
-    setLoading(true);
     try {
       const res = await axios.get(`${URI}admin/check-role`, {
         withCredentials: true,
@@ -158,10 +148,8 @@ function BarChart() {
       console.log(error);
       setModalContent({ title: "Error fetching", text: error.message || "Unknown error" });
       modalRef.current?.open(); // safer call
-    } finally {
-      setLoading(false);
-    }
   }
+}
 
   const openAddAcountModal = () => {
     addUserModalRef.current?.open()
@@ -172,7 +160,7 @@ function BarChart() {
     checkUserRole();
   }, []);
 
-  if(loading) {
+  if(isLoading) {
     return(
       <div className='flex justify-center items-center w-full h-full flex-col gap-8'>
         <h1 className='text-xl font-bold text-[#343C6A]'>Fetching Users</h1>
@@ -340,7 +328,7 @@ function BarChart() {
             ) : (
               <tr className="bg-white ">
                 <td colSpan="6" className="px-6 py-4 text-center">
-                  No products found matching your search.
+                  No users found matching your search.
                 </td>
               </tr>
             )}
@@ -348,7 +336,7 @@ function BarChart() {
         </table>
       </div>
       <ModalMessage ref={modalRef} modalTitle={modalContent.title} modalText={modalContent.text}/>
-      <ModalAddAccount ref={addUserModalRef} isSuperAdmin={isSuperAdmin} shouldReload={true}/>
+      <ModalAddAccount ref={addUserModalRef} isSuperAdmin={isSuperAdmin} shouldReload={false}/>
     </div>
   );
 }

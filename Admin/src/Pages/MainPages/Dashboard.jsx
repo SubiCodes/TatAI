@@ -478,13 +478,9 @@ function Dashboard() {
                     </div>
 
                     <div className="w-full flex justify-center items-center mt-4 gap-8">
-                      <button className="text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs"  onClick={() => { setSelectedGuide(guide); openViewRef();}}
+                      <button className="text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs w-full"  onClick={() => { setSelectedGuide(guide); openViewRef();}}
                       >
                         View Guide
-                      </button>
-                      <button className="text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs" onClick={() => {setSelectedGuide(guide); setSelectedGuideImgs(imageIDs); openDeleteRef();
-                      }}>
-                        Delete Guide
                       </button>
                     </div>
                   </div>

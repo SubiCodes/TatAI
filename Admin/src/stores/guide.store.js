@@ -7,13 +7,14 @@ const guideStore = create((set) => ({
     isLoading: false,
     message: '',
     error: null,
+    comments: [],
+    feedback: null,
     fetchGuides: async () => {
         try {
-            set({isLoading: true})
+            set({ isLoading: true, guides: [] });
             const res = await axios.get(`${import.meta.env.VITE_URI}guide`);
             const data = res.data.data;
-            set({guides: data});
-            set({message: `Successfully fetched guides.'`});
+            set({ guides: data, message: "Successfully fetched guides." });
         } catch (error) {
             set({error: error.message})
             set({message: `Something went wrong: ${error.message}`});
@@ -113,18 +114,87 @@ const guideStore = create((set) => ({
 
     changeGuideStatus: async (guideID, status) => {
       try {
-          const res = await axios.put(`${import.meta.env.VITE_URI}guide/guideStatus/${guideID}`, { status: status });
-          console.log(res.data.data);
-          const newGuide = await axios.get(`${import.meta.env.VITE_URI}guide/${guideID}`);
-          const newGuideList = await axios.get(`${import.meta.env.VITE_URI}guide`);
-          set({ isLoading: true, guide: newGuide.data.data, guides: newGuideList.data.data });
-          return `Successfully updated guide status to ${status}.`;
+        // Update status on server
+        const res = await axios.put(`${import.meta.env.VITE_URI}guide/guideStatus/${guideID}`, { status });
+        const updatedGuide = res.data.data;
+    
+        // Update local state directly instead of refetching
+        set((state) => {
+          const updatedGuides = state.guides.map((guide) =>
+            guide._id === guideID ? { ...guide, status: updatedGuide.status } : guide
+          );
+          return {
+            guide: { ...state.guide, status: updatedGuide.status },
+            guides: updatedGuides,
+            isLoading: true,
+          };
+        });
+    
+        return `Successfully updated guide status to ${status}.`;
       } catch (error) {
-          console.error(error);
-          set({message: `Something went wrong: ${error.message}`});
-          return `Something went wrong while changing status.`;
+        console.error(error);
+        set({ message: `Something went wrong: ${error.message}` });
+        return `Something went wrong while changing status.`;
       } finally {
         set({ isLoading: false });
+      }
+    },
+    getUserGuides: async (id) => {
+      try {
+        set({ isLoading: true });
+        const res = await axios.get(`${import.meta.env.VITE_URI}guide/user-guides/${id}`);
+        const newGuides = res.data.data;
+    
+        set({guides: newGuides, message: "User guides updated!"})
+      } catch (error) {
+        console.error(error);
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+    getComments: async () => {
+      try {
+        set({ isLoading: true, error: null });
+        const res = await axios.get(
+          `${import.meta.env.VITE_URI}guide/getAllComments`
+        );
+        console.log(res.data.data);
+        set({comments: res.data.data})
+      } catch (error) {
+        console.log(error);
+        set({error: error.message})
+      } finally {
+        set({isLoading: false})
+      }
+    },
+    getGuideFeedback: async (guideID) => {
+      try {
+        set({ isLoading: true, error: null });
+        const res = await axios.get(`${import.meta.env.VITE_URI}guide/getFeedback/${guideID}`);
+        console.log(res.data.data);
+        set({feedback: res.data.data})
+      } catch (error) {
+        console.log(error);
+        set({error: error.message})
+      } finally {
+        set({isLoading: false})
+      }
+    },
+    hideComment: async (commentId) => {
+      try {
+        set({ error: null });
+        const res = await axios.put(`${import.meta.env.VITE_URI}guide/hideFeedback/${commentId}`);
+        set((state) => {
+          const updatedFeedback = state.feedback.map(comment => 
+            comment._id === commentId 
+              ? { ...comment, hidden: !comment.hidden }
+              : comment
+          );
+          return { feedback: updatedFeedback };  
+        });
+        console.log(res.data.data);  
+      } catch (error) {
+        console.log(error);
       }
     }
 }));

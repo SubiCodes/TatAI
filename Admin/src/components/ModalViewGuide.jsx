@@ -1,5 +1,4 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
-import axios from 'axios';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { X, ShieldQuestion, Eye, EyeOff } from 'lucide-react';
 import ModalConfirmReusable from './ModalConfirmReusable.jsx';
@@ -18,7 +17,7 @@ import lgbt_1 from '../Images/profile-icons/lgbt_1.png'
 import lgbt_2 from '../Images/profile-icons/lgbt_2.png'
 import lgbt_3 from '../Images/profile-icons/lgbt_3.png'
 import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
-import guideStore from '../stores/guide.store.js';
+import guideStore from '../stores/guide.store.js'
 
 
 // Using forwardRef to make the modal accessible from parent components
@@ -51,37 +50,21 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
         }
     };
 
-    const { guide, getGuide, changeGuideStatus, isLoading, error } = guideStore();
-
-    const [feedback, setFeedback] = useState([]);
+    const { guide, getGuide, changeGuideStatus, isLoading, error, getGuideFeedback, feedback, hideComment } = guideStore();
 
     const [changeStatusTo, setChangeStatusTo] = useState('');
 
     const getFeedback = async () => {
-        try {
-        setFetchingComments(true);
-          const res = await axios.get(`${import.meta.env.VITE_URI}guide/getFeedback/${guideID}`);
-          console.log(res.data.data);
-          setFeedback(res.data.data);
-        } catch (error) {
-          console.error(error);
-          setFeedback(null);
-        } finally {
-            setFetchingComments(false);
-        }
-    }
+      setFetchingComments(true);
+      try {
+        await getGuideFeedback(guideID);
+      } finally {
+        setFetchingComments(false);
+      }
+    };
 
-    const hideComment = async (commentId) => {
-        try {
-            setFetchingComments(true);
-            const res = await axios.put(`${import.meta.env.VITE_URI}guide/hideFeedback/${commentId}`);
-            getFeedback();
-            console.log(res.data.data);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setFetchingComments(false);
-        }
+    const hideUserComment = async (commentId) => {
+        hideComment(commentId);
     };
 
     const changeStatus = async () => {
@@ -353,83 +336,79 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                   <h1 className="text-4xl font-bold">Comments</h1>
                 </div>
 
-                <div className='w-full flex flex-col items-start justify-start'>
-                {fetchingComments ? (
-                    <div className='w-full flex flex-col items-center justify-center gap-4'>
-                      <h1 className='text-lg font-bold text-gray-400'>Loading Comments</h1>
-                      <PropagateLoader />
+                <div className="w-full flex flex-col items-start justify-start">
+  {fetchingComments ? (
+    <div className="w-full flex flex-col items-center justify-center gap-4">
+      <h1 className="text-lg font-bold text-gray-400">Loading Comments</h1>
+      <PropagateLoader />
+    </div>
+  ) : (
+    <>
+      {!feedback || feedback.length === 0 ? (
+        <p className="text-gray-500">No comments yet.</p>
+      ) : (
+        feedback
+          .filter(comment => comment && comment.comment && comment.comment.trim() !== "")
+          .map(comment => (
+            <div key={comment._id} className="flex flex-col mb-6 w-full">
+              <div className="flex flex-row gap-4 mb-4">
+                <div className="flex h-full">
+                  <img
+                    src={profileIcons[comment?.userInfo?.profileIcon || 'empty_profile']}
+                    alt="User Icon"
+                    className="w-12 h-12 rounded-full"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <h3 className="text-md font-semibold">{comment?.userInfo?.name || 'Anonymous'}</h3>
+                  <p className="text-sm text-gray-500">{comment?.userInfo?.email || ''}</p>
+                </div>
+                <div className="flex items-center justify-center ml-2">
+                  <div className="dropdown">
+                    <div tabIndex={0} role="button" className="cursor-pointer">
+                      {comment.hidden ? (
+                        <EyeOff size={16} className="text-gray-500" />
+                      ) : (
+                        <Eye size={16} className="text-gray-500" />
+                      )}
                     </div>
-                ) : (
-                        (() => {
-                        const commentsWithText = feedback?.filter(
-                            comment => comment.comment && comment.comment.trim() !== ""
-                        );
-
-                        if (!commentsWithText || commentsWithText.length === 0) {
-                            return <p className='text-gray-500'>No comments yet.</p>;
-                        }
-
-                        return commentsWithText?.map(comment => (
-                            <div key={comment._id} className='flex flex-col mb-6 max-w-2/3'>
-                            <div className="flex flex-row gap-4 mb-4">
-                                <div className="flex h-full">
-                                <img
-                                    src={profileIcons[comment?.userInfo.profileIcon]}
-                                    alt="User Icon"
-                                    className="w-12 h-auto rounded-full"
-                                />
-                                </div>
-                                <div className="flex flex-row h-4">
-                                <div className="flex flex-col">
-                                    <h3 className='text-md font-semibold'>{comment?.userInfo?.name}</h3>
-                                    <p className='text-sm text-gray-500'>{comment?.userInfo?.email}</p>
-                                </div>
-                                </div>
-                                <div className="flex items-center justify-center ml-2">
-                                <div className="dropdown">
-                                    <div tabIndex={0} role="button" className='cursor-pointer'>
-                                    {comment.hidden ? (
-                                        <EyeOff size={16} className="text-gray-500" />
-                                    ) : (
-                                        <Eye size={16} className="text-gray-500" />
-                                    )}
-                                    </div>
-                                    <ul
-                                    tabIndex={0}
-                                    className="dropdown-content menu bg-white rounded-box z-99 w-52 p-2 shadow-sm cursor-pointer"
-                                    onClick={() => hideComment(comment._id)}
-                                    >
-                                    {!comment.hidden ? "Hide Comment" : "Unhide Comment"}
-                                    </ul>
-                                </div>
-                                </div>
-                            </div>
-                            <div className="flex flex-row gap-4">
-                                <div className='w-full'>
-                                <h1 className={`text-lg ${comment.hidden ? 'text-gray-400' : ""}`}>
-                                    {`${comment?.comment}`}
-                                </h1>
-                                </div>
-                            </div>
-                            <div className="flex flex-row gap-4">
-                                <h3 className='text-sm text-gray-700'>
-                                Rating: {!comment.rating ? "None" : `${comment.rating}`}
-                                </h3>
-                                <p className='text-sm text-gray-700'>
-                                {new Date(comment.createdAt).toLocaleString('en-US', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: 'numeric',
-                                    minute: 'numeric',
-                                })}
-                                </p>
-                            </div>
-                            </div>
-                        ));
-                        })
-                    )}
-                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu bg-white rounded-box z-30 w-52 p-2 shadow-sm cursor-pointer"
+                      onClick={() => hideUserComment(comment._id)}
+                    >
+                      <li>{!comment.hidden ? "Hide Comment" : "Unhide Comment"}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-row gap-4">
+                <div className="w-full">
+                  <h1 className={`text-lg ${comment.hidden ? 'text-gray-400' : ''}`}>
+                    {comment.comment}
+                  </h1>
+                </div>
+              </div>
+              <div className="flex flex-row gap-4">
+                <h3 className="text-sm text-gray-700">
+                  Rating: {!comment.rating ? "None" : `${comment.rating}`}
+                </h3>
+                <p className="text-sm text-gray-700">
+                  {new Date(comment.createdAt).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                  })}
+                </p>
+              </div>
+            </div>
+          ))
+      )}
+    </>
+  )}
+</div>
 
 
               </div>

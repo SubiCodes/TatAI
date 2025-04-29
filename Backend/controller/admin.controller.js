@@ -95,7 +95,7 @@ export const changeStatus = async (req, res) => {
         user.status = action;
         user.save();
 
-        return res.status(200).json({success: true, message: "User status updated successfully."});
+        return res.status(200).json({success: true, message: "User status updated successfully.", data: user});
 
     } catch (error) {
         console.log(error);
@@ -145,7 +145,7 @@ export const changeRole = async (req, res) => {
         user.role = role;
         user.save();
 
-        return res.status(200).json({success: true, message: "User role updated successfully."});
+        return res.status(200).json({success: true, message: "User role updated successfully.", data: user});
 
     } catch (error) {
         console.log(error);

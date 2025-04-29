@@ -69,8 +69,8 @@ function Guides() {
 
   if (isLoading) {
     <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
-    <h1 className='text-2xl font-bold'>Fetching Guides</h1>
-    <PropagateLoader color="#3B82F6" size={18} className='ml-4' />
+      <h1 className='text-2xl font-bold'>Fetching Guides</h1>
+      <PropagateLoader color="#3B82F6" size={18} className='ml-4' />
     </div>
   }
 
