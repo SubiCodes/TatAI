@@ -1,7 +1,11 @@
 import { Router } from "express";
-import { upload, deleteImageByUrl, createGuide, getGuides, getGuide, getUserGuides, deleteGuide, updateGuideStatus, addFeedback, getFeedback, getUserFeedback, getAllComments, hideFeedback } from "../controller/guide.controller.js";
+import { upload, deleteImageByUrl, createGuide, updateGuide, getGuides, getGuide, getUserGuides, deleteGuide, updateGuideStatus, addFeedback, getFeedback, getUserFeedback, getAllComments, hideFeedback } from "../controller/guide.controller.js";
 
 const guideRouter = Router();
+
+
+guideRouter.post('/edit-guide', updateGuide);
+
 
 guideRouter.post('/upload', upload);
 guideRouter.post('/deleteImage', deleteImageByUrl);

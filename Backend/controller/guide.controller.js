@@ -31,25 +31,32 @@ export const upload = async (req, res) => {
 };
 
 export const deleteImageByUrl = async (req, res) => {
-    try {
-      const { public_id } = req.body;  // Use public_id from the request body
-      console.log('Received public_id:', public_id);
+  try {
+    // Get the public_id from the request body
+    const { public_id } = req.body;  
+    console.log('Received public_id:', public_id);
   
-      // Delete the image from Cloudinary using the public_id
-      const result = await cloudinary.uploader.destroy(public_id);
-      console.log('Cloudinary deletion result:', result);
-  
-      if (result.result === 'ok') {
-        res.json({ message: 'Image deleted successfully' });
-      } else {
-        res.status(400).json({ error: 'Failed to delete image', details: result });
-      }
-    } catch (error) {
-      console.error('Server error:', error);
-      res.status(500).json({ error: 'Server error while deleting image' });
+    // Check if the public_id is provided
+    if (!public_id) {
+      return res.status(400).json({ error: 'Public ID is required' });
     }
-  };
-
+  
+    // Delete the image from Cloudinary using the public_id
+    const result = await cloudinary.uploader.destroy(public_id);
+    console.log('Cloudinary deletion result:', result);
+  
+    // If deletion is successful, return a success message
+    if (result.result === 'ok') {
+      res.json({ message: 'Image deleted successfully' });
+    } else {
+      // If deletion fails, return an error message with details
+      res.status(200).json({ error: 'Failed to delete image', details: result });
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ error: 'Server error while deleting image' });
+  }
+};
 export const createGuide = async (req, res) => {
     try {
         const { userID, type, title, description, coverImg, toolsNeeded, materialsNeeded, stepTitles, stepDescriptions, stepImg, closingMessage, additionalLink } = req.body;
@@ -566,4 +573,25 @@ export const hideFeedback = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, error: `Error: ${error.message}` });
     }
-}
+};
+
+export const updateGuide = async (req, res) => {
+  try {
+    const { guideID, userID, ...updatedFields } = req.body;
+    console.log(guideID)
+    const guide = await Guide.findById(guideID);
+    const user = await UserInfo.findById(userID);
+
+    if (!guide) return res.status(404).json({ success: false, error: "Guide not found" });
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+    Object.keys(updatedFields).forEach(key => {
+      guide[key] = updatedFields[key] || guide[key];
+    });
+
+    const updatedGuide = await guide.save();
+    res.status(200).json({ success: true, guide: updatedGuide });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error: ${error.message}` });
+  }
+};

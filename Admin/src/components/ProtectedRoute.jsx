@@ -3,6 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 import { URI } from '../constants/URI.js';
+import { MoonLoader } from 'react-spinners';
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,8 +31,9 @@ const ProtectedRoute = () => {
 
   if (loading) {
     return (
-        <div>
-            Loading...
+        <div className='w-screen h-screen flex flex-col items-center justify-center gap-12 '>
+            <span className='text-2xl font-bold'>Logging in</span>
+            <MoonLoader size={48}/>
         </div>
     ); // Or a spinner
   }
