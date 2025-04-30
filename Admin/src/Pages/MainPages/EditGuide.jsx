@@ -1,58 +1,176 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Wrench, Hammer, Sofa, CookingPot, X } from 'lucide-react';
-import { BeatLoader } from 'react-spinners';
+import { BeatLoader, MoonLoader } from 'react-spinners';
 import { useParams, useNavigate } from 'react-router-dom';
 import ModalConfirmReusable from '../../components/ModalConfirmReusable';
 import ModalMessage from '../../components/ModalMessage';
 import guideStore from '../../stores/guide.store';
 
+
+
 const EditGuide = () => {
-  const { guideID } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { isLoading, getGuide, guide, status } = guideStore();
+  const { isLoading, getGuide, guide, updateGuide  } = guideStore();
+
+  const [status, setStatus] = useState('');
 
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [coverPhotoPreview, setCoverPhotoPreview] = useState('');
+  const [coverPhotoFile, setCoverPhotoFile] = useState(null);
   const [tools, setTools] = useState([]);
+  const [newTool, setNewTool] = useState('');
   const [materials, setMaterials] = useState('');
   const [stepTitles, setStepTitles] = useState(['']);
   const [stepContents, setStepContents] = useState(['']);
   const [stepFilesPreviews, setStepFilesPreviews] = useState([null]);
+  const [stepFiles, setStepFiles] = useState([null]); // New state for storing the actual files
   const [closingMessage, setClosingMessage] = useState('');
   const [additionalLinks, setAdditionalLinks] = useState('');
 
-  const modalRef = useRef();
-  const modalConfirmRef = useRef();
+  const [isOpen, setIsOpen] = useState(false);
+  const [confirmIsOpen, setConfirmIsOpen] = useState(false);
+  const [updatingIsOpen, setUpdatingIsOpen] = useState(false);
 
-  //Update Guide
+  const toggleDialog = () => setIsOpen(!isOpen);
+  const toggleDialogConfirm = () => setConfirmIsOpen(!confirmIsOpen);
+
+  const handleValidateBeforeUpdate = async () => {
+    if (!category) {
+      setStatus('Please select a category for your guide');
+      setIsOpen(true)
+      return;
+    }
+  
+    if (!title.trim()) {
+      setStatus("Please enter a title for your guide");
+      setIsOpen(true)
+      return;
+    }
+  
+    if (!description.trim()) {
+      setStatus("Please enter a description for your guide");
+      setIsOpen(true)
+      return;
+    }
+  
+    if (!coverPhotoPreview && !coverPhotoFile) {
+      setStatus("Please upload a cover photo");
+      setIsOpen(true)
+      return;
+    }
+  
+    if (category !== 'tool') {
+      if (tools.length === 0 || (tools.length === 1 && !tools[0].trim())) {
+        setStatus("Please list the tools needed");
+        setIsOpen(true)
+        return;
+      }
+  
+      if (category !== 'repair') {
+        if (!materials.trim()) {
+          setStatus("Please list the materials needed");
+          setIsOpen(true)
+          return;
+        }
+      }
+    }
+  
+    if (!closingMessage.trim()) {
+      setStatus("Please provide a closing message");
+      setIsOpen(true)
+      return;
+    }
+  
+    for (let i = 0; i < stepTitles.length; i++) {
+      if (!stepTitles[i].trim()) {
+        setStatus(`Please enter a title for Step ${i + 1}`);
+        setIsOpen(true)
+        return;
+      }
+  
+      if (!stepContents[i].trim()) {
+        setStatus(`Please enter a description for Step ${i + 1}`);
+       setIsOpen(true)
+        return;
+      }
+  
+      if (!stepFiles[i] && !stepFilesPreviews[i]) {
+        setStatus(`Please upload an image for Step ${i + 1}`);
+        setIsOpen(true)
+        return;
+      }
+    }  
+    setConfirmIsOpen(true);
+  };
+  
   const handleUpdate = async () => {
-    console.log(category);
-    console.log(title);
-    console.log(description);
-    console.log(coverPhotoPreview);
-    console.log(tools);
-    console.log(materials);
-    console.log(stepTitles);
-    console.log(stepContents);
-    console.log(stepFilesPreviews);
-    console.log(closingMessage);
-    console.log(additionalLinks);
-  }
+    try {
+      setConfirmIsOpen(false);
+      setUpdatingIsOpen(true);
+      const URI = import.meta.env.VITE_URI;
+  
+      // Step 1: Determine which existing step images were removed
+      const deletedImagePublicIds = [];
+  
+      if (guide && guide.stepImg?.length > 0) {
+        for (let i = 0; i < guide.stepImg.length; i++) {
+          const oldImg = guide.stepImg[i];
+          const wasRemoved = stepFilesPreviews[i] === null; // image preview is gone
+          const noNewFile = !stepFiles[i]; // and no replacement file was uploaded
+  
+          if (wasRemoved && noNewFile && oldImg?.public_id) {
+            deletedImagePublicIds.push(oldImg.public_id);
+          }
+        }
+      }
+  
+      const guideData = {
+        userID: guide.userID,
+        type: category,
+        title,
+        description,
+        toolsNeeded: tools,
+        materialsNeeded: materials,
+        stepTitles,
+        stepDescriptions: stepContents,
+        closingMessage,
+        additionalLink: additionalLinks,
+        coverImg: guide.coverImg,
+        stepImg: guide.stepImg || [],
+      };
+
+      console.log('Guide Data:', guideData);
+  
+      const message = await updateGuide(
+        id,
+        guideData,
+        coverPhotoFile,
+        stepFiles,
+        deletedImagePublicIds // pass the list here
+      );
+  
+      setStatus(message);
+    } catch (error) {
+      console.error("Update failed:", error);
+      setStatus("Update failed. Please try again.");
+    } 
+  };
+  
 
   // Fetch guide data when component mounts
   useEffect(() => {
-    if (guideID) {
-      getGuide(guideID);
+    console.log(id);
+    if (id) {
+      getGuide(id);
     }
-  }, [guideID, getGuide]);
+  }, [id, getGuide]);
 
   // Populate form fields when guide data is loaded
   useEffect(() => {
     if (guide) {
-      console.log("Populating form with guide data:", guide);
-      
       // Set basic information
       setCategory(guide.type || '');
       setTitle(guide.title || '');
@@ -93,7 +211,6 @@ const EditGuide = () => {
     }
   }, [guide]);
 
-
   // Display loading state
   if (isLoading && !guide) {
     return (
@@ -102,6 +219,53 @@ const EditGuide = () => {
       </div>
     );
   }
+
+  // Function to add a new step
+  const addStep = () => {
+    setStepTitles([...stepTitles, '']);
+    setStepContents([...stepContents, '']);
+    setStepFilesPreviews([...stepFilesPreviews, null]);
+    setStepFiles([...stepFiles, null]); // Add a corresponding step file entry
+  };
+
+  // Function to remove a step
+  const removeStep = (index) => {
+    const newStepTitles = stepTitles.filter((_, i) => i !== index);
+    const newStepContents = stepContents.filter((_, i) => i !== index);
+    const newStepFilesPreviews = stepFilesPreviews.filter((_, i) => i !== index);
+    const newStepFiles = stepFiles.filter((_, i) => i !== index); // Remove the step file
+
+    setStepTitles(newStepTitles);
+    setStepContents(newStepContents);
+    setStepFilesPreviews(newStepFilesPreviews);
+    setStepFiles(newStepFiles); // Remove the corresponding step file
+  };
+
+  const addTool = () => {
+    if (newTool.trim() === '') return;
+  
+    setTools([...tools, newTool.trim()]);
+    setNewTool(''); // clear the input
+  };
+  
+  const removeTool = (index) => {
+    const updatedTools = tools.filter((_, i) => i !== index);
+    setTools(updatedTools);
+  };
+
+  // Function to handle step file selection
+  const handleStepFileChange = (index, event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const newStepFilesPreviews = [...stepFilesPreviews];
+      newStepFilesPreviews[index] = URL.createObjectURL(file); // Set preview URL
+      setStepFilesPreviews(newStepFilesPreviews);
+
+      const newStepFiles = [...stepFiles];
+      newStepFiles[index] = file; // Store the actual file
+      setStepFiles(newStepFiles);
+    }
+  };
 
   return (
     <div className='w-full h-full'>
@@ -174,6 +338,7 @@ const EditGuide = () => {
                   if (file) {
                     const previewURL = URL.createObjectURL(file);
                     setCoverPhotoPreview(previewURL);
+                    setCoverPhotoFile(file);
                   }
                 }}
               />
@@ -181,10 +346,27 @@ const EditGuide = () => {
 
             {/* Tools Section */}
             {category !== 'tool' && (
+              <>
               <div className="w-full flex flex-col gap-2">
                 <legend className="fieldset-legend text-base font-semibold">
                   {category === 'cooking' ? 'Kitchenware:' : 'Tools Needed:'}
                 </legend>
+
+                <div className="w-full flex flex-row gap-2 justify-between items-center">
+                  <input
+                    type="text"
+                    placeholder="List the tools needed for this guide."
+                    className="input border-1 border-gray-400 rounded-sm w-full"
+                    value={newTool}
+                    onChange={(e) => setNewTool(e.target.value)}
+                  />
+                  <button
+                    className="w-24 self-end bg-gray-400 text-white rounded-lg py-2 cursor-pointer"
+                    onClick={addTool}
+                  >
+                    Add Tool
+                  </button>
+                </div>
                 
                 {/* Display existing tools */}
                 {tools.length > 0 && (
@@ -197,6 +379,7 @@ const EditGuide = () => {
                             <button
                               className="text-red-500 hover:text-red-700 ml-2 flex items-center justify-center"
                               aria-label="Remove tool"
+                              onClick={() => removeTool(index)}
                             >
                               <X size={16} />
                             </button>
@@ -208,35 +391,26 @@ const EditGuide = () => {
                 )}
 
                 {/* Add new tool input */}
-                <div className="w-full flex flex-row gap-2 justify-between items-center">
+                
+              </div>
+
+              {category !== 'repair' && (
+                <div className="w-full flex flex-col gap-2">
+                  <legend className="fieldset-legend text-base font-semibold">
+                    {category === "cooking" ? "Ingredients Needed:" : "Materials needed:"}
+                  </legend>
                   <input
                     type="text"
-                    placeholder="List the tools needed for this guide."
+                    value={materials}
+                    placeholder="List the materials needed for this guide."
                     className="input border-1 border-gray-400 rounded-sm w-full"
+                    onChange={(e) => setMaterials(e.target.value)}
                   />
-                  <button
-                    className="w-24 self-end bg-gray-400 text-white rounded-lg py-2 cursor-pointer"
-                  >
-                    Add Tool
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Materials Section */}
-            {category !== 'repair' && category !== 'tool' && (
-              <div className="w-full flex flex-col gap-2">
-                <legend className="fieldset-legend text-base font-semibold">
-                  {category === "cooking" ? "Ingredients Needed:" : "Materials needed:"}
-                </legend>
-                <input
-                  type="text"
-                  value={materials}
-                  placeholder="List the materials needed for this guide."
-                  className="input border-1 border-gray-400 rounded-sm w-full"
-                  onChange={(e) => setMaterials(e.target.value)}
-                />
-              </div>
+                </>
+
             )}
           </div>
 
@@ -289,15 +463,26 @@ const EditGuide = () => {
                       type="file"
                       className="file-input border-gray-400 border w-full h-auto rounded-sm"
                       accept="image/*"
+                      onChange={(e) => handleStepFileChange(index, e)} // Handle file selection
                     />
                   </fieldset>
                 </div>
+                <button
+                  onClick={() => removeStep(index)}
+                  className="text-red-500 hover:text-red-700 absolute top-2 right-2"
+                  aria-label="Remove step"
+                >
+                  <X size={16} />
+                </button>
               </div>
             ))}
           </div>
 
           {/* Add Step Button */}
-          <button className="w-full bg-gray-100 text-black border-1 rounded-lg py-2 cursor-pointer">
+          <button
+            className="w-full bg-gray-100 text-black border-1 rounded-lg py-2 cursor-pointer"
+            onClick={addStep}
+          >
             Add Step
           </button>
 
@@ -328,7 +513,7 @@ const EditGuide = () => {
             <button
               className="w-full bg-primary text-white rounded-lg py-2 cursor-pointer"
               disabled={isLoading}
-              onClick={handleUpdate}
+              onClick={handleValidateBeforeUpdate}
             >
               {isLoading ? <BeatLoader color="#ffffff" size={10} /> : 'Update Guide'}
             </button>
@@ -336,22 +521,102 @@ const EditGuide = () => {
         </div>
       </div>
 
-      {/* Modals */}
-      <ModalConfirmReusable 
-        ref={modalConfirmRef} 
-        onSubmit={() => {}} 
-        toConfirm={`Update guide ${title}?`} 
-        title={"Update Guide"} 
-        titleResult={"Guide Updated"}
-      />
-      <ModalMessage 
-        ref={modalRef} 
-        modalTitle={'Update guide error'} 
-        modalText={status} 
-        shouldReload={false}
-      />
-    </div>  
+      {/* Message Modal */}
+      <dialog 
+        open={isOpen} 
+        onClick={(e) => e.target === e.currentTarget && toggleDialog()}
+        className="fixed inset-0 p-0 w-screen h-screen bg-transparent z-50"
+      >
+        <div className="fixed inset-0 bg-black opacity-20 backdrop-blur-sm"></div>
+        
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-md w-96 max-w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-lg font-bold mb-4">Oops</h2>
+          <p className="mb-4">{status}</p>
+          <div className='w-full flex justify-end'>
+          <button 
+            onClick={toggleDialog} 
+            className="bg-primary text-white py-2 px-4 rounded-md hover:bg-secondary"
+          >
+            Okay
+          </button>
+          </div>
+          
+        </div>
+      </dialog>
+
+      {/* Confirm modal */}
+      <dialog 
+        open={confirmIsOpen} 
+        onClick={(e) => e.target === e.currentTarget && toggleDialog()}
+        className="fixed inset-0 p-0 w-screen h-screen bg-transparent z-50"
+      >
+        <div className="fixed inset-0 bg-black opacity-20 backdrop-blur-sm"></div>
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-md w-96 max-w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-lg font-bold mb-4">{"Conirm"}</h2>
+          <div className='w-full mb-4'>
+            <span className='break-words block'>
+              Are you done editing guide?
+            </span>
+          </div>
+          <div className='w-full flex justify-end gap-2'>
+              <button 
+              onClick={toggleDialogConfirm} 
+              className="bg-gray-400 text-white py-1 px-4 rounded-md hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+
+              <button 
+              onClick={() => handleUpdate()} 
+              className="bg-primary text-white py-1 px-4 rounded-md hover:bg-secondary"
+              >
+                Confirm
+              </button>
+          </div>
+          
+        </div>
+      </dialog>
+
+      {/* updating modal */}
+      <dialog 
+        open={updatingIsOpen} 
+        onClick={(e) => e.target === e.currentTarget && toggleDialog()}
+        className="fixed inset-0 p-0 w-screen h-screen bg-transparent z-50"
+      >
+        <div className="fixed inset-0 bg-black opacity-20 backdrop-blur-sm"></div>
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-md w-96 max-w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h2 className="text-lg font-bold mb-4">{isLoading ? "Updating guide" : "Result"}</h2>
+          <p className="mb-4">{}</p>
+          <div className='w-full mb-4 flex items-center justify-center'>
+            <span className='break-words block'>
+              {isLoading ? (<MoonLoader size={32}/>) : (status)}
+            </span>
+          </div>
+          <div className='w-full flex justify-end gap-2'>
+            {!isLoading && (
+              <button 
+              onClick={() => setUpdatingIsOpen(false)} 
+              className="bg-primary text-white py-1 px-4 rounded-md hover:bg-secondary"
+              >
+                Done
+              </button>
+            )}
+          </div>
+          
+        </div>
+      </dialog>
+      
+    </div>
   );
-}
+};
 
 export default EditGuide;

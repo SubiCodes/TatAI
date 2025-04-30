@@ -98,6 +98,7 @@ const guideStore = create((set) => ({
           set({ isLoading: false });
         }
       },
+      
     getGuide: async (guideID) => {
       try {
           set({ isLoading: true, guide: []});
@@ -110,8 +111,93 @@ const guideStore = create((set) => ({
       } finally {
         set({ isLoading: false });
       }
+    }, 
+    
+    updateGuide: async (guideID, guideData, coverPhotoFile, stepFilesArray, deletedStepImageIds = []) => {
+      set({ isLoading: true });
+    
+      try {
+        const URI = import.meta.env.VITE_URI;
+    
+        // Delete explicitly removed step images
+        for (const public_id of deletedStepImageIds) {
+          await axios.post(`${URI}guide/deleteImage`, { public_id });
+        }
+    
+        // Handle cover photo
+        let coverPhotoData = guideData.coverImg;
+        if (coverPhotoFile) {
+          if (guideData.coverImg?.public_id) {
+            await axios.post(`${URI}guide/deleteImage`, {
+              public_id: guideData.coverImg.public_id,
+            });
+          }
+    
+          const base64 = await convertToBase64(coverPhotoFile);
+          const res = await axios.post(`${URI}guide/upload`, { data: base64 });
+          coverPhotoData = res.data;
+        }
+    
+        // Trim step data to valid step count
+        const validStepCount = guideData.stepTitles.length;
+        const allStepImgs = guideData.stepImg || [];
+    
+        // Delete any excess step images from Cloudinary
+        const excessStepImgs = allStepImgs.slice(validStepCount);
+        for (const img of excessStepImgs) {
+          if (img?.public_id) {
+            await axios.post(`${URI}guide/deleteImage`, {
+              public_id: img.public_id,
+            });
+          }
+        }
+    
+        const stepFilesData = allStepImgs.slice(0, validStepCount);
+        const trimmedStepFilesArray = stepFilesArray.slice(0, validStepCount);
+    
+        for (let i = 0; i < trimmedStepFilesArray.length; i++) {
+          const file = trimmedStepFilesArray[i];
+    
+          if (file) {
+            if (stepFilesData[i]?.public_id) {
+              await axios.post(`${URI}guide/deleteImage`, {
+                public_id: stepFilesData[i].public_id,
+              });
+            }
+    
+            const base64 = await convertToBase64(file);
+            const res = await axios.post(`${URI}guide/upload`, { data: base64 });
+    
+            stepFilesData[i] = {
+              url: res.data.url,
+              public_id: res.data.public_id,
+            };
+          }
+        }
+    
+        const res = await axios.post(`${URI}guide/edit-guide`, {
+          guideID,
+          userID: guideData.userID,
+          ...guideData,
+          coverImg: coverPhotoData,
+          stepImg: stepFilesData,
+        });
+    
+        set({
+          message: `Successfully updated guide '${guideData.title}'`,
+          guide: res.data.guide,
+        });
+    
+        return `Guide '${guideData.title}' updated.`;
+      } catch (error) {
+        console.error("Error updating guide:", error.message);
+        set({ message: `Something went wrong: ${error.message}` });
+        return `Error: ${error.message}`;
+      } finally {
+        set({ isLoading: false });
+      }
     },
-
+    
     changeGuideStatus: async (guideID, status) => {
       try {
         // Update status on server
