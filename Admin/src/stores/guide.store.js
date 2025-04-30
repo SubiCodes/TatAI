@@ -100,7 +100,7 @@ const guideStore = create((set) => ({
       },
     getGuide: async (guideID) => {
       try {
-          set({ isLoading: true });
+          set({ isLoading: true, guide: []});
           const res = await axios.get(`${import.meta.env.VITE_URI}guide/${guideID}`);
           console.log("guide", res.data.data);
           set({guide: res.data.data})

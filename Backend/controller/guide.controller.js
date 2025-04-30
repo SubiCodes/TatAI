@@ -409,7 +409,7 @@ export const getFeedback = async (req, res) => {
       const feedback = await Feedback.find({ guideId: _id });
 
       if (!feedback || feedback.length === 0) {
-          return res.status(404).json({ success: false, error: "Feedback not found" });
+          return res.status(200).json({ success: true, data: [] });
       }
 
       // Extract all unique user IDs from the feedback

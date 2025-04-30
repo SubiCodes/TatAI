@@ -12,6 +12,7 @@ import Settings from './Pages/MainPages/Settings/Settings.jsx';
 import ForgotPassword from './Pages/MainPages/Settings/ForgotPassword.jsx';
 import ViewAccount from './Pages/MainPages/ViewAccount.jsx';
 import AddGuide from './Pages/MainPages/AddGuide.jsx';
+import EditGuide from './Pages/MainPages/EditGuide.jsx';
 
 function App() {
   
@@ -30,6 +31,7 @@ function App() {
             <Route path="/users" element={<Users />} />
             <Route path="/pending-guides" element={<Guides />} />
             <Route path="/add-guide" element={<AddGuide />} />
+            <Route path="/edit-guide/:id" element={<EditGuide />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Route>

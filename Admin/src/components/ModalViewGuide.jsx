@@ -1,7 +1,7 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react';
 import PropagateLoader from 'react-spinners/PropagateLoader';
 import { X, ShieldQuestion, Eye, EyeOff } from 'lucide-react';
-import ModalConfirmReusable from './ModalConfirmReusable.jsx';
+import ModalConfirmReusable from '../components/ModalConfirmReusable.jsx';
 import Swal from 'sweetalert2'
 
 import empty_profile from '../Images/profile-icons/empty_profile.png'
@@ -18,6 +18,9 @@ import lgbt_2 from '../Images/profile-icons/lgbt_2.png'
 import lgbt_3 from '../Images/profile-icons/lgbt_3.png'
 import lgbt_4 from '../Images/profile-icons/lgbt_4.png'
 import guideStore from '../stores/guide.store.js'
+import axios from 'axios';
+
+import { Link } from 'react-router-dom';
 
 
 // Using forwardRef to make the modal accessible from parent components
@@ -53,6 +56,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
     const { guide, getGuide, changeGuideStatus, isLoading, error, getGuideFeedback, feedback, hideComment } = guideStore();
 
     const [changeStatusTo, setChangeStatusTo] = useState('');
+    const [adminID, setAdminID] = useState();
 
     const getFeedback = async () => {
       setFetchingComments(true);
@@ -94,8 +98,21 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
         'lgbt_4': lgbt_4
     };
 
+    const getAdminID = async () => {
+      try {
+        console.log('api called', `${import.meta.env.VITE_URI}admin/admin-data`);
+        const res = await axios.get(`${import.meta.env.VITE_URI}admin/admin-data`, {
+          withCredentials: true,
+        });
+        setAdminID(res.data.data._id);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
     useEffect(() => {
         if (isOpen) {
+            getAdminID();
             getGuide(guideID);
             getFeedback();
         }
@@ -144,6 +161,14 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                     </div>
                   </div>
                   <h1 className="text-xl font-bold text-gray-600">{guide?.posterInfo?.name}</h1>
+                  <div className='flex-1'/>
+                  {adminID === guide.userID && (
+                    <Link to={`/edit-guide/${guide._id}`}>
+                      <button className='bg-transparent text-black p-2 border-[1px] rounded-lg cursor-pointer hover:bg-primary hover:text-white hover:border-0 duration-300'>
+                        Edit Guide
+                      </button>
+                    </Link>
+                  )}
                 </div>
       
                 <div className="w-full h-auto flex flex-col items-center justify-center">

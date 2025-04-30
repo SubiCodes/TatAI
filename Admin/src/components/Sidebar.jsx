@@ -54,7 +54,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     const currentPath = location.pathname;
   
     // Check for /add-guide route and keep the 'Guides' active
-    if (currentPath === '/add-guide') {
+    if (currentPath === '/add-guide' || currentPath === '/edit-guide') {
       setActivePage('Guides');
       return;
     }
