@@ -1,14 +1,11 @@
 import { View, Text, TextInput, TouchableOpacity, StatusBar, SafeAreaView, Image, ActivityIndicator} from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
+import { router } from 'expo-router'
 import { useFocusEffect, useRouter } from 'expo-router'
 import Dropdown from '@/components/dropdown.tsx'
 import DateTimePicker from "@react-native-community/datetimepicker";
 import FetchingDataScreen from '@/components/fetching-data-screen.jsx';
-
-import { API_URL } from '@/constants/links.js'
-import axios from 'axios'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { jwtDecode } from 'jwt-decode'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
@@ -30,14 +27,15 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 
-const Profile = () => {
+import userStore from '@/store/user.store';
 
-    const router = useRouter();
-    const [fullName, setFullName] = useState('');
-    const [email, setEmail] = useState('');
-    const [profileIcon, setProfileIcon] = useState('');
-    const [fetchingData, setFetchingData] = useState(false);
-    const [errorFetching, setErrorFetching] = useState(false);
+const Profile = () => {
+    const user = userStore((state) => state.user);
+    const isLoading = userStore((state) => state.isLoading);
+    const error = userStore((state) => state.error);
+    const checkUserLoggedIn = userStore((state) => state.checkUserLoggedIn);
+    const getUserInfo = userStore((state) => state.getUserInfo);
+    const logoutUser = userStore((state) => state.logoutUser);
 
     const profileIcons = {
           empty_profile: empty_profile,
@@ -56,35 +54,12 @@ const Profile = () => {
     }
 
     const checkLoggedIn = async () => {
-        setFetchingData(true);
-        const token = await AsyncStorage.getItem('token');
-        if (!token){
-            setFetchingData(false);
-            router.replace('/(auth-screens)/signin');
-            return;
-        };
-        setFetchingData(false);
+        checkUserLoggedIn();
     };
 
     const getUserData = async () => {
-        setFetchingData(true);
-        setErrorFetching(false);
-        try {
-            const token = await AsyncStorage.getItem('token');
-            const decryptedToken = await jwtDecode(token);
-            if (!token) {
-                router.dismissAll();
-                router.replace('/(auth-screens)/signin');
-            }
-            const res = await axios.get(`${API_URL}/api/v1/user/${decryptedToken.userID}`);
-            setFullName(`${res.data.data.firstName} ${res.data.data.lastName}`);
-            setEmail(res.data.data.email);
-            setProfileIcon(res.data.data.profileIcon);
-        } catch (error) {
-            setErrorFetching(true);
-            console.log(error.message);
-        }finally{
-            setFetchingData(false);
+        if (!user) {
+            getUserInfo();
         }
     }
 
@@ -99,9 +74,9 @@ const Profile = () => {
     return (
         <>
             <StatusBar translucent={true} className='bg-background dark:bg-background-dark'/>
-            {fetchingData ? (
+            {isLoading ? (
                     <FetchingDataScreen/>
-                ) : errorFetching ? (
+                ) : error ? (
                     <View className='w-screen h-screen items-center justify-center gap-4 bg-background dark:bg-background-dark'>
                          <Text className='text-3xl font-extrabold text-red-500'>Network Error</Text>
                                   <Text>Please connect to a stable internet.</Text>
@@ -114,7 +89,7 @@ const Profile = () => {
                 
                 <View className='w-full flex flex-col justify-end items-center gap-4 pb-8' style={{height: '48%'}}>
                     <View className='w-52 h-52 flex flex-col justify-center items-center bg-[#A9A9A9] rounded-full'>
-                        <Image source={profileIcons[profileIcon]} className='max-w-48 h-auto' resizeMode='contain'/>
+                        <Image source={profileIcons[user.profileIcon]} className='max-w-48 h-auto' resizeMode='contain'/>
                         <TouchableOpacity 
                         className='w-12 h-12 bg-primary rounded-full items-center justify-center'
                         style={{
@@ -133,8 +108,8 @@ const Profile = () => {
                     </View>
 
                     <View className='w-auto h-auto flex-col items-center'>
-                        <Text className='text-3xl text-secondary font-semibold'>{fullName}</Text>
-                        <Text className='text-base text-text dark:text-text-dark'>{email}</Text>
+                        <Text className='text-3xl text-secondary font-semibold'>{`${user.firstName} ${user.lastName}`}</Text>
+                        <Text className='text-base text-text dark:text-text-dark'>{user.email}</Text>
                     </View>
                 </View>
 
@@ -196,8 +171,7 @@ const Profile = () => {
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
                     <TouchableOpacity className='w-full flex-row justify-start items-center gap-2' onPress={() => {
-                        AsyncStorage.removeItem('token');
-                        checkLoggedIn();
+                        logoutUser();
                     }}>
                         <View className='w-12 h-auto border-0 items-center justify-cente'>
                             <Text className="text-text text-2xl dark:text-text-dark">
