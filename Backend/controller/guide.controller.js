@@ -189,7 +189,6 @@ export const getGuides = async (req, res) => {
       };
     });
     
-    // Create user map for easy lookup
     const posterMap = {};
     posters.forEach(poster => {
       posterMap[poster._id.toString()] = {
@@ -198,7 +197,6 @@ export const getGuides = async (req, res) => {
       };
     });
     
-    // Add the poster and feedback info to each guide
     const guidesWithData = latestGuides.map(guide => {
       const guideObj = guide.toObject();
       const userIdStr = guide.userID.toString();
@@ -217,6 +215,72 @@ export const getGuides = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const getGuidesPerType = async (req, res) => {
+  try {
+    const { type, amount } = req.body;
+    const latestGuides = await Guide.find({type: type, status: 'accepted'}).limit(amount);
+
+    const userIds = latestGuides.map(guide => guide.userID);
+    const guideIds = latestGuides.map(guide => guide._id);
+    
+    // Find all users whose IDs match those in the guides
+    const posters = await UserInfo.find({ _id: { $in: userIds } }, 'firstName lastName profileIcon');
+    
+    const allFeedback = await Feedback.find({ 
+      guideId: { $in: guideIds },  
+    });
+    
+    // Process feedback data manually
+    const feedbackMap = {};
+    
+    guideIds.forEach(guideId => {
+      const guideFeedback = allFeedback.filter(fb => fb.guideId.toString() === guideId.toString());
+      
+      // Count comments (feedback entries with non-empty comments)
+      const commentCount = guideFeedback.filter(fb => fb.comment && fb.comment.trim() !== '').length;
+      
+      // Calculate average rating (only for feedback entries with ratings)
+      const ratingsOnly = guideFeedback.filter(fb => typeof fb.rating === 'number');
+      const averageRating = ratingsOnly.length > 0 
+        ? ratingsOnly.reduce((sum, fb) => sum + fb.rating, 0) / ratingsOnly.length
+        : 0;
+      
+      feedbackMap[guideId.toString()] = {
+        averageRating: parseFloat(averageRating.toFixed(1)), // Round to 1 decimal place
+        commentCount,
+        ratingCount: ratingsOnly.length
+      };
+    });
+    
+    const posterMap = {};
+    posters.forEach(poster => {
+      posterMap[poster._id.toString()] = {
+        name: `${poster.firstName} ${poster.lastName}`,
+        profileIcon: poster.profileIcon
+      };
+    });
+    
+    const guidesWithData = latestGuides.map(guide => {
+      const guideObj = guide.toObject();
+      const userIdStr = guide.userID.toString();
+      const guideIdStr = guide._id.toString();
+      
+      return {
+        ...guideObj,
+        posterInfo: posterMap[userIdStr] || null,
+        feedbackInfo: feedbackMap[guideIdStr] || { averageRating: 0, commentCount: 0, ratingCount: 0 }
+      };
+    });
+
+    return res.status(200).json({ success: true, data: guidesWithData });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
 
 export const getUserGuides = async (req, res) => {
   try {

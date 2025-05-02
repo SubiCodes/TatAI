@@ -316,10 +316,11 @@ export const getLatestFeedback = async (req, res) => {
 
 export const getLatestGuides = async (req, res) => {
     try {
+      const { amount } = req.body;
       // Get the latest guides
       const latestGuides = await Guide.find()
         .sort({ createdAt: -1 }) 
-        .limit(2);
+        .limit(amount);
       
       // Extract the userIDs and guideIDs
       const userIds = latestGuides.map(guide => guide.userID);

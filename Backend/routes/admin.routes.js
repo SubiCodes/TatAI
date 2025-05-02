@@ -14,6 +14,6 @@ adminRouter.get("/user-guide-count", getCount);
 adminRouter.get("/live-guide-count", getLiveGuidesCount);
 adminRouter.get("/guide-ratings", getRatingsCount);
 adminRouter.get("/latest-feedback", getLatestFeedback);
-adminRouter.get("/latest-guides", getLatestGuides);
+adminRouter.post("/latest-guides", getLatestGuides);
 
 export default adminRouter;
