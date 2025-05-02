@@ -138,7 +138,7 @@ function Dashboard() {
     const getLatestGuide = async () => {
       try {
         setFetchingData(true);
-        const res = await axios.get(`${import.meta.env.VITE_URI}admin/latest-guides`);
+        const res = await axios.post(`${import.meta.env.VITE_URI}admin/latest-guides`, {amount: 2});
         console.log("Latest guides:", res.data.data);    
         setLatestGuides(res.data.data);
       } catch (error) {
