@@ -35,12 +35,17 @@ export const resendVerificationToken = async (req, res) => {
         if (!existingUser) {
             return res.status(404).json({success: false, message: "User does not exist."});
         }
+        if (!existingUser.verificationToken) {
+            const token = Math.random().toString(36).substring(2, 8).toUpperCase();
+            existingUser.verificationToken = token;
+            await existingUser.save();
+        }
         sendVerificationToken(email, existingUser.verificationToken);
         return res.status(200).json({success: true, message: "Verification token resent successfully."});
     } catch (error) {
         return res.status(500).json({success: false, message: `Cannot resend verification token: Server side error.`, error: error.message});
     }
-}
+};
 
 export const verifyUser = async (req, res) => {
     const {email, token} = req.body;
@@ -85,7 +90,7 @@ export const signIn = async (req, res) => {
         }
 
         const token = JWT.sign({ userID: existingUser._id }, JWT_SECRET);
-        res.status(200).json({success: true, message: "User logged in successfully.", token: token});
+        res.status(200).json({success: true, message: "User logged in successfully.", token: token, user: existingUser});
 
     } catch (error) {
         return res.status(500).json({success: false, message: `Cannot login user: ${error.message}`});

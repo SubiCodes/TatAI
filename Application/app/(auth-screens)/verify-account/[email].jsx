@@ -5,7 +5,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
 import { OtpInput } from "react-native-otp-entry";
 import { useFocusEffect } from 'expo-router';
-import { API_URL } from '@/constants/links';
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
 
 const VerifyAccount = () => {
 
@@ -21,11 +25,13 @@ const VerifyAccount = () => {
         router.replace('/(auth-screens)/signin');
         return;
     }
-    const resendEmail = await axios.post(`${API_URL}/api/v1/auth/resend-verification-token`, {email: email}, 
+    const resendEmail = await axios.post(`${API_URL}auth/resend-verification-token`, {email: email}, 
         { 
-            validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
+            validateStatus: (status) => status < 500,
         }
     );
+    console.log('API CALL', `${API_URL}/auth/resend-verification-token`);
+    console.log(resendEmail.data);
     return;
    }
 
@@ -33,7 +39,7 @@ const VerifyAccount = () => {
         setResendEmail(false);
         setResetTimer(60);
         try {
-            const resendEmail = await axios.post(`${API_URL}/api/v1/auth/resend-verification-token`, {email: email}, 
+            const resendEmail = await axios.post(`${API_URL}auth/resend-verification-token`, {email: email}, 
                 { 
                     validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
                 }
@@ -49,7 +55,7 @@ const VerifyAccount = () => {
     const handleSubmitVerification = async () => {
         setSubmitting(true);
         try {
-            const verifyUser = await axios.post(`${API_URL}/api/v1/auth/verify-user`, {email: email, token: verificationToken.toUpperCase()}, 
+            const verifyUser = await axios.post(`${API_URL}auth/verify-user`, {email: email, token: verificationToken.toUpperCase()}, 
                 { 
                     validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
                 }
@@ -61,7 +67,7 @@ const VerifyAccount = () => {
                 ]);
                 return;
             }
-            Alert.alert('🎊Congratulations', `${verifyUser.data.message}. Please login to continue`, [
+            Alert.alert('Congratulations', `${verifyUser.data.message}. Please login to continue`, [
                 {text: 'OK'},
             ]);
             router.replace('/(auth-screens)/signin');
@@ -84,13 +90,11 @@ const VerifyAccount = () => {
         }
     }, [resetTimer]);
 
-    useFocusEffect(
-        useCallback(() => {
-            checkEmail();
-        }, [])
-    );
+    useEffect(() => {
+        checkEmail();
+    }, []);
 
-  return (
+    return (
      <SafeAreaView className='h-[100%] w-screen flex items-center flex-col bg-background  md:pt-0 md:justify-center'>
             <View className='w-80 items-start justify-center gap-4 pt-32 md:w-screen md:items-center md:gap-12'>
                 <View className='w-80 items-center gap-2 md:w-4/5 overflow-ellipsis md:gap-8'>

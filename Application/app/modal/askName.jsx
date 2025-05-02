@@ -11,16 +11,14 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import axios from 'axios';
 
 const AskName = () => {
-
     const navigation = useNavigation();
     const router = useRouter();
     const scrollViewRef = useRef();
-    
 
     const removeHeader = () => {
         navigation.setOptions({
-            title: "Customize Your Experience", // Change header title
-            headerShown: false, // Ensure the header is visible
+            title: "Customize Your Experience",
+            headerShown: false,
         });
     }
 
@@ -29,7 +27,7 @@ const AskName = () => {
     const [messages, setMessages] = useState([]);
     const [typedMessage, setTypedMessage] = useState("");
     const [lastUserMessage, setLastUserMessage] = useState("");
-    const [botResponseCount,  setBotResponseCount] = useState(0);
+    const [botResponseCount, setBotResponseCount] = useState(0);
     const [replySuggestion, setReplySuggestion] = useState();
     const [showReplySuggestion, setShowReplySuggestion] = useState(false);
     const nameSuggestions = ["Son", "Daughter", "Sweetie", "Buddy"];
@@ -37,27 +35,26 @@ const AskName = () => {
 
     const getID = async () => {
         try {
-            const token = await AsyncStorage.getItem('token'); // Use `getItem`, not `get`
-                if (token) {
-                    const decodedToken = jwtDecode(token);
-                    setUserID(decodedToken.userID);
-                    console.log("User ID:", decodedToken.userID);
-                }
+            const token = await AsyncStorage.getItem('token');
+            if (token) {
+                const decodedToken = jwtDecode(token);
+                setUserID(decodedToken.userID);
+                console.log("User ID:", decodedToken.userID);
+            }
         } catch (error) {
             console.log(error.message);
-            
         }
     };
 
     const updatePreference = async () => {
         if (!userID) {
             console.log("User ID not set, skipping update.");
-            return; 
+            return;
         }
 
         try {
             const res = await axios.put(
-                `${API_URL}/api/v1/user/${userID}`, 
+                `${API_URL}/api/v1/user/${userID}`,
                 { preferredName: lastUserMessage },
                 { validateStatus: (status) => status < 500 }
             );
@@ -75,7 +72,6 @@ const AskName = () => {
     }
 
     const loadInitialMessages = async () => {
-
         setMessages([]);
         setWaitingForResponse(true);
 
@@ -100,10 +96,9 @@ const AskName = () => {
 
         setTimeout(() => {
             setWaitingForResponse(false);
-            setLastUserMessage(""); 
+            setLastUserMessage("");
         }, 1000 * botResponses.length);
     }
-
 
     const handleSendMessage = async () => {
         setShowNameSuggestion(false);
@@ -116,8 +111,8 @@ const AskName = () => {
                 { message: typedMessage, sender: "user" }
             ]);
 
-            setLastUserMessage(typedMessage); 
-            setTypedMessage("");  
+            setLastUserMessage(typedMessage);
+            setTypedMessage("");
         }
     };
 
@@ -128,7 +123,7 @@ const AskName = () => {
             ...prevMessages,
             { message: name, sender: "user" }
         ]);
-        setLastUserMessage(name); 
+        setLastUserMessage(name);
         setShowNameSuggestion(false);
     }
 
@@ -137,20 +132,20 @@ const AskName = () => {
         setShowNameSuggestion(false);
         setShowReplySuggestion(false);
 
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                { message: replySuggestion, sender: "user" }
-            ]);
+        setMessages((prevMessages) => [
+            ...prevMessages,
+            { message: replySuggestion, sender: "user" }
+        ]);
 
-            setLastUserMessage(replySuggestion); 
-            setTypedMessage("");  
+        setLastUserMessage(replySuggestion);
+        setTypedMessage("");
     }
+
     useEffect(() => {
         if (lastUserMessage && waitingForResponse) {
-
-            setShowReplySuggestion(false);
-
             if (botResponseCount === 0) {
+                setBotResponseCount(1); // lock this block
+
                 const botResponses = [
                     `Lovely to meet you, ${lastUserMessage}!`,
                     "A few things to keep in mind...",
@@ -158,63 +153,62 @@ const AskName = () => {
                     "I offer predefined fix-it guides, diagnostics, and tool suggestions based on your queries, but I won’t physically perform repairs.",
                     "I improve over time, but my responses are based on trained data and predefined rules — I won’t browse the internet for live updates."
                 ];
-    
+
                 botResponses.forEach((response, index) => {
                     setTimeout(() => {
                         setMessages((prevMessages) => [
                             ...prevMessages,
                             { message: response, sender: "bot" }
                         ]);
-    
+
                         if (index === botResponses.length - 1) {
                             setReplySuggestion("I acknowledge that message.");
                             setShowReplySuggestion(true);
                         }
                     }, 1000 * index);
                 });
-    
+
                 setTimeout(async () => {
-                    console.log("Calling updatePreference...");
-                    await updatePreference();   // Ensure the call happens with awaited userID
+                    await updatePreference();
                     setWaitingForResponse(false);
                     setLastUserMessage("");
-                    setBotResponseCount(botResponseCount + 1);
                 }, 1000 * botResponses.length);
             }
 
-            if (botResponseCount === 1) {
+            else if (botResponseCount === 1) {
+                setBotResponseCount(2); // lock this block
+
                 const botResponses = [
                     "TatAI's features, functionality, and guidelines may evolve over time as we continue to improve the system. ",
                     "While I strive to provide accurate and helpful guidance, please verify information independently before making decisions."
                 ];
-    
+
                 botResponses.forEach((response, index) => {
                     setTimeout(() => {
                         setMessages((prevMessages) => [
                             ...prevMessages,
                             { message: response, sender: "bot" }
                         ]);
-    
+
                         if (index === botResponses.length - 1) {
                             setReplySuggestion("Sounds good! Let's begin.");
-                            setShowReplySuggestion(true)
+                            setShowReplySuggestion(true);
                         }
                     }, 1000 * index);
                 });
-    
+
                 setTimeout(() => {
                     setWaitingForResponse(false);
-                    setLastUserMessage(""); 
-                    setBotResponseCount(botResponseCount + 1);
+                    setLastUserMessage("");
                 }, 1000 * botResponses.length);
             }
 
-            if (botResponseCount === 2){
+            else if (botResponseCount === 2) {
+                setBotResponseCount(3); // prevent rerun
                 setTimeout(() => {
                     router.replace('/(tabs)/home');
                 }, 1000);
             }
-
         }
     }, [lastUserMessage, waitingForResponse]);
 
@@ -230,70 +224,56 @@ const AskName = () => {
         loadInitialMessages();
     }, []);
 
-  return (
-    <>
-    <SafeAreaView className='w-screen h-screen flex items-center gap-4'>
+    return (
+        <SafeAreaView className='w-screen h-screen flex items-center gap-4'>
+            <WelcomeBotHeader />
 
-        <WelcomeBotHeader/>
+            <ScrollView className='w-full h-screen flex-col border-0 pt-0 px-4' contentContainerStyle={{ gap: 12 }} ref={scrollViewRef}>
+                <StatusBar translucent={true} backgroundColor={'#FAF9F6'} />
+                <View className='w-40 h-40 justify-center items-center rounded-full bg-gray-200 self-center mb-8'></View>
 
-        <ScrollView className='w-full h-screen flex-col border-0 pt-0 px-4' contentContainerStyle={{gap:12}} ref={scrollViewRef}>
-        <StatusBar translucent={true} backgroundColor={'#FAF9F6'}/>
-        <View className='w-40 h-40 justify-center items-center rounded-full bg-gray-200 self-center mb-8'>
-            
-        </View>
+                {messages.map((msg, index) => (
+                    <View
+                        key={index}
+                        className={`w-auto h-auto justify-center p-4 rounded-xl ${msg.sender === "bot" ? "self-start bg-gray-200" : "self-end bg-blue-200"}`}
+                    >
+                        <Text>{msg.message}</Text>
+                    </View>
+                ))}
 
-        {messages.map((msg, index) => {
-            return (
-                <View 
-                    key={index} 
-                    className={`w-auto h-auto justify-center p-4 rounded-xl ${msg.sender === "bot" ? "self-start bg-gray-200" : "self-end bg-blue-200"}`}
-                >
-                    <Text>{msg.message}</Text>
-                </View>
-            );
-        })}
+                {waitingForResponse && (
+                    <View className="w-auto h-auto justify-center flex-row gap-2 p-4 rounded-xl self-start bg-gray-200">
+                        <View className='w-2 h-2 rounded-full bg-gray-400' />
+                        <View className='w-2 h-2 rounded-full bg-gray-400' />
+                        <View className='w-2 h-2 rounded-full bg-gray-400' />
+                    </View>
+                )}
 
-        {waitingForResponse && (
-            <View className="w-auto h-auto justify-center flex-row gap-2 p-4 rounded-xl self-start bg-gray-200">
-                <View className='w-2 h-2 rounded-full bg-gray-400'/>
-                <View className='w-2 h-2 rounded-full bg-gray-400'/>
-                <View className='w-2 h-2 rounded-full bg-gray-400'/>
+                {showNameSuggestion && (
+                    <View className='w-full h-auto flex-wrap flex-row justify-center gap-2 p-2 rounded-3xl self-center mt-4'>
+                        {nameSuggestions.map((name, index) => (
+                            <TouchableOpacity key={index} className='w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4' onPress={() => handleSendSuggestedName(name)}>
+                                <Text className='text-black text-base'>{name}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
+
+                {showReplySuggestion && (
+                    <TouchableOpacity className='w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4' onPress={handleSendSuggestedMessage}>
+                        <Text className='text-black text-base'>{replySuggestion}</Text>
+                    </TouchableOpacity>
+                )}
+            </ScrollView>
+
+            <View className='w-full h-auto justify-center items-center flex-row gap-2 pb-0 bg-transparent'>
+                <TextInput className='w-72 h-12 rounded bg-gray-200 p-2' placeholder='Send a message...' value={typedMessage} onChangeText={setTypedMessage} editable={!waitingForResponse} />
+                <TouchableOpacity className='w-12 h-12 rounded bg-secondary items-center justify-center' onPress={handleSendMessage} disabled={waitingForResponse}>
+                    <FontAwesome name="send" size={24} color="white" />
+                </TouchableOpacity>
             </View>
-        )}
+        </SafeAreaView>
+    );
+};
 
-        {showNameSuggestion && (
-            <View className='w-full h-auto flex-wrap flex-row justify-center gap-2 p-2 rounded-3xl self-center mt-4'>
-                {nameSuggestions.map((name, index) => {
-                    return(
-                        <TouchableOpacity key={index} className='w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4' onPress={() => handleSendSuggestedName(name)}>
-                            <Text className='text-black text-base'>{name}</Text>
-                        </TouchableOpacity> 
-                    )
-                })}
-            </View>
-        )}
-            
-        {showReplySuggestion && (
-            <TouchableOpacity className='w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4' onPress={handleSendSuggestedMessage}>
-                <Text className='text-black text-base'>{replySuggestion}</Text>
-            </TouchableOpacity>
-        )}
-
-        
-
-        </ScrollView>
-        
-        <View className='w-full h-auto justify-center items-center flex-row gap-2 pb-0 bg-transparent'>
-            <TextInput className='w-72 h-12 rounded bg-gray-200 p-2' placeholder='Send a message...' value={typedMessage} onChangeText={(text) => setTypedMessage(text)} disabled={waitingForResponse}/>
-            <TouchableOpacity className='w-12 h-12 rounded bg-secondary items-center justify-center' onPress={handleSendMessage} disabled={waitingForResponse}>
-                <FontAwesome name="send" size={24} color="white" />
-            </TouchableOpacity>
-        </View>
-        
-
-    </SafeAreaView>
-    </>
-  )
-}
-
-export default AskName
+export default AskName;

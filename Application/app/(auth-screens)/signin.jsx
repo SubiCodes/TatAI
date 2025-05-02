@@ -13,16 +13,18 @@ import illustration from '../../assets/images/signin-illustration.png'
 import signinImage from '../../assets/images/auth-images/logo1.png'
 import { useColorScheme } from 'nativewind';
 
+
+import userStore from '@/store/user.store';
+
 const SignIn = () => {
 
   const {colorScheme, toggleColorScheme} = useColorScheme();
-  
+  const {user, userLogin, isLoading, error} = userStore();
 
   const [appReady, setAppReady] = useState(false);
   const router = useRouter();
   const {width, height} = Dimensions.get('window');
 
-  const [errors, setErrors] = useState("");
   const [hidePassword, setHidePassword] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,39 +36,7 @@ const SignIn = () => {
   };
 
   const handleEmailLogin = async() => {
-    setErrors("");
-    setLoading(true);
-    try {
-      if(email.trim() === "" || password.trim() === ""){
-        setErrors("Please fill all fields.");
-        Alert.alert('Login error', 'Please fill in all the fields.', [
-          {text: 'OK'},
-        ]);
-        return;
-      }
-      const res = await axios.post(`${API_URL}/api/v1/auth/sign-in`, {email: email, password: password}, 
-        { 
-          validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
-        }
-      );
-
-      if(res.data.success){
-        await AsyncStorage.setItem('token', res.data.token);
-        router.replace('/(tabs)/home');
-      }
-      if(!res.data.success) {
-        setErrors("Invalid Credentials.");
-        Alert.alert('Login error', 'Please input valid credentials.', [
-          {text: 'OK'},
-        ]);
-      };
-    } catch (error) {
-      console.log(error);
-      setErrors(error.message);
-      setLoading(false);
-    } finally{
-      setLoading(false);
-    }
+    const res = await userLogin(email, password);
   }; 
 
   const checkLoggedIn = async() => {
@@ -82,7 +52,6 @@ const SignIn = () => {
   };
 
   const reset = () => {
-    setErrors("");
     setHidePassword(true);
     setAppReady(false)
     setEmail("");
@@ -147,9 +116,9 @@ const SignIn = () => {
           
           
           <View className='h-auto min-h-30 items-center'>
-            {errors && (
+            {error && (
             <View className='w-[300] h-12 border-2 border-red-500 rounded-lg mb-2 px-4 justify-center' style={{backgroundColor: '#fef6f5'}}>
-              <Text className='text-black'>{`ⓘ ${errors}`}</Text>
+              <Text className='text-black'>{`ⓘ ${error}`}</Text>
             </View>  )}
                
             <TextInput placeholder={'Email'}  value={email} onChangeText={(text) => setEmail(text)}
@@ -176,7 +145,7 @@ const SignIn = () => {
          
           <TouchableOpacity className='flex-row mt-2 gap-2 min-h-11 h-11 bg-primary justify-center items-center rounded-xl shadow-lg shadow-gray-400 elevation-2' style={{width: '80%'}}
            onPress={handleEmailLogin} disabled={loading}>
-            {loading ? (<ActivityIndicator size="small" color="white"/>) : (
+            {isLoading ? (<ActivityIndicator size="small" color="white"/>) : (
               <Text className='font-bold text-lg text-white'>Login</Text>
             )}
           </TouchableOpacity>

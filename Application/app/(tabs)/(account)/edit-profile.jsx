@@ -26,10 +26,18 @@ import { API_URL } from '@/constants/links';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { useFocusEffect } from 'expo-router';
+import userStore from '@/store/user.store';
 
 const {width, height} = Dimensions.get('screen');
 
 const EditProfile = () => {
+
+    const user = userStore((state) => state.user);
+    const isLoading = userStore((state) => state.isLoading);
+    const error = userStore((state) => state.error);
+    const getUserInfo = userStore((state) => state.getUserInfo);
+    const editUserInfo = userStore((state) => state.editUserInfo);
+    const checkUserLoggedIn = userStore((state) => state.checkUserLoggedIn);
 
     const [activeProfileIcon, setActiveProfileIcon] = useState();
     const [firstName, setFirstName] = useState('');
@@ -63,13 +71,6 @@ const EditProfile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProfileIcon, setSelectedProfileIcon] = useState();
 
-    const test = () => {
-      console.log(firstName);
-      console.log(lastName);
-      console.log(birthDate);
-      console.log(gender);
-    }
-
     const handleDropdownChange = (item) => {
       setGender(item.value);
     };
@@ -79,22 +80,6 @@ const EditProfile = () => {
       setIsModalOpen(false);
     };
 
-    const handleSaveChanges = async () => {
-      setPostingData(true);
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const decryptedToken = await jwtDecode(token);
-        const res = await axios.put(`${API_URL}/api/v1/user/${decryptedToken.userID}`, {firstName: firstName, lastName: lastName, birthday: birthDate, gender: gender, profileIcon: activeProfileIcon});
-        console.log('Successfully updated!');
-      } catch (error) {
-        Alert.alert("⚠️Oops", "Cannot apply changes. Please check your connection or contact customer support.");
-        console.log(error.message);
-      }
-      finally{
-        setPostingData(false);
-        getUserData();
-      }
-    }
 
     const checkNameEmpty = () => {
       if (firstName.trim() === ''){
@@ -113,22 +98,27 @@ const EditProfile = () => {
     const getUserData = async () => {
       setFetchingData(true);
       try {
-        const token = await AsyncStorage.getItem('token');
-        const decryptedToken = await jwtDecode(token);
-        const res = await axios.get(`${API_URL}/api/v1/user/${decryptedToken.userID}`);
-        setFirstName(res.data.data.firstName);
-        setLastName(res.data.data.lastName);
-        const backendDate = res.data.data.birthday;
-        setBirthDate(backendDate ? new Date(backendDate) : null);
-        setGender(res.data.data.gender);
-        setGender(res.data.data.gender);
-        setActiveProfileIcon(res.data.data.profileIcon);
-        setSelectedProfileIcon(res.data.data.profileIcon);
-        setFetchingData(false);
+        if (!user) {
+          checkUserLoggedIn();
+        }
+        setFirstName(user.firstName);
+        setLastName(user.lastName);
+        setGender(user.gender);
+        setActiveProfileIcon(user.profileIcon);
+        setSelectedProfileIcon(user.profileIcon);
+
+        if (user.birthday) {
+          const parsedDate = new Date(user.birthday);
+          if (!isNaN(parsedDate.getTime())) {
+            setBirthDate(parsedDate);
+          }
+        }
+    
       } catch (error) {
         Alert.alert("⚠️Oops", "Cannot fetch information.");
-        setFetchingData(false);
         console.log(error.message);
+      } finally {
+        setFetchingData(false);
       }
     };
 
@@ -148,7 +138,7 @@ const EditProfile = () => {
       <StatusBar translucent={false} className='bg-background dark:bg-background-dark'/>
       <SafeAreaView className="h-[100%] w-screen flex-col bg-background">
       {fetchingData ? (
-        <FetchingDataScreen/>
+        <ActivityIndicator size={24} color={blue}/>
       ) : (
         <ScrollView className="flex-1 gap-4 min-h-[100%] bg-background dark:bg-background-dark"
           contentContainerStyle={{
@@ -283,13 +273,13 @@ const EditProfile = () => {
                 />
               </View>
 
-              <TouchableOpacity className='w-full h-12 items-center justify-center bg-primary rounded-md mt-4' onPress={handleSaveChanges} disabled={postingData}>
-                  {postingData ? (<ActivityIndicator color={'white'} size={24}/>) : (<Text className='text-white font-bold text-xl'>Save</Text>)}
+              <TouchableOpacity className='w-full h-12 items-center justify-center bg-primary rounded-md mt-4' onPress={() => {editUserInfo(firstName, lastName, birthDate, gender, activeProfileIcon, user._id)}} disabled={postingData}>
+                  {isLoading ? (<ActivityIndicator color={'white'} size={24}/>) : (<Text className='text-white font-bold text-xl'>Save</Text>)}
               </TouchableOpacity>
 
           </View>
 
-          <View className='min-h-12'/>
+
             
         </ScrollView>
       )}

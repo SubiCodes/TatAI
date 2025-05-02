@@ -9,13 +9,11 @@ export default function Layout() {
   const {colorScheme} = useColorScheme();
 
   return (
-    <>
-    <View className="absolute h-24 w-screen bg-background dark:bg-background-dark" style={{position: 'absolute', bottom: 0, }}/>
+
     <Tabs screenOptions={{
       tabBarStyle: {
-        borderRadius: 12,
-        bottom: 24,
-        width: '90%',
+        borderRadius: 0,
+        width: '100%',
         height: 56,
         alignSelf: 'center',
         display: 'flex',
@@ -62,6 +60,5 @@ export default function Layout() {
         }}
       />
      </Tabs>
-     </>
   );
 }
