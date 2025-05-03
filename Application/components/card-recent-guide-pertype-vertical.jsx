@@ -39,7 +39,7 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
 
   return (
    <View
-        className="w-8/9 min-h-34 h-auto bg-white flex flex-col rounded-xl overflow-hidden shadow-black"
+        className="w-8/9 min-h-34 h-auto bg-white flex flex-col rounded-xl overflow-hidden shadow-black dark:bg-[#2A2A2A]"
         style={
         Platform.OS === 'android'
             ? { elevation: 6 }
@@ -67,7 +67,7 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
         </View>
         <View className="w-full min-w-full flex flex-col border-b-[1px] border-gray-200">
             <View className="px-2 py-4">
-                <Text className="text-2xl text-text font-semibold" numberOfLines={2}>
+                <Text className="text-2xl text-text font-semibold dark:text-text-dark" numberOfLines={2}>
                 {guide?.title || 'Guide title fallback'}
                 </Text>
             </View>
@@ -87,7 +87,9 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
             <View className='flex-row items-center justify-end gap-3'>
                 {/* Rating */}
                 <View className='flex-row items-center gap-1'>
-                    <AntDesign name="star" size={20} color="black" />
+                    <Text className='dark:text-text-dark'>
+                        <AntDesign name="star" size={20}/>
+                    </Text>
                     <Text className="text-sm text-gray-400 font-semibold">
                         {guide.feedbackInfo.averageRating}
                     </Text>
@@ -95,7 +97,9 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
                 
                 {/* Comments */}
                 <View className='flex-row items-center gap-1'>
-                    <MaterialCommunityIcons name="comment-text-outline" size={20} color="black" />
+                    <Text className='dark:text-text-dark'>
+                        <MaterialCommunityIcons name="comment-text-outline" size={20}/>
+                    </Text>
                     <Text className="text-sm text-gray-400 font-semibold">
                         {guide.feedbackInfo.commentCount}
                     </Text>
@@ -103,7 +107,9 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
 
                 {/* Bookmark */}
                 <View className='flex-row items-center gap-1'>
-                    <FontAwesome6 name="bookmark" size={16} color="black" />
+                    <Text className='dark:text-text-dark'>
+                         <FontAwesome6 name="bookmark" size={16}/>
+                    </Text>
                 </View>
             </View>
            

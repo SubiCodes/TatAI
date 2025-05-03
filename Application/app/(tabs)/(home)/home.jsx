@@ -1,10 +1,11 @@
-import { View, Text, ActivityIndicator, StatusBar, Dimensions, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, StatusBar, Dimensions, ScrollView, TextInput, TouchableOpacity, } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import React, { useCallback, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useRouter, useNavigation } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
+import { Link } from 'expo-router';
 
 import logo from '@/assets/images/auth-images/logo1.png';
 import CardRecentGuide from '@/components/card-recent-guide.jsx';
@@ -46,11 +47,8 @@ const Home = () => {
   const router = useRouter();
   const navigation = useNavigation();
 
-  const [tabBarVisible, setTabBarVisible] = useState(false);
-
   const checkVerified = async () => {
     try {
-      setTabBarVisible(false); // hide tab bar during check
 
       if (user) {
         if (user.status === 'Unverified') {
@@ -68,17 +66,18 @@ const Home = () => {
           return;
         }
       }
-      setTabBarVisible(true);
     } catch (error) {
       console.log('error at home: ', error.message);
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      checkUserLoggedIn();
-    }, [])
-  );
+  const fetchGuides = async () => {
+    if (!latestGuides) {getLatestGuide();}
+    if (!repairGuides) {getLatestGuidePerType('repair');}
+    if (!diyGuides) {getLatestGuidePerType('diy');}
+    if (!cookingGuides) {getLatestGuidePerType('cooking')}
+    if (!toolGuides) {getLatestGuidePerType('tool');}
+  }
 
   useEffect(() => {
     const checkVerifications = async () => {
@@ -90,11 +89,7 @@ const Home = () => {
 
   //fetch guides:
   useEffect(() => {
-    getLatestGuide();
-    getLatestGuidePerType('repair');
-    getLatestGuidePerType('diy');
-    getLatestGuidePerType('cooking');
-    getLatestGuidePerType('tool');
+    fetchGuides();
   }, []);
 
   useEffect(() => {
@@ -111,26 +106,6 @@ const Home = () => {
     loadTheme();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      navigation.setOptions({
-        tabBarStyle: tabBarVisible
-          ? {
-              borderRadius: 0,
-              width: '100%',
-              height: 56,
-              alignSelf: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: colorScheme === 'dark' ? '#4A4A4A' : 'white',
-              borderWidth: 2,
-              borderColor: colorScheme === 'dark' ? '#4A4A4A' : 'white',
-            }
-          : { display: 'none' },
-      });
-    }, [tabBarVisible, colorScheme])
-  );
 
   if (isLoading || isFetchingGuides) {
     return (
@@ -143,7 +118,7 @@ const Home = () => {
 
   if (error || errorFetchingGuides) {
     return (
-      <View className="w-screen h-screen items-center justify-center">
+      <View className="w-screen h-screen items-center justify-center dark:bg-background-dark dark:text-text-dark">
         <StatusBar translucent backgroundColor={'transparent'} />
         <Text className="text-3xl font-extrabold text-red-500">{error ? error : errorFetchingGuides}</Text>
         <Text>Please connect to a stable internet.</Text>
@@ -153,28 +128,29 @@ const Home = () => {
 
   return (
     <>
-      <StatusBar backgroundColor={'transparent'} />
+      <StatusBar className='dark:bg-background-dark' translucent={false}/>
       <ScrollView 
-        className="flex-1 bg-background"
+        className="flex-1 bg-background dark:bg-background-dark"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}
       >
         {/* Search Bar */}
   
-        <View className='w-full py-4 px-6 bg-white border-t-[1px] border-b-[1px] border-gray-200 flex flex-row items-center justify-center gap-4'>
-          <TextInput className='flex-1 bg-[#EBEBEB] text-md rounded-3xl px-2' placeholder='Search a guide'/>
-          <Octicons name="three-bars" size={24} color="black" />
+        <View className='w-full py-4 px-6 bg-white flex flex-row items-center justify-center gap-4 border-t-[1px] border-b-[1px] border-gray-200 dark:bg-[#2A2A2A] dark:border-b-0 dark:border-t-0'>
+          <TextInput className='flex-1 bg-[#EBEBEB] text-md rounded-3xl px-6` dark:bg-background-dark dark:text-text-dark' placeholder='Search a guide'  placeholderTextColor={colorScheme === 'dark' ? '#A0A0A0' : '#7A7A7A'}/>
         </View>
 
         <View className="w-full px-6 pt-8">
           <View className='w-full flex flex-row justify-between items-center mb-2'>
-            <Text className='text-4xl font-bold'>Recent</Text>
-            <AntDesign name="arrowright" size={24} color="black" />
+            <Text className='text-4xl font-bold dark:text-text-dark'>Recent</Text>
+            <Link href="/(tabs)/(home)/showguide/recent" className='dark:text-text-dark'>
+              <AntDesign name="arrowright" size={24} />
+            </Link>
           </View>
           
           {/* fetch latest guides */}
           {isFetchingGuides ? (
-            <View className="w-full items-center py-4">
+            <View className="w-full items-center py-4 dark:bg-background-dark dark:text-text-dark">
               <ActivityIndicator size="large" color="blue" />
             </View>
           ) : (
@@ -198,16 +174,18 @@ const Home = () => {
           )}
 
           <View className='w-full flex flex-row justify-between items-center mb-2'>
-            <Text className='text-4xl font-bold'>Repair</Text>
-            <AntDesign name="arrowright" size={24} color="black" />
+            <Text className='text-4xl font-bold dark:text-text-dark'>Repair</Text>
+            <Link href="/(tabs)/(home)/showguide/repair" className='dark:text-text-dark'>
+              <AntDesign name="arrowright" size={24} />
+            </Link>
           </View>
           {/* fetch latest repair guides */}
           {isFetchingGuides ? (
-            <View className="w-full items-center py-4">
+            <View className="w-full items-center py-4 dark:bg-background-dark dark:text-text-dark">
               <ActivityIndicator size="large" color="blue" />
             </View>
           ) : (
-            <View className="w-full overflow-y-visible py-2 mb-4 flex flex-col gap-2 items-center">
+            <View className="w-full overflow-y-visible py-2 mb-4 flex flex-col gap-4 items-center">
               {repairGuides.map((guide) => (
                 <CardRecentGuidePerTypeVertical key={guide._id} guide={guide}/>
               ))}
@@ -215,12 +193,14 @@ const Home = () => {
           )}
 
           <View className='w-full flex flex-row justify-between items-center mb-2'>
-            <Text className='text-4xl font-bold'>DIY</Text>
-            <AntDesign name="arrowright" size={24} color="black" />
+            <Text className='text-4xl font-bold dark:text-text-dark'>DIY</Text>
+            <Link href="/(tabs)/(home)/showguide/diy" className='dark:text-text-dark'>
+              <AntDesign name="arrowright" size={24} />
+            </Link>
           </View>
           {/* fetch latest diy guides */}
           {isFetchingGuides ? (
-            <View className="w-full items-center py-4">
+            <View className="w-full items-center py-4 dark:bg-background-dark dark:text-text-dark">
               <ActivityIndicator size="large" color="blue" />
             </View>
           ) : (
@@ -243,9 +223,11 @@ const Home = () => {
             </View>
           )}
 
-          <View className='w-full flex flex-row justify-between items-center mb-2'>
-            <Text className='text-4xl font-bold'>Cooking</Text>
-            <AntDesign name="arrowright" size={24} color="black" />
+          <View className='w-full flex flex-row justify-between items-center mb-2 dark:bg-background-dark dark:text-text-dark'>
+            <Text className='text-4xl font-bold dark:text-text-dark '>Cooking</Text>
+            <Link href="/(tabs)/(home)/showguide/cooking" className='dark:text-text-dark'>
+              <AntDesign name="arrowright" size={24} />
+            </Link>
           </View>
           {/* fetch latest cooking guides */}
           {isFetchingGuides ? (
@@ -253,16 +235,18 @@ const Home = () => {
               <ActivityIndicator size="large" color="blue" />
             </View>
           ) : (
-            <View className="w-full overflow-y-visible py-2 mb-4 flex flex-col gap-2 items-center">
+            <View className="w-full overflow-y-visible py-2 mb-4 flex flex-col gap-4 items-center">
               {cookingGuides.map((guide) => (
                 <CardRecentGuidePerTypeVertical key={guide._id} guide={guide}/>
               ))}
             </View>
           )}
 
-          <View className='w-full flex flex-row justify-between items-center mb-2'>
-            <Text className='text-4xl font-bold'>Tools</Text>
-            <AntDesign name="arrowright" size={24} color="black" />
+          <View className='w-full flex flex-row justify-between items-center mb-2 dark:bg-background-dark dark:text-text-dark'>
+            <Text className='text-4xl font-bold dark:text-text-dark'>Tools</Text>
+            <Link href="/(tabs)/(home)/showguide/tool" className='dark:text-text-dark'>
+              <AntDesign name="arrowright" size={24} />
+            </Link>
           </View>
           {/* fetch latest tool guides */}
           {isFetchingGuides ? (

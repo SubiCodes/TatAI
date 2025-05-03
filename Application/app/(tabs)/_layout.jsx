@@ -31,7 +31,7 @@ export default function Layout() {
       tabBarActiveTintColor: '#006FFD'
     }}>
       <Tabs.Screen
-        name="home"
+        name="(home)"
         options={{
           title: "Home", 
           headerShown: false,
