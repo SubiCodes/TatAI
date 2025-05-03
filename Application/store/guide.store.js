@@ -6,6 +6,7 @@ const API_URL =
   Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
 
 const guideStore = create((set) => ({
+    guide: null,
     guides: [],
     latestGuides: [],
     repairGuides: [],
@@ -14,6 +15,9 @@ const guideStore = create((set) => ({
     diyGuides: [],
     isFetchingGuides: false,
     errorFetchingGuides: null,
+    feedbacks: [],
+    isFetchingFeedbacks: false,
+    errorFetchingFeedbacks: null,
     getAllGuides: async () => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
@@ -66,6 +70,31 @@ const guideStore = create((set) => ({
             set({isFetchingGuides: false});
         }
     },
+    getGuide: async (id) => {
+        try {
+            set({isFetchingGuides: true, errorFetchingGuides: null});
+            const res = await axios.get(`${API_URL}guide/${id}`);
+            set({guide: res.data.data})
+        } catch (error) {
+            console.log('error ins get guide', error.message);
+            set({errorFetchingGuides: error.message});
+        } finally {
+            set({isFetchingGuides: false});
+        }
+    },
+    getFeedbacks: async (guideID) => {
+        try {
+            set({isFetchingFeedbacks: true, errorFetchingFeedbacks: null});
+            const res = await axios.get(`${API_URL}guide/getFeedback/${guideID}`);
+            console.log(res.data.data);
+            set({feedbacks: res.data.data});
+        } catch (error) {
+            console.log('error in get feedback', error.message);
+            set({errorFetchingFeedbacks: error.message});
+        } finally {
+            set({isFetchingFeedbacks: false});
+        }
+    }
 }));
 
 export default guideStore

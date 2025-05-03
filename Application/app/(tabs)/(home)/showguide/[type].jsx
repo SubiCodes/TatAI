@@ -5,7 +5,8 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl
 } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -22,6 +23,7 @@ const Type = () => {
   const { type } = useLocalSearchParams();
   const router = useRouter();
   const { colorScheme, toggleColorScheme } = useColorScheme();
+  const [refreshing, setRefreshing] = useState(false);
 
   const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
   const errorFetchingGuides = guideStore((state) => state.errorFetchingGuides);
@@ -32,6 +34,9 @@ const Type = () => {
     (state) => state.getLatestGuidePerTypeAll
   );
 
+  const handleGoBack = () => {
+    router.back();
+  }
 
   //Setup Filters
   const [searchText, setSearchText] = useState('');
@@ -51,6 +56,17 @@ const Type = () => {
     getLatestGuidePerTypeAll(type);
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchGuides();
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [type]);
+
   useFocusEffect(
     useCallback(() => {
       fetchGuides();
@@ -59,14 +75,12 @@ const Type = () => {
 
   return (
     <>
-      <StatusBar className="dark:bg-background-dark" translucent={false} />
-
       {/* Sticky Search Bar */}
-      <View className="absolute top-0 left-0 right-0 z-50 pointer-events-auto">
+      <View className="absolute top-0 left-0 right-0 z-50 pointer-events-auto mt-10">
         <View className="w-full py-4 px-6 bg-white flex flex-row items-center justify-center gap-4 border-b border-gray-200 dark:bg-[#2A2A2A] dark:border-b-0">
-          <Link className="text-text dark:text-text-dark" href={"/(tabs)/(home)/home"}>
+          <TouchableOpacity className="text-text dark:text-text-dark" onPress={() => {handleGoBack()}}>
             <MaterialIcons name="arrow-back" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
-          </Link>
+          </TouchableOpacity>
           <TextInput
             className="flex-1 bg-[#EBEBEB] text-md rounded-3xl px-4 dark:bg-background-dark dark:text-text-dark"
             placeholder="Search a guide"
@@ -81,9 +95,18 @@ const Type = () => {
 
       {/* Scrollable Content */}
       <ScrollView
-        className="flex-1 bg-background dark:bg-background-dark"
+        className="flex-1 bg-background dark:bg-background-dark mt-24"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 80, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingTop: 32, paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#0066FF']}
+            tintColor={colorScheme === 'dark' ? '#FFFFFF' : '#0066FF'}
+            progressBackgroundColor={colorScheme === 'dark' ? '#383838' : '#F2F2F2'}
+          />
+        }
       >
         {/* Page Title */}
         <View className="w-full py-4 px-6">

@@ -1,5 +1,6 @@
-import { View, Text, Image, Platform } from 'react-native';
+import { View, Text, Image, Platform, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { useRouter } from 'expo-router';
 
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
@@ -37,7 +38,23 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 const CardRecentGuidePerTypeVertical = ({guide}) => {
 
+      const router = useRouter();
+    
+      const handlePress = () => {
+        if (guide?._id) {
+          router.push(`/guide/${guide._id}`);
+        } 
+        else {
+          Alert.alert(
+            'Guide Not Found',
+            'This guide may have been deleted or its link is no longer valid.',
+            [{ text: 'OK' }]
+          );
+        }
+      };
+
   return (
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
    <View
         className="w-8/9 min-h-34 h-auto bg-white flex flex-col rounded-xl overflow-hidden shadow-black dark:bg-[#2A2A2A]"
         style={
@@ -72,7 +89,6 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
                 </Text>
             </View>
         </View>
-        <View className='w-full h-1 bg-gray-400'/>
         <View className="w-full px-2 py-3 pr-4 flex flex-row">
             <View className='flex-1 flex-row gap-2 items-center justify-start'>
                 <View className='w-6 h-6 rounded-full'>
@@ -115,6 +131,7 @@ const CardRecentGuidePerTypeVertical = ({guide}) => {
            
         </View>
     </View>
+    </TouchableOpacity>
   )
 }
 

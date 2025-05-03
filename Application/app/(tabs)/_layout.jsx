@@ -26,7 +26,7 @@ export default function Layout() {
       tabBarItemStyle: {
         justifyContent: 'center',   
         alignItems: 'center',
-        paddingTop: 4,                       
+        paddingTop: 0,                       
       },
       tabBarActiveTintColor: '#006FFD'
     }}>
