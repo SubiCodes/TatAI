@@ -1,5 +1,7 @@
 import { View, Text, Image, Platform } from 'react-native';
+import { useEffect } from 'react';
 import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
@@ -18,6 +20,7 @@ import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { useColorScheme } from 'nativewind';
 
     const profileIcons = {
           empty_profile: empty_profile,
@@ -36,10 +39,25 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
     }
 
 const CardRecentGuidePerTypeHorizontal = ({guide}) => {
+    const { colorScheme, toggleColorScheme } = useColorScheme();
+
+    useEffect(() => {
+        const loadTheme = async () => {
+          try {
+            const storedTheme = await AsyncStorage.getItem('theme');
+            if (storedTheme && storedTheme !== colorScheme) {
+              toggleColorScheme();
+            }
+          } catch (error) {
+            console.error('Failed to load theme:', error);
+          }
+        };
+        loadTheme();
+      }, []);
 
   return (
    <View
-        className="w-80 min-h-34 h-auto bg-white flex flex-col rounded-xl overflow-hidden shadow-black"
+        className="w-80 min-h-34 h-auto bg-white flex flex-col rounded-xl overflow-hidden shadow-black dark:bg-[#2A2A2A]"
         style={
         Platform.OS === 'android'
             ? { elevation: 6 }
@@ -66,7 +84,7 @@ const CardRecentGuidePerTypeHorizontal = ({guide}) => {
            />
         </View>
         <View className="w-full px-2 py-4 flex flex-col ">
-           <Text className="text-2xl text-text font-semibold" numberOfLines={2}>{guide?.title || 'Guide Title'}</Text>
+           <Text className="text-2xl text-text font-semibold dark:text-text-dark" numberOfLines={2}>{guide?.title || 'Guide Title'}</Text>
         </View>
         <View className="w-full px-2 py-3 pr-4 flex flex-row border-t-2 border-gray-200">
             <View className='flex-1 flex-row gap-2 items-center justify-start'>
@@ -82,7 +100,9 @@ const CardRecentGuidePerTypeHorizontal = ({guide}) => {
             <View className='flex-row items-center justify-end gap-3 overflow-hidden'>
                 {/* Rating */}
                 <View className='flex-row items-center gap-1'>
-                    <AntDesign name="star" size={20} color="black" />
+                    <Text className='dark:text-text-dark'>
+                        <AntDesign name="star" size={20}/>
+                    </Text>
                     <Text className="text-sm text-gray-400 font-semibold">
                         {guide.feedbackInfo.averageRating}
                     </Text>
@@ -90,7 +110,9 @@ const CardRecentGuidePerTypeHorizontal = ({guide}) => {
                 
                 {/* Comments */}
                 <View className='flex-row items-center gap-1'>
-                    <MaterialCommunityIcons name="comment-text-outline" size={20} color="black" />
+                    <Text className='dark:text-text-dark'>
+                        <MaterialCommunityIcons name="comment-text-outline" size={20}/>
+                    </Text>
                     <Text className="text-sm text-gray-400 font-semibold">
                         {guide.feedbackInfo.commentCount}
                     </Text>
@@ -98,7 +120,9 @@ const CardRecentGuidePerTypeHorizontal = ({guide}) => {
 
                 {/* Bookmark */}
                 <View className='flex-row items-center gap-1'>
-                    <FontAwesome6 name="bookmark" size={16} color="black" />
+                    <Text className='dark:text-text-dark'>
+                         <FontAwesome6 name="bookmark" size={16}/>
+                    </Text>
                 </View>
             </View>
            

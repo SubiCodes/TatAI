@@ -18,7 +18,6 @@ const guideStore = create((set) => ({
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
             const res = await axios.get(`${API_URL}guide`);
-            console.log(res.data.data);
             set({guides: res.data.data});
         } catch (error) {
             console.log(error.message);
@@ -47,6 +46,19 @@ const guideStore = create((set) => ({
             if(type === 'diy') set({diyGuides: res.data.data});
             if(type === 'cooking') set({cookingGuides: res.data.data});
             if(type === 'tool') set({toolGuides: res.data.data});
+        } catch (error) {
+            console.log('error in repair fetch', error.message);
+            set({errorFetchingGuides: error.message});
+        } finally {
+            set({isFetchingGuides: false});
+        }
+    },
+    
+    getLatestGuidePerTypeAll: async (type) => {
+        try {
+            set({isFetchingGuides: true, errorFetchingGuides: null});
+            const res = await axios.post(`${API_URL}guide/pertype`, {type: type});
+            set({guides: res.data.data})
         } catch (error) {
             console.log('error in repair fetch', error.message);
             set({errorFetchingGuides: error.message});

@@ -155,7 +155,7 @@ export const getGuide = async (req, res) => {
 
 export const getGuides = async (req, res) => {
   try {
-    const latestGuides = await Guide.find()
+    const latestGuides = await Guide.find().sort({ createdAt: -1 });
 
     const userIds = latestGuides.map(guide => guide.userID);
     const guideIds = latestGuides.map(guide => guide._id);

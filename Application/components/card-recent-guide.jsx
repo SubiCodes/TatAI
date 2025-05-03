@@ -4,7 +4,7 @@ import React from 'react';
 const CardRecentGuide = ({guide}) => {
   return (
     <View
-      className="w-80 min-h-34 bg-white flex flex-col rounded-xl overflow-hidden shadow-black"
+      className="w-80 min-h-34 bg-white flex flex-col rounded-xl overflow-hidden shadow-black dark:bg-[#2A2A2A]"
       style={
         Platform.OS === 'android'
           ? { elevation: 6 }
@@ -31,7 +31,7 @@ const CardRecentGuide = ({guide}) => {
         />
       </View>
       <View className="w-full px-2 py-4 flex flex-col">
-        <Text className="text-2xl text-text font-semibold">{guide?.title || 'Guide Title'}</Text>
+        <Text className="text-2xl text-text font-semibold dark:text-text-dark">{guide?.title || 'Guide Title'}</Text>
       </View>
     </View>
   );
