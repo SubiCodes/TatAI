@@ -1,13 +1,17 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput } from 'react-native';
 import React, { useCallback, useEffect } from 'react'
 import { useRouter } from 'expo-router';
 
+import { useColorScheme } from 'nativewind';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
-import guideStore from '@/store/guide.store'
+import guideStore from '@/store/guide.store';
+import userStore from '@/store/user.store';
 
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
@@ -27,6 +31,8 @@ import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 function Guide() {
     const {id} = useLocalSearchParams();
 
+    const user = userStore((state) => state.user);
+
     const guide = guideStore((state) => state.guide);
     const getGuide = guideStore((state) => state.getGuide);
     const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
@@ -38,6 +44,7 @@ function Guide() {
     const getFeedbacks = guideStore((state) => state.getFeedbacks);
 
     const router = useRouter();
+    const { colorScheme, toggleColorScheme } = useColorScheme();
 
     const goBack = () => {
       router.back();
@@ -102,7 +109,7 @@ function Guide() {
   return (
     <View className="w-full h-full flex mt-10 bg-background dark:bg-background-dark">
       <View className="w-full px-4 py-4 bg-white flex flex-row justify-start items-center z-50 gap-4 dark:bg-[#2A2A2A]">
-        <Text onPress={goBack} className='text-text dark:text-text-dark'>
+        <Text onPress={goBack} className="text-text dark:text-text-dark">
           <AntDesign name="arrowleft" size={24} />
         </Text>
         <Text className="text-xl text-text dark:text-text-dark">
@@ -114,11 +121,16 @@ function Guide() {
               } Guide`}
         </Text>
         <View className="flex-1" />
-        <Text className='text-text dark:text-text-dark'>
+        <Text
+          className="text-text dark:text-text-dark"
+          onPress={() => {
+            console.log(user);
+          }}
+        >
           <FontAwesome6 name="bookmark" size={24} />
         </Text>
-        <Text className='text-text dark:text-text-dark'>
-          <Entypo name="dots-three-vertical" size={24}/>
+        <Text className="text-text dark:text-text-dark">
+          <Entypo name="dots-three-vertical" size={24} />
         </Text>
       </View>
 
@@ -135,10 +147,49 @@ function Guide() {
         ) : (
           <View className="w-full h-auto flex flex-col gap-2 px-6">
             {/* Title */}
-            <View className="w-full items-center justify-center">
-              <Text className="text-center text-text text-4xl font-bold dark:text-text-dark">
+            <View className="w-full items-start justify-center mb-2">
+              <Text className="text-justify text-text text-5xl font-bold dark:text-text-dark">
                 {guide?.title}
               </Text>
+            </View>
+
+            {/* Guide informations */}
+            <View className="w-full items-start justify-center flex-col mb-4">
+              <Text className="text-justify text-text text-lg dark:text-text-dark">
+                Posted by:{" "}
+                <Text className="font-black underline">
+                  {guide?.posterInfo.name}
+                </Text>
+              </Text>
+              <Text className="text-justify text-text text-lg dark:text-text-dark">
+                Last updated:{" "}
+                {new Date(guide?.updatedAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </Text>
+            </View>
+            <View className="w-full flex flex-row gap-6">
+              <View className="flex flex-row items-center justify-center gap-2">
+                <Text className="text-primary dark:text-secondary">
+                  <AntDesign name="star" size={20} />
+                </Text>
+                <Text className="text-text dark:text-text-dark">
+                  {guide?.feedbackInfo.averageRating}
+                </Text>
+              </View>
+              <View className="flex flex-row items-center justify-center gap-2">
+                <Text className="text-primary dark:text-secondary">
+                  <MaterialCommunityIcons
+                    name="comment-text-outline"
+                    size={20}
+                  />
+                </Text>
+                <Text className="text-text dark:text-text-dark">
+                  {guide?.feedbackInfo.commentCount}
+                </Text>
+              </View>
             </View>
 
             {/* Cover Image */}
@@ -170,9 +221,10 @@ function Guide() {
                     : "Kitchenware"}
                 </Text>
                 {guide?.toolsNeeded?.map((tool, index) => (
-                  <Text key={index} className="mb-2 text-lg text-text dark:text-text-dark">{`${
-                    index + 1
-                  }. ${tool}`}</Text>
+                  <Text
+                    key={index}
+                    className="mb-2 text-lg text-text dark:text-text-dark"
+                  >{`${index + 1}. ${tool}`}</Text>
                 ))}
               </View>
             )}
@@ -286,65 +338,121 @@ function Guide() {
         )}
 
         {/* Feedbacks */}
-        <View className="w-full items-center justify-start mb-8">
-          <Text className="text-center text-text text-3xl font-bold dark:text-text-dark">
-            Comments
-          </Text>
-        </View>
-
-        {isFetchingFeedbacks ? (
-          <View className="w-full h-full flex flex-col gap-2 items-center justify-center">
-            <Text className='text-text text-md dark:text-text-dark'>Fetching Feedbacks</Text>
-            <ActivityIndicator color={"blue"} />
+        {!isFetchingFeedbacks && !isFetchingGuides && (
+          <View className="w-full items-center justify-start mb-8">
+            <Text className="text-center text-text text-3xl font-bold dark:text-text-dark">
+              Comments
+            </Text>
           </View>
-        ) : (
-          <View className='w-full flex flex-col gap-4 px-6'>
-            {feedbacks?.filter(comment => comment?.comment?.trim() !== '').map(comment => (
-              <View key={comment._id} className="flex flex-col mb-6 w-full">
-                {/* User Info */}
-                <View className="flex-row gap-4 mb-4">
+        )}
+
+        {/* Add Comment */}
+        {!isFetchingFeedbacks &&
+          !isFetchingGuides &&
+          user &&
+          feedbacks &&
+          (() => {
+            const userHasCommented = feedbacks.some(
+              (comment) => comment.userId === user._id
+            );
+
+            if (userHasCommented) return null; // Don't render comment box if already commented
+
+            return (
+              <View className="w-full flex flex-col gap-2 px-6 mb-12">
+                <View className="flex flex-row gap-4 mb-0">
                   <Image
-                    source={profileIcons[comment?.userInfo?.profileIcon || 'empty_profile']}
+                    source={profileIcons[user?.profileIcon || "empty_profile"]}
                     className="w-12 h-12 rounded-full"
                   />
                   <View className="flex-1">
                     <Text className="text-md font-semibold dark:text-text-dark">
-                      {comment?.userInfo?.name || 'Anonymous'}
+                      {`${user?.firstName} ${user?.lastName}`}
                     </Text>
-                    <Text className="text-sm text-gray-500">
-                      {comment?.userInfo?.email || ''}
-                    </Text>
+                    <Text className="text-sm text-gray-500">{user?.email}</Text>
                   </View>
                 </View>
 
-                {/* Comment Text */}
-                <View className="flex-row gap-4">
-                  <Text className={`text-lg ${comment.hidden ? 'text-gray-400' : 'text-black dark:text-white'}`}>
-                    {comment.comment}
-                  </Text>
-                </View>
 
-                {/* Rating and Date */}
-                <View className="flex-row gap-4 mt-1">
-                  <Text className="text-sm text-gray-700 dark:text-gray-200">
-                    Rating: {comment.rating || 'None'}
-                  </Text>
-                  <Text className="text-sm text-gray-700 dark:text-gray-200">
-                    {new Date(comment.createdAt).toLocaleString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: 'numeric',
-                    })}
-                  </Text>
+                <View className='w-full flex flex-row gap-6'>
+                  <TextInput
+                    className="flex-1 border-b-[1px] border-b-gray-200 text-text dark:text-text-dark"
+                    placeholder="Write a comment"
+                    placeholderTextColor={
+                      colorScheme === "dark" ? "#A0A0A0" : "#7A7A7A"
+                    }
+                    multiline={true}
+                    textAlignVertical="top"
+                  />
+                  <View className='flex justify-end'>
+                    <TouchableOpacity>
+                      <Text className='text-primary dark:text-secondary'><Ionicons name="send" size={24}/></Text>
+                    </TouchableOpacity>
+                  </View>
+                  
                 </View>
               </View>
-            ))}
+            );
+        })()}
 
+        {isFetchingFeedbacks || isFetchingGuides ? null : (
+          <View className="w-full flex flex-col gap-4 px-6">
+            {feedbacks
+              ?.filter((comment) => comment?.comment?.trim() !== "")
+              .map((comment) => (
+                <View key={comment._id} className="flex flex-col mb-6 w-full">
+                  {/* User Info */}
+                  <View className="flex-row gap-4 mb-4">
+                    <Image
+                      source={
+                        profileIcons[
+                          comment?.userInfo?.profileIcon || "empty_profile"
+                        ]
+                      }
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <View className="flex-1">
+                      <Text className="text-md font-semibold dark:text-text-dark">
+                        {comment?.userInfo?.name || "Anonymous"}
+                      </Text>
+                      <Text className="text-sm text-gray-500">
+                        {comment?.userInfo?.email || ""}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Comment Text */}
+                  <View className="flex-row gap-4">
+                    <Text
+                      className={`text-lg ${
+                        comment.hidden
+                          ? "text-gray-400"
+                          : "text-black dark:text-white"
+                      }`}
+                    >
+                      {comment.comment}
+                    </Text>
+                  </View>
+
+                  {/* Rating and Date */}
+                  <View className="flex-row gap-4 mt-1">
+                    <Text className="text-sm text-gray-700 dark:text-gray-200">
+                      Rating: {comment.rating || "None"}
+                    </Text>
+                    <Text className="text-sm text-gray-700 dark:text-gray-200">
+                      {new Date(comment.createdAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                      })}
+                    </Text>
+                  </View>
+                </View>
+              ))}
           </View>
         )}
-
       </ScrollView>
     </View>
   );

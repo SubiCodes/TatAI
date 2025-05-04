@@ -284,7 +284,7 @@ export const getRatingsCount = async (req, res) => {
 export const getLatestFeedback = async (req, res) => {
     try {
         const latestFeedback = await Feedback.findOne({ comment: { $exists: true, $ne: "" } })
-        .sort({ createdAt: -1 });
+        .sort({ updatedAt: -1 });
 
         if (!latestFeedback) {
             return;
@@ -319,7 +319,7 @@ export const getLatestGuides = async (req, res) => {
       const { amount } = req.body;
       // Get the latest guides
       const latestGuides = await Guide.find()
-        .sort({ createdAt: -1 }) 
+        .sort({ updatedAt: -1 }) 
         .limit(amount);
       
       // Extract the userIDs and guideIDs
