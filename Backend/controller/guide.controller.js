@@ -393,6 +393,8 @@ export const addFeedback = async (req, res) => {
     const { guideId, userId, comment, rating } = req.body;
 
     if (!guideId || !userId) {
+      console.log('g id: ', guideId);
+      console.log('u id: ', userId);
       return res.status(400).json({
         success: false,
         message: "Missing required fields: guideId and userId are required",
