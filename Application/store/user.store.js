@@ -85,7 +85,6 @@ checkUserLoggedIn: async () => {
   
       const decodedToken = jwtDecode(token);     
       const res = await axios.get(`${API_URL}user/${decodedToken.userID}`);
-      console.log(res.data.data);
       set({ user: res.data.data });
     } catch (error) {
       console.error('checkUserLoggedIn error:', error.message);

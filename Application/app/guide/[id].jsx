@@ -1,7 +1,8 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput } from 'react-native';
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'expo-router';
+import { Rating } from '@kolking/react-native-rating';
 
 import { useColorScheme } from 'nativewind';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -76,6 +77,14 @@ function Guide() {
           lgbt_3: lgbt_3,
           lgbt_4: lgbt_4,
     }
+
+    //Functions and theyre requirements
+    const [rating, setRating] = useState(0);
+
+    const handleChange = useCallback(
+      (value) => setRating(Math.round(value)),
+      [rating]
+    );
 
     if (errorFetchingGuides){
      return (
@@ -338,6 +347,23 @@ function Guide() {
         )}
 
         {/* Feedbacks */}
+
+        {/* Ratings */}
+        {!isFetchingFeedbacks && !isFetchingGuides && (
+          <>
+            <View className="w-full items-center justify-start mb-8">
+              <Text className="text-center text-text text-3xl font-bold dark:text-text-dark">
+                Rate Guide
+              </Text>
+            </View>
+            <View className="w-full flex flex-col gap-2 px-6 mb-8 items-center justify-center">
+              <Rating size={40} rating={rating} onChange={handleChange} baseColor={colorScheme === "dark" ? "#A7C7E7" : "#A7C7E7"} fillColor={colorScheme === "dark" ? "#006FFD" : "#0818A8"}/>
+              <Text className='text-text dark:text-text-dark'>You rated {rating} out of 5</Text>
+            </View>
+          </>
+        )}
+
+        {/* Comments */}
         {!isFetchingFeedbacks && !isFetchingGuides && (
           <View className="w-full items-center justify-start mb-8">
             <Text className="text-center text-text text-3xl font-bold dark:text-text-dark">
@@ -359,7 +385,7 @@ function Guide() {
             if (userHasCommented) return null; // Don't render comment box if already commented
 
             return (
-              <View className="w-full flex flex-col gap-2 px-6 mb-12">
+              <View className="w-full flex flex-col gap-2 px-6 mb-8">
                 <View className="flex flex-row gap-4 mb-0">
                   <Image
                     source={profileIcons[user?.profileIcon || "empty_profile"]}
@@ -373,8 +399,7 @@ function Guide() {
                   </View>
                 </View>
 
-
-                <View className='w-full flex flex-row gap-6'>
+                <View className="w-full flex flex-row gap-6 pr-6">
                   <TextInput
                     className="flex-1 border-b-[1px] border-b-gray-200 text-text dark:text-text-dark"
                     placeholder="Write a comment"
@@ -384,16 +409,17 @@ function Guide() {
                     multiline={true}
                     textAlignVertical="top"
                   />
-                  <View className='flex justify-end'>
+                  <View className="flex justify-end">
                     <TouchableOpacity>
-                      <Text className='text-primary dark:text-secondary'><Ionicons name="send" size={24}/></Text>
+                      <Text className="text-primary dark:text-secondary">
+                        <Ionicons name="send" size={24} />
+                      </Text>
                     </TouchableOpacity>
                   </View>
-                  
                 </View>
               </View>
             );
-        })()}
+          })()}
 
         {isFetchingFeedbacks || isFetchingGuides ? null : (
           <View className="w-full flex flex-col gap-4 px-6">
