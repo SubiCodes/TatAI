@@ -155,7 +155,7 @@ export const getGuide = async (req, res) => {
 
 export const getGuides = async (req, res) => {
   try {
-    const latestGuides = await Guide.find().sort({ createdAt: -1 });
+    const latestGuides = await Guide.find().sort({ updatedAt: -1 });
 
     const userIds = latestGuides.map(guide => guide.userID);
     const guideIds = latestGuides.map(guide => guide._id);
@@ -287,7 +287,7 @@ export const getUserGuides = async (req, res) => {
     const { _id } = req.params; // Assuming the userID is passed as a route parameter
 
     // Find guides based on the filter
-    const latestGuides = await Guide.find({ userID: _id }).sort({ createdAt: -1 });
+    const latestGuides = await Guide.find({ userID: _id }).sort({ updatedAt: -1 });
     
     // If no guides found, return an empty array
     if (latestGuides.length === 0) {
@@ -418,30 +418,34 @@ export const addFeedback = async (req, res) => {
     let existingFeedback = await Feedback.findOne({ guideId, userId });
 
     if (existingFeedback) {
-      // Update existing feedback
-      const updateData = {};
-      
-      if (comment !== undefined) updateData.comment = comment;
-      if (rating !== undefined) updateData.rating = rating;
-      
-      // Update the createdAt timestamp to reflect the modification time
-      updateData.createdAt = new Date();
+      if (comment === undefined && rating !== undefined) {
+        // Only rating is being updated — do not update timestamps
+        existingFeedback.rating = rating;
+        await existingFeedback.save({ timestamps: false });
 
-      // Use findOneAndUpdate to update the document with the new values
-      existingFeedback = await Feedback.findOneAndUpdate(
-        { guideId, userId },
-        updateData,
-        { new: true } // Return the updated document
-      );
+        return res.status(200).json({
+          success: true,
+          message: "Feedback rating updated without modifying timestamp.",
+          data: existingFeedback,
+        });
+      }
 
-      return res.status(200).json({
-        success: true,
-        message: "Feedback updated successfully.",
-        data: existingFeedback,
-      });
+      if (comment !== undefined || rating !== undefined) {
+        // Update comment and/or rating normally
+        if (comment !== undefined) existingFeedback.comment = comment;
+        if (rating !== undefined) existingFeedback.rating = rating;
+
+        await existingFeedback.save(); // This will update updatedAt
+
+        return res.status(200).json({
+          success: true,
+          message: "Feedback updated successfully.",
+          data: existingFeedback,
+        });
+      }
     }
 
-    // If no feedback exists, create a new one
+    // No existing feedback: must provide at least comment or rating
     if (!comment && rating === undefined) {
       return res.status(400).json({
         success: false,
@@ -449,12 +453,12 @@ export const addFeedback = async (req, res) => {
       });
     }
 
+    // Create new feedback
     const newFeedback = await Feedback.create({
       guideId,
       userId,
       comment,
       rating,
-      // createdAt will be automatically set to current time for new documents
     });
 
     return res.status(201).json({
@@ -472,6 +476,7 @@ export const addFeedback = async (req, res) => {
     });
   }
 };
+
 
 export const getFeedback = async (req, res) => {
   const { _id } = req.params;
@@ -527,7 +532,7 @@ export const getUserFeedback = async (req, res) => {
     const feedback = await Feedback.find({
       userId: _id,
       comment: { $exists: true, $ne: "" } // comment must exist and not be empty
-    }).sort({ createdAt: -1 });
+    }).sort({ updatedAt: -1 });
 
     if (!feedback || feedback.length === 0) {
       return res.status(404).json({ success: false, error: "Feedback not found" });
@@ -564,7 +569,7 @@ export const getAllComments = async (req, res) => {
     // Get all feedbacks that have a comment, sorted by newest first
     const feedbacks = await Feedback.find({
       comment: { $exists: true, $ne: "" }
-    }).sort({ createdAt: -1 });
+    }).sort({ updatedAt: -1 });
 
     // If no feedbacks with comments exist, return empty data array
     if (!feedbacks || feedbacks.length === 0) {
