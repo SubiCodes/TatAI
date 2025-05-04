@@ -94,7 +94,72 @@ const guideStore = create((set) => ({
         } finally {
             set({isFetchingFeedbacks: false});
         }
-    }
+    },
+    postFeedbackRating: async (guideId, userId, rating, user, feedbacks) => {
+        try {
+            const existingFeedback = feedbacks?.find(
+                (feedback) => feedback.guideId === guideId && feedback.userId === userId
+            );
+    
+            const res = await axios.post(`${API_URL}guide/addFeedback`, {
+                guideId,
+                userId,
+                rating,
+            });
+    
+            const newFeedback = {
+                ...res.data.data,
+                userInfo: {
+                    name: user.name,
+                    email: user.email,
+                    profileIcon: user.profileIcon,
+                },
+            };
+    
+            set((state) => ({
+                feedbacks: existingFeedback
+                    ? state.feedbacks.map((feedback) =>
+                          feedback._id === existingFeedback._id ? newFeedback : feedback
+                      )
+                    : [...state.feedbacks, newFeedback],
+            }));
+        } catch (error) {
+            console.log("Error posting feedback:", error);
+        }
+    },
+    
+    postFeedbackComment: async (guideId, userId, comment, user, feedbacks) => {
+        try {
+            const existingFeedback = feedbacks?.find(
+                (feedback) => feedback.guideId === guideId && feedback.userId === userId
+            );
+    
+            const res = await axios.post(`${API_URL}guide/addFeedback`, {
+                guideId,
+                userId,
+                comment,
+            });
+    
+            const newFeedback = {
+                ...res.data.data,
+                userInfo: {
+                    name: `${user.firstName} ${user.lastName}`.trim(),
+                    email: user.email,
+                    profileIcon: user.profileIcon,
+                },
+            };
+    
+            set((state) => ({
+                feedbacks: existingFeedback
+                    ? state.feedbacks.map((feedback) =>
+                          feedback._id === existingFeedback._id ? newFeedback : feedback
+                      )
+                    : [...state.feedbacks, newFeedback],
+            }));
+        } catch (error) {
+            console.log("Error posting feedback:", error);
+        }
+    },       
 }));
 
 export default guideStore

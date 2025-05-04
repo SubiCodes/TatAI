@@ -43,6 +43,8 @@ function Guide() {
     const isFetchingFeedbacks = guideStore((state) => state.isFetchingFeedbacks);
     const errorFetchingFeedbacks = guideStore((state) => state.errorFetchingFeedbacks);
     const getFeedbacks = guideStore((state) => state.getFeedbacks);
+    const postFeedbackRating = guideStore((state) => state.postFeedbackRating);
+    const postFeedbackComment = guideStore((state) => state.postFeedbackComment);
 
     const router = useRouter();
     const { colorScheme, toggleColorScheme } = useColorScheme();
@@ -55,12 +57,6 @@ function Guide() {
       getGuide(id);
       getFeedbacks(id);
     }, [id])
-
-    useFocusEffect(
-      useCallback(() => {
-
-      }, [])
-    );
 
     const profileIcons = {
           empty_profile: empty_profile,
@@ -81,10 +77,40 @@ function Guide() {
     //Functions and theyre requirements
     const [rating, setRating] = useState(0);
 
+    const checkExistingRating = () => {
+      const existingFeedback = feedbacks?.find(
+        (feedback) => feedback.userId === user._id
+      );
+      if (existingFeedback) {
+        setRating(existingFeedback.rating);
+      }
+    };
+
     const handleChange = useCallback(
-      (value) => setRating(Math.round(value)),
-      [rating]
+      async (value) => {
+        const roundedRating = Math.round(value);
+        setRating(roundedRating);
+    
+        try {
+          await postFeedbackRating(id, user._id, roundedRating, user, feedbacks);
+        } catch (error) {
+          console.log("Error posting feedback:", error);
+        }
+      }
     );
+
+    useEffect(() => {
+      checkExistingRating();
+    }, [id]);
+
+    const [comment, setComment] = useState('');
+
+    const handlePostComment = async ()=> {
+      console.log(comment);
+      if (comment.trim() !== ''){
+        await postFeedbackComment(id, user._id, comment, user, feedbacks);
+      };
+    }
 
     if (errorFetchingGuides){
      return (
@@ -357,8 +383,16 @@ function Guide() {
               </Text>
             </View>
             <View className="w-full flex flex-col gap-2 px-6 mb-8 items-center justify-center">
-              <Rating size={40} rating={rating} onChange={handleChange} baseColor={colorScheme === "dark" ? "#A7C7E7" : "#A7C7E7"} fillColor={colorScheme === "dark" ? "#006FFD" : "#0818A8"}/>
-              <Text className='text-text dark:text-text-dark'>You rated {rating} out of 5</Text>
+              <Rating
+                size={40}
+                rating={rating}
+                onChange={handleChange}
+                baseColor={colorScheme === "dark" ? "#A7C7E7" : "#A7C7E7"}
+                fillColor={colorScheme === "dark" ? "#006FFD" : "#0818A8"}
+              />
+              <Text className="text-text dark:text-text-dark">
+                You rated {rating} out of 5
+              </Text>
             </View>
           </>
         )}
@@ -379,9 +413,11 @@ function Guide() {
           feedbacks &&
           (() => {
             const userHasCommented = feedbacks.some(
-              (comment) => comment.userId === user._id
+              (comment) =>
+                comment.userId === user._id &&
+                comment.comment?.trim() // ensures it's not null/undefined/empty
             );
-
+            
             if (userHasCommented) return null; // Don't render comment box if already commented
 
             return (
@@ -408,9 +444,11 @@ function Guide() {
                     }
                     multiline={true}
                     textAlignVertical="top"
+                    value={comment}
+                    onChangeText={setComment}
                   />
                   <View className="flex justify-end">
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => {handlePostComment()}}>
                       <Text className="text-primary dark:text-secondary">
                         <Ionicons name="send" size={24} />
                       </Text>
@@ -424,7 +462,15 @@ function Guide() {
         {isFetchingFeedbacks || isFetchingGuides ? null : (
           <View className="w-full flex flex-col gap-4 px-6">
             {feedbacks
-              ?.filter((comment) => comment?.comment?.trim() !== "")
+              ?.filter(
+                (feedback) =>
+                  feedback?.comment && feedback?.comment.trim() !== ""
+              ) // Only display feedbacks with non-null and non-empty comments
+              .sort((a, b) => {
+                if (a.userId === user._id) return -1;
+                if (b.userId === user._id) return 1;
+                return 0;
+              })
               .map((comment) => (
                 <View key={comment._id} className="flex flex-col mb-6 w-full">
                   {/* User Info */}
@@ -456,7 +502,7 @@ function Guide() {
                           : "text-black dark:text-white"
                       }`}
                     >
-                      {comment.comment}
+                      {comment.comment} {/* Display the comment */}
                     </Text>
                   </View>
 
