@@ -86,7 +86,6 @@ const guideStore = create((set) => ({
         try {
             set({isFetchingFeedbacks: true, errorFetchingFeedbacks: null});
             const res = await axios.get(`${API_URL}guide/getFeedback/${guideID}`);
-            console.log(res.data.data);
             set({feedbacks: res.data.data});
         } catch (error) {
             console.log('error in get feedback', error.message);
@@ -106,11 +105,13 @@ const guideStore = create((set) => ({
                 userId,
                 rating,
             });
+
+            console.log("Rating res: ", res.data.data);
     
             const newFeedback = {
                 ...res.data.data,
                 userInfo: {
-                    name: user.name,
+                    name: `${user.firstName} ${user.lastName}`.trim(),
                     email: user.email,
                     profileIcon: user.profileIcon,
                 },
@@ -139,7 +140,10 @@ const guideStore = create((set) => ({
                 userId,
                 comment,
             });
-    
+            
+            console.log("Comment res: ", res.data.data);
+            
+
             const newFeedback = {
                 ...res.data.data,
                 userInfo: {

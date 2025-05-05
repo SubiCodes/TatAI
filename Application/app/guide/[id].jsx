@@ -28,7 +28,6 @@ import lgbt_2 from '@/assets/images/profile-icons/lgbt_2.png'
 import lgbt_3 from '@/assets/images/profile-icons/lgbt_3.png'
 import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 
-
 function Guide() {
     const {id} = useLocalSearchParams();
 
@@ -83,6 +82,8 @@ function Guide() {
       );
       if (existingFeedback) {
         setRating(existingFeedback.rating);
+      } else{
+        setRating(0)
       }
     };
 
@@ -414,15 +415,13 @@ function Guide() {
           (() => {
             const userHasCommented = feedbacks.some(
               (comment) =>
-                comment.userId === user._id &&
-                comment.comment?.trim() // ensures it's not null/undefined/empty
+                comment.userId === user._id && comment.comment?.trim() // ensures it's not null/undefined/empty
             );
-            
+
             if (userHasCommented) return null; // Don't render comment box if already commented
 
             return (
               <View className="w-full flex flex-col gap-2 px-6 mb-8">
-           
                 <View className="flex flex-row gap-4 mb-0">
                   <Image
                     source={profileIcons[user?.profileIcon || "empty_profile"]}
@@ -449,7 +448,11 @@ function Guide() {
                     onChangeText={setComment}
                   />
                   <View className="flex justify-end">
-                    <TouchableOpacity onPress={() => {handlePostComment()}}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        handlePostComment();
+                      }}
+                    >
                       <Text className="text-primary dark:text-secondary">
                         <Ionicons name="send" size={24} />
                       </Text>
@@ -460,18 +463,16 @@ function Guide() {
             );
           })()}
 
+          {/* Comments by the user. */}
         {isFetchingFeedbacks || isFetchingGuides ? null : (
           <View className="w-full flex flex-col gap-4 px-6">
             {feedbacks
               ?.filter(
                 (feedback) =>
-                  feedback?.comment && feedback?.comment.trim() !== ""
-              ) // Only display feedbacks with non-null and non-empty comments
-              .sort((a, b) => {
-                if (a.userId === user._id) return -1;
-                if (b.userId === user._id) return 1;
-                return 0;
-              })
+                  typeof feedback.comment === 'string' &&
+                  feedback.comment.trim() !== '' &&
+                  feedback.userId === user._id
+              )
               .map((comment) => (
                 <View key={comment._id} className="flex flex-col mb-6 w-full">
                   {/* User Info */}
@@ -492,9 +493,11 @@ function Guide() {
                         {comment?.userInfo?.email || ""}
                       </Text>
                     </View>
-                    <View className='flex items-center justify-center'>
-                      <TouchableOpacity className='text-gray-400'>
-                        <Entypo name="dots-three-horizontal" size={14}/>
+                    <View className="flex items-center justify-center">
+                      <TouchableOpacity>
+                        <Text className="text-gray-600 dark:text-gray-300">
+                          <Entypo name="dots-three-horizontal" size={18} />
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -508,7 +511,79 @@ function Guide() {
                           : "text-black dark:text-white"
                       }`}
                     >
-                      {comment.comment} {/* Display the comment */}
+                      {comment.comment}
+                    </Text>
+                  </View>
+
+                  {/* Rating and Date */}
+                  <View className="flex-row gap-4 mt-1">
+                    <Text className="text-sm text-gray-700 dark:text-gray-200">
+                      Rating: {comment.rating || "None"}
+                    </Text>
+                    <Text className="text-sm text-gray-700 dark:text-gray-200">
+                      {new Date(comment.createdAt).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                      })}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+          </View>
+        )}
+
+
+        {/* Comment by other users */}
+        {isFetchingFeedbacks || isFetchingGuides ? null : (
+          <View className="w-full flex flex-col gap-4 px-6">
+            {feedbacks
+              ?.filter(
+                (feedback) =>
+                  feedback?.comment?.trim() !== "" &&
+                  feedback.userId !== user._id // Exclude current user's feedback
+              )
+              .map((comment) => (
+                <View key={comment._id} className="flex flex-col mb-6 w-full">
+                  {/* User Info */}
+                  <View className="flex-row gap-4 mb-4">
+                    <Image
+                      source={
+                        profileIcons[
+                          comment?.userInfo?.profileIcon || "empty_profile"
+                        ]
+                      }
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <View className="mr-4">
+                      <Text className="text-md font-semibold dark:text-text-dark">
+                        {comment?.userInfo?.name || "Anonymous"}
+                      </Text>
+                      <Text className="text-sm text-gray-500">
+                        {comment?.userInfo?.email || ""}
+                      </Text>
+                    </View>
+                    <View className="flex items-center justify-center">
+                      <TouchableOpacity>
+                        <Text className="text-gray-600 dark:text-gray-300">
+                          <Entypo name="dots-three-horizontal" size={18} />
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Comment Text */}
+                  <View className="flex-row gap-4">
+                    <Text
+                      className={`text-lg ${
+                        comment.hidden
+                          ? "text-gray-400"
+                          : "text-black dark:text-white"
+                      }`}
+                    >
+                      {comment.comment}
                     </Text>
                   </View>
 
