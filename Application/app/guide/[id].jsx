@@ -1,6 +1,6 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useRouter } from 'expo-router';
 import { Rating } from '@kolking/react-native-rating';
 
@@ -10,6 +10,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { BottomSheet } from 'react-native-sheet';
 
 import guideStore from '@/store/guide.store';
 import userStore from '@/store/user.store';
@@ -101,7 +102,7 @@ function Guide() {
 
     useEffect(() => {
       checkExistingRating();
-    }, [id]);
+    });
 
     const [comment, setComment] = useState('');
 
@@ -422,6 +423,7 @@ function Guide() {
 
             return (
               <View className="w-full flex flex-col gap-2 px-6 mb-8">
+           
                 <View className="flex flex-row gap-4 mb-0">
                   <Image
                     source={profileIcons[user?.profileIcon || "empty_profile"]}
@@ -483,13 +485,18 @@ function Guide() {
                       }
                       className="w-12 h-12 rounded-full"
                     />
-                    <View className="flex-1">
+                    <View className="mr-4">
                       <Text className="text-md font-semibold dark:text-text-dark">
                         {comment?.userInfo?.name || "Anonymous"}
                       </Text>
                       <Text className="text-sm text-gray-500">
                         {comment?.userInfo?.email || ""}
                       </Text>
+                    </View>
+                    <View className='flex items-center justify-center'>
+                      <TouchableOpacity className='text-gray-400'>
+                        <Entypo name="dots-three-horizontal" size={14}/>
+                      </TouchableOpacity>
                     </View>
                   </View>
 
