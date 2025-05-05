@@ -1,19 +1,16 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking } from 'react-native';
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useRouter } from 'expo-router';
 import { Rating } from '@kolking/react-native-rating';
-
 import { useColorScheme } from 'nativewind';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
 import guideStore from '@/store/guide.store';
 import userStore from '@/store/user.store';
-
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
 import boy_2 from '@/assets/images/profile-icons/boy_2.png'
@@ -27,36 +24,41 @@ import lgbt_1 from '@/assets/images/profile-icons/lgbt_1.png'
 import lgbt_2 from '@/assets/images/profile-icons/lgbt_2.png'
 import lgbt_3 from '@/assets/images/profile-icons/lgbt_3.png'
 import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
+import RBSheet from 'react-native-raw-bottom-sheet'
 
 function Guide() {
     const {id} = useLocalSearchParams();
-
+    const refRBSheet = useRef();
+    const refRBSheet2 = useRef();
+    const refRBSheet3 = useRef();
+    const refRBSheet4 = useRef();
     const user = userStore((state) => state.user);
-
     const guide = guideStore((state) => state.guide);
     const getGuide = guideStore((state) => state.getGuide);
     const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
     const errorFetchingGuides = guideStore((state) => state.errorFetchingGuides);
-
     const feedbacks = guideStore((state) => state.feedbacks);
     const isFetchingFeedbacks = guideStore((state) => state.isFetchingFeedbacks);
     const errorFetchingFeedbacks = guideStore((state) => state.errorFetchingFeedbacks);
     const getFeedbacks = guideStore((state) => state.getFeedbacks);
     const postFeedbackRating = guideStore((state) => state.postFeedbackRating);
     const postFeedbackComment = guideStore((state) => state.postFeedbackComment);
-
+    const deleteFeedbackComment = guideStore((state) => state.deleteFeedbackComment);
     const router = useRouter();
     const { colorScheme, toggleColorScheme } = useColorScheme();
 
+    // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
+    // const [userComment, setUserComment] = useState(userComment?.comment);
+    
     const goBack = () => {
       router.back();
     };
-
+    
     useEffect(() => {
       getGuide(id);
       getFeedbacks(id);
     }, [id])
-
+    
     const profileIcons = {
           empty_profile: empty_profile,
           boy_1: boy_1,
@@ -72,10 +74,11 @@ function Guide() {
           lgbt_3: lgbt_3,
           lgbt_4: lgbt_4,
     }
-
+    
     //Functions and theyre requirements
     const [rating, setRating] = useState(0);
-
+    const [comment, setComment] = useState('');
+    
     const checkExistingRating = () => {
       const existingFeedback = feedbacks?.find(
         (feedback) => feedback.userId === user._id
@@ -86,7 +89,7 @@ function Guide() {
         setRating(0)
       }
     };
-
+    
     const handleChange = useCallback(
       async (value) => {
         const roundedRating = Math.round(value);
@@ -97,22 +100,29 @@ function Guide() {
         } catch (error) {
           console.log("Error posting feedback:", error);
         }
-      }
+      },
+      [id, user, feedbacks, postFeedbackRating]
     );
-
+    
     useEffect(() => {
       checkExistingRating();
-    });
-
-    const [comment, setComment] = useState('');
-
-    const handlePostComment = async ()=> {
+    }, [feedbacks]);
+    
+    const handlePostComment = async () => {
       console.log(comment);
-      if (comment.trim() !== ''){
+      if (comment.trim() !== '') {
         await postFeedbackComment(id, user._id, comment, user, feedbacks);
-      };
+        setComment(''); // Clear comment after posting
+        refRBSheet.current.close(); // Close the sheet after posting
+      }
     }
 
+    const handleDeleteComment = async () => {
+      await deleteFeedbackComment(id, user._id, '', user, feedbacks);
+      setComment('');
+      refRBSheet.current.close(); 
+    }
+    
     if (errorFetchingGuides){
      return (
       <>
@@ -142,6 +152,7 @@ function Guide() {
       </>
       )
     }
+    
   return (
     <View className="w-full h-full flex mt-10 bg-background dark:bg-background-dark">
       <View className="w-full px-4 py-4 bg-white flex flex-row justify-start items-center z-50 gap-4 dark:bg-[#2A2A2A]">
@@ -170,7 +181,7 @@ function Guide() {
         </Text>
       </View>
 
-      {/* Diplay Contents */}
+      {/* Display Contents */}
       <ScrollView
         className="flex-1 z-50"
         showsVerticalScrollIndicator={false}
@@ -188,7 +199,6 @@ function Guide() {
                 {guide?.title}
               </Text>
             </View>
-
             {/* Guide informations */}
             <View className="w-full items-start justify-center flex-col mb-4">
               <Text className="text-justify text-text text-lg dark:text-text-dark">
@@ -227,7 +237,6 @@ function Guide() {
                 </Text>
               </View>
             </View>
-
             {/* Cover Image */}
             <View className="w-full h-[250px] items-start justify-start mb-2 py-0">
               <Image
@@ -240,14 +249,12 @@ function Guide() {
                 resizeMode="contain"
               />
             </View>
-
             {/* Description */}
             <View className="w-full items-center justify-center mb-8">
               <Text className="text-justify text-text text-lg dark:text-text-dark">
                 {guide?.description}
               </Text>
             </View>
-
             {/* Tools Needed */}
             {guide?.type !== "tool" && (
               <View className="w-full flex-col mb-4">
@@ -264,7 +271,6 @@ function Guide() {
                 ))}
               </View>
             )}
-
             {/* Materials Needed */}
             {(guide?.type === "cooking" || guide?.type === "diy") && (
               <View className="w-full flex-col mb-16">
@@ -276,14 +282,12 @@ function Guide() {
                 </Text>
               </View>
             )}
-
             {/* Procedures */}
             <View className="w-full items-center justify-center mb-4">
               <Text className="text-center text-text text-3xl font-bold dark:text-text-dark">
                 {guide?.type === "tool" ? "Tool Uses" : "Procedures"}
               </Text>
             </View>
-
             {guide?.stepTitles.map((title, index) => (
               <View key={index} className="w-full flex-col gap-4">
                 {/* Step Title */}
@@ -293,14 +297,12 @@ function Guide() {
                       <Text>{`${index + 1}`}</Text>
                     </View>
                   </View>
-
                   <View className="flex-1 justify-center">
                     <Text className="text-left text-lg font-semibold text-text dark:text-text-dark">
                       {title}
                     </Text>
                   </View>
                 </View>
-
                 {/* Step Images */}
                 <View className="w-auto h-[250px] items-start justify-start mb-2 py-0">
                   <Image
@@ -313,7 +315,6 @@ function Guide() {
                     resizeMode="contain"
                   />
                 </View>
-
                 {/* Step Descriptions */}
                 <View className="w-auto flex items-start justify-start mb-6">
                   <Text className="text-justify text-text text-lg dark:text-text-dark">
@@ -322,7 +323,6 @@ function Guide() {
                 </View>
               </View>
             ))}
-
             {/* Closing Message */}
             <View className="w-full items-start justify-start mb-4">
               <Text className="text-start text-text text-3xl font-bold dark:text-text-dark">
@@ -334,7 +334,6 @@ function Guide() {
                 {guide?.closingMessage}
               </Text>
             </View>
-
             {/* Additional Links */}
             <View className="w-full items-start justify-start mb-4">
               <Text className="text-start text-text text-3xl font-bold dark:text-text-dark">
@@ -372,9 +371,7 @@ function Guide() {
             </View>
           </View>
         )}
-
         {/* Feedbacks */}
-
         {/* Ratings */}
         {!isFetchingFeedbacks && !isFetchingGuides && (
           <>
@@ -397,7 +394,6 @@ function Guide() {
             </View>
           </>
         )}
-
         {/* Comments */}
         {!isFetchingFeedbacks && !isFetchingGuides && (
           <View className="w-full items-center justify-start mb-8">
@@ -463,14 +459,14 @@ function Guide() {
             );
           })()}
 
-          {/* Comments by the user. */}
+        {/* Comments by the user */}
         {isFetchingFeedbacks || isFetchingGuides ? null : (
           <View className="w-full flex flex-col gap-4 px-6">
             {feedbacks
               ?.filter(
                 (feedback) =>
-                  typeof feedback.comment === 'string' &&
-                  feedback.comment.trim() !== '' &&
+                  typeof feedback.comment === "string" &&
+                  feedback.comment.trim() !== "" &&
                   feedback.userId === user._id
               )
               .map((comment) => (
@@ -494,14 +490,15 @@ function Guide() {
                       </Text>
                     </View>
                     <View className="flex items-center justify-center">
-                      <TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => refRBSheet.current.open()}
+                      >
                         <Text className="text-gray-600 dark:text-gray-300">
                           <Entypo name="dots-three-horizontal" size={18} />
                         </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
-
                   {/* Comment Text */}
                   <View className="flex-row gap-4">
                     <Text
@@ -514,7 +511,6 @@ function Guide() {
                       {comment.comment}
                     </Text>
                   </View>
-
                   {/* Rating and Date */}
                   <View className="flex-row gap-4 mt-1">
                     <Text className="text-sm text-gray-700 dark:text-gray-200">
@@ -530,15 +526,192 @@ function Guide() {
                       })}
                     </Text>
                   </View>
+                  {/* Bottom Sheet Actions */}
+                  <RBSheet
+                    ref={refRBSheet}
+                    closeOnDragDown={true}
+                    closeOnPressMask={true}
+                    animationType="slide"
+                    customStyles={{
+                      wrapper: {
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                      },
+                      container: {
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                        paddingHorizontal: 16,
+                        backgroundColor:
+                          colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+                        maxHeight: 150, // Maximum constraint to prevent taking up the entire screen
+                      },
+                      draggableIcon: {
+                        backgroundColor:
+                          colorScheme === "dark" ? "#A0A0A0" : "#000",
+                        width: 60,
+                      },
+                    }}
+                  >
+                    <View className="py-4 pb-24 gap-4">
+                      <TouchableOpacity className="w-full bg-blue-500 dark:bg-blue-600 py-3 rounded-xl shadow-sm active:opacity-80">
+                        <Text
+                          className="text-center text-white text-lg font-semibold"
+                          onPress={() => {
+                            setComment(comment.comment);
+                            refRBSheet3?.current.open();
+                          }}
+                        >
+                          Edit
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80"
+                        onPress={() => {
+                          refRBSheet4?.current.open();
+                        }}
+                      >
+                        <Text className="text-center text-white text-lg font-semibold">
+                          Delete
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </RBSheet>
+                  {/* Delete Confirmation */}
+                  <RBSheet
+                    ref={refRBSheet4}
+                    closeOnDragDown={true}
+                    closeOnPressMask={true}
+                    animationType="slide"
+                    customStyles={{
+                      wrapper: {
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                      },
+                      container: {
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                        paddingHorizontal: 16,
+                        backgroundColor:
+                          colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+                        maxHeight: "80%", // Maximum constraint to prevent taking up the entire screen
+                      },
+                      draggableIcon: {
+                        backgroundColor:
+                          colorScheme === "dark" ? "#A0A0A0" : "#000",
+                        width: 60,
+                      },
+                    }}
+                  >
+                    <View className="py-4">
+                      <Text className="text-xl font-bold mb-4 text-text dark:text-text-dark">
+                        Delete Comment
+                      </Text>
+
+                      <View className="flex flex-row gap-4 mb-2">
+                        <Image
+                          source={
+                            profileIcons[user?.profileIcon || "empty_profile"]
+                          }
+                          className="w-12 h-12 rounded-full"
+                        />
+                        <View>
+                          <Text className="text-md font-semibold dark:text-text-dark">
+                            {`${user?.firstName} ${user?.lastName}`}
+                          </Text>
+                          <Text className="text-sm text-gray-500">
+                            {user?.email}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <Text
+                        className="py-4 mb-4 text-text dark:text-text-dark">
+                          {comment.comment}
+                      </Text>
+
+                      <TouchableOpacity
+                        className="bg-red-400 dark:bg-red-500 py-3 rounded-lg items-center mb-4"
+                        onPress={() => handleDeleteComment()}
+                      >
+                        <Text className="text-white font-semibold" >
+                          Delete Comment
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </RBSheet>
                 </View>
               ))}
           </View>
         )}
 
+        {/* Edit Comment */}
+        {/* Bottom Sheet Edit */}
+        <RBSheet
+          ref={refRBSheet3}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          animationType="slide"
+          customStyles={{
+            wrapper: {
+              backgroundColor: "rgba(0,0,0,0.5)",
+            },
+            container: {
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              paddingHorizontal: 16,
+              backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+              maxHeight: "80%", // Maximum constraint to prevent taking up the entire screen
+            },
+            draggableIcon: {
+              backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
+              width: 60,
+            },
+          }}
+        >
+          <View className="py-4">
+            <Text className="text-xl font-bold mb-4 text-text dark:text-text-dark">
+              Edit Comment
+            </Text>
 
-        {/* Comment by other users */}
+            <View className="flex flex-row gap-4 mb-2">
+              <Image
+                source={profileIcons[user?.profileIcon || "empty_profile"]}
+                className="w-12 h-12 rounded-full"
+              />
+              <View>
+                <Text className="text-md font-semibold dark:text-text-dark">
+                  {`${user?.firstName} ${user?.lastName}`}
+                </Text>
+                <Text className="text-sm text-gray-500">{user?.email}</Text>
+              </View>
+            </View>
+
+            <TextInput
+              className="border border-gray-300 rounded-lg p-4 mb-4 text-text dark:text-text-dark"
+              style={{ textAlignVertical: "top" }}
+              placeholder="Write your comment here..."
+              placeholderTextColor={
+                colorScheme === "dark" ? "#A0A0A0" : "#7A7A7A"
+              }
+              multiline={true}
+              numberOfLines={4}
+              value={comment}
+              onChangeText={setComment}
+            />
+
+            <TouchableOpacity
+              className="bg-primary dark:bg-secondary py-3 rounded-lg items-center mb-4"
+              onPress={() => {
+                handlePostComment();
+                refRBSheet3?.current.close();
+              }}
+            >
+              <Text className="text-white font-semibold">Post Comment</Text>
+            </TouchableOpacity>
+          </View>
+        </RBSheet>
+
+        {/* Comments by other users */}
         {isFetchingFeedbacks || isFetchingGuides ? null : (
-          <View className="w-full flex flex-col gap-4 px-6">
+          <View className="w-full flex flex-col gap-2 px-6 mb-4">
             {feedbacks
               ?.filter(
                 (feedback) =>
@@ -567,13 +740,15 @@ function Guide() {
                     </View>
                     <View className="flex items-center justify-center">
                       <TouchableOpacity>
-                        <Text className="text-gray-600 dark:text-gray-300">
+                        <Text
+                          className="text-gray-600 dark:text-gray-300"
+                          onPress={() => refRBSheet2.current.open()}
+                        >
                           <Entypo name="dots-three-horizontal" size={18} />
                         </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
-
                   {/* Comment Text */}
                   <View className="flex-row gap-4">
                     <Text
@@ -586,7 +761,6 @@ function Guide() {
                       {comment.comment}
                     </Text>
                   </View>
-
                   {/* Rating and Date */}
                   <View className="flex-row gap-4 mt-1">
                     <Text className="text-sm text-gray-700 dark:text-gray-200">
@@ -602,6 +776,38 @@ function Guide() {
                       })}
                     </Text>
                   </View>
+                  <RBSheet
+                    ref={refRBSheet2}
+                    closeOnDragDown={true}
+                    closeOnPressMask={true}
+                    animationType="slide"
+                    customStyles={{
+                      wrapper: {
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                      },
+                      container: {
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                        paddingHorizontal: 16,
+                        backgroundColor:
+                          colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+                        maxHeight: 80, // Maximum constraint to prevent taking up the entire screen
+                      },
+                      draggableIcon: {
+                        backgroundColor:
+                          colorScheme === "dark" ? "#A0A0A0" : "#000",
+                        width: 60,
+                      },
+                    }}
+                  >
+                    <View className="py-4 gap-4">
+                      <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80">
+                        <Text className="text-center text-white text-lg font-semibold">
+                          Report
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </RBSheet>
                 </View>
               ))}
           </View>
@@ -611,4 +817,4 @@ function Guide() {
   );
 }
 
-export default Guide
+export default Guide;
