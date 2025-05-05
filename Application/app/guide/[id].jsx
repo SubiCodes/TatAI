@@ -10,7 +10,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { BottomSheet } from 'react-native-sheet';
 
 import guideStore from '@/store/guide.store';
 import userStore from '@/store/user.store';
