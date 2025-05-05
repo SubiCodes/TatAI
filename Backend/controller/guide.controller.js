@@ -393,8 +393,6 @@ export const addFeedback = async (req, res) => {
     const { guideId, userId, comment, rating } = req.body;
 
     if (!guideId || !userId) {
-      console.log('g id: ', guideId);
-      console.log('u id: ', userId);
       return res.status(400).json({
         success: false,
         message: "Missing required fields: guideId and userId are required",
@@ -416,12 +414,12 @@ export const addFeedback = async (req, res) => {
       });
     }
 
-    // Check if user already gave feedback on this guide
+    // Check if feedback already exists
     let existingFeedback = await Feedback.findOne({ guideId, userId });
 
     if (existingFeedback) {
       if (comment === undefined && rating !== undefined) {
-        // Only rating is being updated — do not update timestamps
+        // Only update rating, without changing timestamps
         existingFeedback.rating = rating;
         await existingFeedback.save({ timestamps: false });
 
@@ -433,11 +431,11 @@ export const addFeedback = async (req, res) => {
       }
 
       if (comment !== undefined || rating !== undefined) {
-        // Update comment and/or rating normally
+        // Update either or both fields safely
         if (comment !== undefined) existingFeedback.comment = comment;
         if (rating !== undefined) existingFeedback.rating = rating;
 
-        await existingFeedback.save(); // This will update updatedAt
+        await existingFeedback.save(); // Updates updatedAt
 
         return res.status(200).json({
           success: true,
@@ -447,7 +445,7 @@ export const addFeedback = async (req, res) => {
       }
     }
 
-    // No existing feedback: must provide at least comment or rating
+    // Creating new feedback — at least one of comment or rating is required
     if (!comment && rating === undefined) {
       return res.status(400).json({
         success: false,
@@ -455,7 +453,6 @@ export const addFeedback = async (req, res) => {
       });
     }
 
-    // Create new feedback
     const newFeedback = await Feedback.create({
       guideId,
       userId,
@@ -478,6 +475,7 @@ export const addFeedback = async (req, res) => {
     });
   }
 };
+
 
 
 export const getFeedback = async (req, res) => {
