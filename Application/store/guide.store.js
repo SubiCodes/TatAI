@@ -128,7 +128,6 @@ const guideStore = create((set) => ({
             console.log("Error posting feedback:", error);
         }
     },
-    
     postFeedbackComment: async (guideId, userId, comment, user, feedbacks) => {
         try {
             const existingFeedback = feedbacks?.find(
@@ -164,6 +163,43 @@ const guideStore = create((set) => ({
             console.log("Error posting feedback:", error);
         }
     },       
+    deleteFeedbackComment: async (guideId, userId, comment, user, feedbacks) => {
+        try {
+            // Find the existing feedback
+            const existingFeedback = feedbacks?.find(
+                (feedback) => feedback.guideId === guideId && feedback.userId === userId
+            );
+    
+            if (!existingFeedback) {
+                console.log("No feedback found for this user");
+                return; // Exit if no feedback is found
+            }
+    
+            // Update the feedback's comment with the new one
+            const updatedFeedback = {
+                ...existingFeedback,
+                comment: comment, // Update the comment with the new value
+            };
+    
+            // Optional: Make API call to update the feedback on the server
+            const res = await axios.post(`${API_URL}guide/addFeedback`, {
+                guideId,
+                userId,
+                comment,
+            });
+    
+            console.log("Feedback updated: ", res.data.data);
+    
+            // Update the feedbacks state with the updated feedback
+            set((state) => ({
+                feedbacks: state.feedbacks.map((feedback) =>
+                    feedback._id === existingFeedback._id ? updatedFeedback : feedback
+                ),
+            }));
+        } catch (error) {
+            console.log("Error updating feedback:", error);
+        }
+    },    
 }));
 
 export default guideStore
