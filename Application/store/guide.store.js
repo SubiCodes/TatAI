@@ -18,6 +18,7 @@ const guideStore = create((set) => ({
     feedbacks: [],
     isFetchingFeedbacks: false,
     errorFetchingFeedbacks: null,
+    isBookmarked: null,
     getAllGuides: async () => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
@@ -198,8 +199,43 @@ const guideStore = create((set) => ({
             }));
         } catch (error) {
             console.log("Error updating feedback:", error);
+            return error.message;
         }
-    },    
+    },
+    deleteRating: async (guideId, userId) => {
+        try {
+            const res = await axios.post(`${API_URL}guide/delete-rating`, {guideId: guideId, userId: userId});
+            console.log(res.data.data);
+        } catch (error) {
+            console.log("Error updating feedback:", error);
+            return error.message;
+        }
+    },
+    checkIfBookmarked: async (guideId, userId) => {
+        try {
+            const res = await axios.post(`${API_URL}guide/is-bookmarked`, {guideId: guideId, userId:userId});
+            console.log(res.data.isBookmarked);
+            set({isBookmarked: res.data.isBookmarked});
+        } catch (error) {
+            console.log("Error updating feedback:", error);
+            return error.message;
+        }
+    },
+    handleBookmark: async (guideId, userId) => {
+        try {
+            const res = await axios.post(`${API_URL}guide/bookmark`, {guideId: guideId, userId:userId})
+            console.log(res.data);
+            if (res.data.message === 'created') { 
+                set({isBookmarked: true});
+                return;
+            } else {
+                set({isBookmarked: false});
+            }
+        } catch (error) {
+            console.log("Error updating feedback:", error);
+            return error.message;
+        }
+    }    
 }));
 
 export default guideStore

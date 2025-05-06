@@ -16,8 +16,6 @@ export default function RootLayout() {
           headerStyle: {
             backgroundColor: 'white',  // Set the background to transparent
           },
-
-          headerRight: () => null, // Remove right header component if not needed
           headerLeft: () => null, // Remove left header component if not needed
         }}
       />
