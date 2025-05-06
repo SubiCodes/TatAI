@@ -284,7 +284,7 @@ export const getRatingsCount = async (req, res) => {
 export const getLatestFeedback = async (req, res) => {
     try {
         const latestFeedback = await Feedback.findOne({ comment: { $exists: true, $ne: "" } })
-        .sort({ updatedAt: -1 });
+        .sort({ createdAt: -1 });
 
         if (!latestFeedback) {
             return;

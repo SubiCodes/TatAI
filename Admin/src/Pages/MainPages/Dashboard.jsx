@@ -396,7 +396,7 @@ function Dashboard() {
                   
                 
                 <div className='flex flex-col mb-6 max-w-full'>
-                  <div className="flex flex-row gap-4 mb-12">
+                  <div className="flex flex-row gap-4 mb-6">
 
                     <div className="flex h-full">
                       <img

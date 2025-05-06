@@ -482,7 +482,7 @@ export const getFeedback = async (req, res) => {
   const { _id } = req.params;
   try {
       // Get all feedback for the guide
-      const feedback = await Feedback.find({ guideId: _id });
+      const feedback = await Feedback.find({ guideId: _id }).sort({ createdAt: -1 });
 
       if (!feedback || feedback.length === 0) {
           return res.status(200).json({ success: true, data: [] });
@@ -569,7 +569,7 @@ export const getAllComments = async (req, res) => {
     // Get all feedbacks that have a comment, sorted by newest first
     const feedbacks = await Feedback.find({
       comment: { $exists: true, $ne: "" }
-    }).sort({ updatedAt: -1 });
+    }).sort({ createdAt: -1 });
 
     // If no feedbacks with comments exist, return empty data array
     if (!feedbacks || feedbacks.length === 0) {
