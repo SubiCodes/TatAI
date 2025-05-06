@@ -1,7 +1,6 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking, RefreshControl } from 'react-native';
 import React, { useCallback, useEffect, useState, useRef } from 'react'
-import { useRouter } from 'expo-router';
 import { Rating } from '@kolking/react-native-rating';
 import { useColorScheme } from 'nativewind';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -9,6 +8,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Fontisto from '@expo/vector-icons/Fontisto';
 import guideStore from '@/store/guide.store';
 import userStore from '@/store/user.store';
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
@@ -25,13 +25,16 @@ import lgbt_2 from '@/assets/images/profile-icons/lgbt_2.png'
 import lgbt_3 from '@/assets/images/profile-icons/lgbt_3.png'
 import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 import RBSheet from 'react-native-raw-bottom-sheet'
+import { useNavigation } from '@react-navigation/native';
 
 function Guide() {
     const {id} = useLocalSearchParams();
-    const refRBSheet = useRef();
-    const refRBSheet2 = useRef();
-    const refRBSheet3 = useRef();
-    const refRBSheet4 = useRef();
+    const refRBSheet = useRef(); //ref or user comment
+    const refRBSheet2 = useRef(); //ref for reporting other comments
+    const refRBSheet3 = useRef(); //ref for editing comment
+    const refRBSheet4 = useRef(); //ref for confirmng delete
+    const refRBSheet5 = useRef(); //ref for reporting guide
+    const refRBSheet6 = useRef(); //ref for confirming rating
     const user = userStore((state) => state.user);
     const guide = guideStore((state) => state.guide);
     const getGuide = guideStore((state) => state.getGuide);
@@ -44,20 +47,41 @@ function Guide() {
     const postFeedbackRating = guideStore((state) => state.postFeedbackRating);
     const postFeedbackComment = guideStore((state) => state.postFeedbackComment);
     const deleteFeedbackComment = guideStore((state) => state.deleteFeedbackComment);
-    const router = useRouter();
+    const isBookmarked = guideStore((state) => state.isBookmarked);
+    const checkIfBookmarked = guideStore((state) => state.checkIfBookmarked);
+    const handleBookmark = guideStore((state) => state.handleBookmark);
+    const deleteRating = guideStore((state) => state.deleteRating);
     const { colorScheme, toggleColorScheme } = useColorScheme();
+    const [refreshing, setRefreshing] = useState(false);
 
     // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
     // const [userComment, setUserComment] = useState(userComment?.comment);
     
+    
     const goBack = () => {
-      router.back();
+      navigation.goBack();
     };
+
+    const navigation = useNavigation();
     
     useEffect(() => {
       getGuide(id);
       getFeedbacks(id);
-    }, [id])
+      checkIfBookmarked(id, user._id);
+    }, []);
+
+    const onRefresh = useCallback(async () => {
+      setRefreshing(true);
+      try {
+        getGuide(id);
+        getFeedbacks(id);
+        checkIfBookmarked(id, user._id);
+      } catch (error) {
+        console.error("Error refreshing data:", error);
+      } finally {
+        setRefreshing(false);
+      }
+    }, []);
     
     const profileIcons = {
           empty_profile: empty_profile,
@@ -76,6 +100,7 @@ function Guide() {
     }
     
     //Functions and theyre requirements
+    const [tempRating, setTempRating] = useState(0);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     
@@ -103,10 +128,19 @@ function Guide() {
       },
       [id, user, feedbacks, postFeedbackRating]
     );
+
+    const handleRemoveRating = async () => {
+      deleteRating(id, user._id)
+    }
     
     useEffect(() => {
       checkExistingRating();
     }, [feedbacks]);
+
+    const handleBookmarking = async () => {
+      await handleBookmark(id, user._id);
+    };
+
     
     const handlePostComment = async () => {
       console.log(comment);
@@ -121,7 +155,9 @@ function Guide() {
       await deleteFeedbackComment(id, user._id, '', user, feedbacks);
       setComment('');
       refRBSheet.current.close(); 
-    }
+    };
+
+
     
     if (errorFetchingGuides){
      return (
@@ -168,24 +204,76 @@ function Guide() {
               } Guide`}
         </Text>
         <View className="flex-1" />
-        <Text
-          className="text-text dark:text-text-dark"
+        <TouchableOpacity
           onPress={() => {
-            console.log(user);
+            handleBookmarking();
           }}
         >
-          <FontAwesome6 name="bookmark" size={24} />
-        </Text>
-        <Text className="text-text dark:text-text-dark">
+          {isBookmarked ? (
+            <Text className="text-primary dark:text-secondary">
+              <Fontisto name="bookmark-alt" size={24} />
+            </Text>
+          ) : (
+            <Text className="text-text dark:text-text-dark">
+              <Fontisto name="bookmark" size={24} />
+            </Text>
+          )}
+        </TouchableOpacity>
+        <Text
+          className="text-text dark:text-text-dark"
+          onPress={() => refRBSheet5?.current.open()}
+        >
           <Entypo name="dots-three-vertical" size={24} />
         </Text>
       </View>
+
+      <RBSheet
+        ref={refRBSheet5}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        animationType="slide"
+        customStyles={{
+          wrapper: {
+            backgroundColor: "rgba(0,0,0,0.5)",
+          },
+          container: {
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 16,
+            backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+            maxHeight: 80, // Maximum constraint to prevent taking up the entire screen
+          },
+          draggableIcon: {
+            backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
+            width: 60,
+          },
+        }}
+      >
+        <View className="py-4 gap-4">
+          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80">
+            <Text className="text-center text-white text-lg font-semibold">
+              Report Guide
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </RBSheet>
 
       {/* Display Contents */}
       <ScrollView
         className="flex-1 z-50"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 50, paddingTop: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#0066FF"]}
+            tintColor={colorScheme === "dark" ? "#FFFFFF" : "#0066FF"}
+            progressBackgroundColor={
+              colorScheme === "dark" ? "#383838" : "#F2F2F2"
+            }
+          />
+        }
       >
         {isFetchingGuides ? (
           <View className="w-full h-full flex items-center justify-center">
@@ -373,6 +461,41 @@ function Guide() {
         )}
         {/* Feedbacks */}
         {/* Ratings */}
+        <RBSheet
+          ref={refRBSheet6}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          animationType="slide"
+          customStyles={{
+            wrapper: {
+              backgroundColor: "rgba(0,0,0,0.5)",
+            },
+            container: {
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              paddingHorizontal: 16,
+              backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+              maxHeight: 120
+            },
+            draggableIcon: {
+              backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
+              width: 60,
+            },
+          }}
+        >
+          <View className="py-4">
+            <Text className="text-xl font-bold mb-4 text-text dark:text-text-dark">
+              Delete Rating?
+            </Text>
+            <TouchableOpacity
+              className="bg-red-400 dark:bg-red-500 py-3 rounded-lg items-center mb-4"
+              onPress={() => {handleRemoveRating(); setRating(0); refRBSheet6?.current.close()}}
+            >
+              <Text className="text-white font-semibold">Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </RBSheet>
+
         {!isFetchingFeedbacks && !isFetchingGuides && (
           <>
             <View className="w-full items-center justify-start mb-8">
@@ -380,7 +503,7 @@ function Guide() {
                 Rate Guide
               </Text>
             </View>
-            <View className="w-full flex flex-col gap-2 px-6 mb-8 items-center justify-center">
+            <View className="w-full flex flex-col gap-4 px-6 mb-8 items-center justify-center">
               <Rating
                 size={40}
                 rating={rating}
@@ -389,8 +512,9 @@ function Guide() {
                 fillColor={colorScheme === "dark" ? "#006FFD" : "#0818A8"}
               />
               <Text className="text-text dark:text-text-dark">
-                You rated {rating} out of 5
+                You rated {rating} out of 5!
               </Text>
+              <Text className='underline text-red-600 dark:text-red-500' onPress={() => {refRBSheet6?.current.open()}}>Remove rating</Text>
             </View>
           </>
         )}
@@ -622,16 +746,15 @@ function Guide() {
                         </View>
                       </View>
 
-                      <Text
-                        className="py-4 mb-4 text-text dark:text-text-dark">
-                          {comment.comment}
+                      <Text className="py-4 mb-4 text-text dark:text-text-dark">
+                        {comment.comment}
                       </Text>
 
                       <TouchableOpacity
                         className="bg-red-400 dark:bg-red-500 py-3 rounded-lg items-center mb-4"
                         onPress={() => handleDeleteComment()}
                       >
-                        <Text className="text-white font-semibold" >
+                        <Text className="text-white font-semibold">
                           Delete Comment
                         </Text>
                       </TouchableOpacity>
@@ -758,7 +881,9 @@ function Guide() {
                           : "text-black dark:text-white"
                       }`}
                     >
-                      {comment.comment}
+                      {comment?.hidden
+                        ? "This comment was hidden by the admin due to inappropriate content"
+                        : comment.comment}
                     </Text>
                   </View>
                   {/* Rating and Date */}
@@ -803,7 +928,7 @@ function Guide() {
                     <View className="py-4 gap-4">
                       <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80">
                         <Text className="text-center text-white text-lg font-semibold">
-                          Report
+                          Report Comment
                         </Text>
                       </TouchableOpacity>
                     </View>

@@ -145,7 +145,7 @@ const Home = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
+    <SafeAreaView className="flex-1 bg-background dark:bg-background-dark pt-36">
       <StatusBar translucent backgroundColor={statusBarColor} />
       {/* Sticky Search Bar */}
       <View className="absolute top-0 left-0 right-0 z-50 mt-10">
@@ -167,7 +167,7 @@ const Home = () => {
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: 100, paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -227,7 +227,7 @@ const Home = () => {
                       paddingRight: 16,
                       paddingVertical: 16, // allows shadow breathing room
                     }}
-                    className="px-2"
+                    className="px-0"
                     style={{
                       minHeight:
                         title === "DIY" || title === "Tools" ? 300 : 220,

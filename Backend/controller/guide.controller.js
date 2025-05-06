@@ -6,6 +6,7 @@ import { CLOUDINARY_SECRET_KEY } from '../config/env.js';
 import UserInfo from '../models/user.model.js';
 import Guide from '../models/guide.model.js';
 import Feedback from '../models/feedback.model.js';
+import Bookmark from '../models/bookmark.model.js'
 
 cloudinary.config({
     cloud_name: CLOUDINARY_CLOUD_NAME,
@@ -434,7 +435,8 @@ export const addFeedback = async (req, res) => {
         // Update either or both fields safely
         if (comment !== undefined) existingFeedback.comment = comment;
         if (rating !== undefined) existingFeedback.rating = rating;
-
+        
+        existingFeedback.createdAt = Date.now();
         await existingFeedback.save(); // Updates updatedAt
 
         return res.status(200).json({
@@ -474,6 +476,26 @@ export const addFeedback = async (req, res) => {
       error: error.toString(),
     });
   }
+};
+
+export const deleteRating = async (req ,res) => {
+  try {
+    const {guideId, userId} = req.body
+    let existingFeedback = await Feedback.findOne({ guideId, userId });
+    if (!existingFeedback) {
+      return res.status(404).json({success: false, message: "Feedback not found"})
+    }
+    existingFeedback.rating = undefined;
+    await existingFeedback.save();
+    return res.status(200).json({success: true, message: "Successfully deleted rating", data: existingFeedback})
+  } catch (error) {
+    console.error("Error adding feedback:", error);
+    console.error("Error adding feedback:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error adding feedback",
+      error: error.toString(),
+  })}
 };
 
 
@@ -660,6 +682,34 @@ export const updateGuide = async (req, res) => {
 
     const updatedGuide = await guide.save();
     res.status(200).json({ success: true, guide: updatedGuide });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error: ${error.message}` });
+  }
+};
+
+export const handleBookmark = async (req, res) => {
+  try {
+    const {guideId, userId} = req.body;
+    const bookmark = await Bookmark.findOne({guideId: guideId, userId: userId});
+    if (!bookmark) {
+      const results = await Bookmark.create({ userId, guideId });
+      return res.status(200).json({ success: true, message: "created", data: {guideId, userId, results} });
+    };
+    const results = await Bookmark.deleteOne({ userId, guideId });
+    return res.status(200).json({ success: true, message: "deleted", data: {guideId, userId, results} });
+  } catch (error) {
+    res.status(500).json({ success: false, error: `Error: ${error.message}` });
+  }
+};
+
+export const isBookmarked = async (req, res) => {
+  try {
+    const {guideId, userId} = req.body;
+    const bookmark = await Bookmark.findOne({guideId: guideId, userId: userId});
+    if (!bookmark) {
+      return res.status(200).json({ success: true, message: "Guide is not bookmarked", isBookmarked: false});
+    };
+    return res.status(200).json({ success: true, message: "Guide is bookmarked", isBookmarked: true});
   } catch (error) {
     res.status(500).json({ success: false, error: `Error: ${error.message}` });
   }
