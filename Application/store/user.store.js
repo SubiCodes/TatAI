@@ -11,7 +11,7 @@ const API_URL =
 
 const userStore = create((set) => ({
 user: null,
-preference: {preferredName: null, preferredTone: null,  toolFamilirarity: null, skillLevel: null},
+preference: null,
 isLoading: false,
 error: null,
 userLogin: async (email, password) => {
@@ -33,7 +33,6 @@ userLogin: async (email, password) => {
 
         set({user: res.data.user});
 
-        console.log(res.data.user);
         router.replace('/(tabs)/home');
       } else {
         set({ error: 'Invalid Credentials.' });
@@ -136,15 +135,61 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
           profileIcon: activeProfileIcon,
         } : null, // Handle the case where user might be null
       }));
-
-      console.log('Successfully updated!');
     } catch (error) {
       Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
       console.log('Error in the store: ',error.message);
     } finally {
       set({ isLoading: false });
     }
-}
+},
+  getUserPreference: async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const decryptedToken = await jwtDecode(token);
+      const res = await axios.get(`${API_URL}preference/${decryptedToken.userID}`);
+      console.log(res.data.data);
+      set({preference: res.data.data})
+    } catch (error) {
+      Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
+      console.log('Error in the store preference: ',error.message);
+    }
+  },
+  addSearch: async (id, search) => {
+    try {
+      console.log("Id: ", id);
+      console.log("search: ", search);
+      const res = await axios.post(`${API_URL}preference/add-search`, {userId: id, search: search});
+      console.log(res.data.data);
+      set({preference: res.data.data})
+    } catch (error) {
+      Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
+      console.log('Error in the store preference: ',error.message);
+    }
+  },
+  removeSearch: async (id, search) => {
+    try {
+      console.log("Id: ", id);
+      console.log("search: ", search);
+      const res = await axios.post(`${API_URL}preference/remove-search`, {userId: id, search: search});
+      console.log(res.data.data);
+      set({preference: res.data.data})
+    } catch (error) {
+      Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
+      console.log('Error in the store preference: ',error.message);
+    }
+  },
+  clearSearch: async (id) => {
+    try {
+      console.log("Id: ", id);
+      const res = await axios.post(`${API_URL}preference/clear-search`, {userId: id});
+      console.log(res.data.data);
+      set({preference: res.data.data})
+    } catch (error) {
+      Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
+      console.log('Error in the store preference: ',error.message);
+    }
+  },
+
 }));
 
 export default userStore;

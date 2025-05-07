@@ -1,6 +1,6 @@
 import { View, Text, Image, Platform, TouchableOpacity, Alert } from 'react-native';
 import React from 'react';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 
 const CardRecentGuide = ({ guide }) => {
   const router = useRouter();

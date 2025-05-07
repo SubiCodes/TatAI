@@ -10,7 +10,7 @@ export const getPreference = async (req, res) => {
     }
 
     try {
-        const preference = await UserPreference.findOne({ userId: _id }).select("preferredName preferredTone skillLevel toolFamiliarity");
+        const preference = await UserPreference.findOne({ userId: _id });
         if (!preference) {
             return res.status(404).json({ success: false, message: "User yet to set up preference not." });
         }
@@ -107,3 +107,109 @@ export const updatePreference = async (req, res) => {
         res.status(500).json({ success: false, message: "Cannot update user preference." });
     }
 };
+
+export const addSearchHistory = async (req, res) => {
+    const { userId, search } = req.body;
+  
+    try {
+      const preference = await UserPreference.findOne({ userId: userId });
+  
+      if (!preference) {
+        return res.status(404).json({ success: false, message: "User preference not found." });
+      }
+  
+      if (!search) {
+        return res.status(400).json({ success: false, message: "Search term is required." });
+      }
+  
+      // Remove search if it already exists
+      preference.previousSearches = preference.previousSearches.filter(item => item !== search);
+  
+      // Add search to the top
+      preference.previousSearches.unshift(search);
+  
+      // Optional: Limit to last 10 searches
+      preference.previousSearches = preference.previousSearches.slice(0, 10);
+  
+      await preference.save();
+  
+      return res.status(200).json({
+        success: true,
+        message: "Search history updated successfully.",
+        data: preference,
+      });
+  
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Can't add search history.",
+        error: error.message,
+      });
+    }
+  };
+
+  export const removeSearch = async (req, res) => {
+    const { userId, search } = req.body;
+  
+    try {
+      const preference = await UserPreference.findOne({ userId: userId });
+  
+      if (!preference) {
+        return res.status(404).json({ success: false, message: "User preference not found." });
+      }
+  
+      if (!search) {
+        return res.status(400).json({ success: false, message: "Search term is required." });
+      }
+  
+      // Remove the search term
+      preference.previousSearches = preference.previousSearches.filter(item => item !== search);
+  
+      await preference.save();
+  
+      return res.status(200).json({
+        success: true,
+        message: "Search history updated successfully.",
+        data: preference,
+      });
+  
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Can't update search history.",
+        error: error.message,
+      });
+    }
+  };
+
+  export const clearSearch = async (req, res) => {
+    const { userId } = req.body;
+  
+    try {
+      const preference = await UserPreference.findOne({ userId: userId });
+  
+      if (!preference) {
+        return res.status(404).json({ success: false, message: "User preference not found." });
+      }
+
+      preference.previousSearches = [];
+  
+      await preference.save();
+  
+      return res.status(200).json({
+        success: true,
+        message: "Search history updated successfully.",
+        data: preference,
+      });
+  
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Can't update search history.",
+        error: error.message,
+      });
+    }
+  };

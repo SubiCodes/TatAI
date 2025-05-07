@@ -22,6 +22,13 @@ export default function RootLayout() {
                 headerBlurEffect: 'regular',
                 headerTintColor
             }}/>
+            <Stack.Screen name="searchresult/[term]" options={{
+                headerShown: false,
+                headerTransparent: true,
+                headerTitle: '',
+                headerBlurEffect: 'regular',
+                headerTintColor
+            }}/>
         </Stack>
     )
 }

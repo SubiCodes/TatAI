@@ -206,7 +206,7 @@ function Guide() {
   }
 
   return (
-    <View className="w-full h-full flex mt-10 bg-background dark:bg-background-dark">
+    <View className="w-full h-full flex bg-background dark:bg-background-dark">
       <View className="w-full px-4 py-4 bg-white flex flex-row justify-start items-center z-50 gap-4 dark:bg-[#2A2A2A]">
         <Text onPress={goBack} className="text-text dark:text-text-dark">
           <AntDesign name="arrowleft" size={24} />
