@@ -1,6 +1,7 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking, RefreshControl, Alert } from 'react-native';
 import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { useRouter } from 'expo-router';
 import { Rating } from '@kolking/react-native-rating';
 import { useColorScheme } from 'nativewind';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -28,167 +29,182 @@ import RBSheet from 'react-native-raw-bottom-sheet'
 import { useNavigation } from '@react-navigation/native';
 
 function Guide() {
-    const {id} = useLocalSearchParams();
-    const refRBSheet = useRef(); //ref or user comment
-    const refRBSheet2 = useRef(); //ref for reporting other comments
-    const refRBSheet3 = useRef(); //ref for editing comment
-    const refRBSheet4 = useRef(); //ref for confirmng delete
-    const refRBSheet5 = useRef(); //ref for reporting guide
-    const refRBSheet6 = useRef(); //ref for confirming rating
-    const user = userStore((state) => state.user);
-    const guide = guideStore((state) => state.guide);
-    const getGuide = guideStore((state) => state.getGuide);
-    const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
-    const errorFetchingGuides = guideStore((state) => state.errorFetchingGuides);
-    const feedbacks = guideStore((state) => state.feedbacks);
-    const isFetchingFeedbacks = guideStore((state) => state.isFetchingFeedbacks);
-    const errorFetchingFeedbacks = guideStore((state) => state.errorFetchingFeedbacks);
-    const getFeedbacks = guideStore((state) => state.getFeedbacks);
-    const postFeedbackRating = guideStore((state) => state.postFeedbackRating);
-    const postFeedbackComment = guideStore((state) => state.postFeedbackComment);
-    const deleteFeedbackComment = guideStore((state) => state.deleteFeedbackComment);
-    const isBookmarked = guideStore((state) => state.isBookmarked);
-    const checkIfBookmarked = guideStore((state) => state.checkIfBookmarked);
-    const handleBookmark = guideStore((state) => state.handleBookmark);
-    const deleteRating = guideStore((state) => state.deleteRating);
-    const { colorScheme, toggleColorScheme } = useColorScheme();
-    const [refreshing, setRefreshing] = useState(false);
+  const { id } = useLocalSearchParams();
+  const refRBSheet = useRef(); //ref or user comment
+  const refRBSheet2 = useRef(); //ref for reporting other comments
+  const refRBSheet3 = useRef(); //ref for editing comment
+  const refRBSheet4 = useRef(); //ref for confirmng delete
+  const refRBSheet5 = useRef(); //ref for reporting guide
+  const refRBSheet6 = useRef(); //ref for confirming rating
+  const user = userStore((state) => state.user);
+  const guide = guideStore((state) => state.guide);
+  const getGuide = guideStore((state) => state.getGuide);
+  const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
+  const errorFetchingGuides = guideStore((state) => state.errorFetchingGuides);
+  const feedbacks = guideStore((state) => state.feedbacks);
+  const isFetchingFeedbacks = guideStore((state) => state.isFetchingFeedbacks);
+  const errorFetchingFeedbacks = guideStore(
+    (state) => state.errorFetchingFeedbacks
+  );
+  const getFeedbacks = guideStore((state) => state.getFeedbacks);
+  const postFeedbackRating = guideStore((state) => state.postFeedbackRating);
+  const postFeedbackComment = guideStore((state) => state.postFeedbackComment);
+  const deleteFeedbackComment = guideStore(
+    (state) => state.deleteFeedbackComment
+  );
+  const isBookmarked = guideStore((state) => state.isBookmarked);
+  const checkIfBookmarked = guideStore((state) => state.checkIfBookmarked);
+  const handleBookmark = guideStore((state) => state.handleBookmark);
+  const deleteRating = guideStore((state) => state.deleteRating);
+  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const [refreshing, setRefreshing] = useState(false);
 
-    // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
-    // const [userComment, setUserComment] = useState(userComment?.comment);
-    
-    
-    const goBack = () => {
-      navigation.goBack();
-    };
+  // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
+  // const [userComment, setUserComment] = useState(userComment?.comment);
+  const router = useRouter();
 
-    const navigation = useNavigation();
-    
-    useEffect(() => {
+  const handleViewPoster = () => {
+    if (guide?.userID) {
+      router.push(`/user/${guide.userID}`);
+    } else {
+      Alert.alert(
+        "User not found",
+        "This user might have been banned or deleted.",
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  const goBack = () => {
+    navigation.goBack();
+  };
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    getGuide(id);
+    getFeedbacks(id);
+    checkIfBookmarked(id, user._id);
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
       getGuide(id);
       getFeedbacks(id);
       checkIfBookmarked(id, user._id);
-    }, []);
-
-    const onRefresh = useCallback(async () => {
-      setRefreshing(true);
-      try {
-        getGuide(id);
-        getFeedbacks(id);
-        checkIfBookmarked(id, user._id);
-      } catch (error) {
-        console.error("Error refreshing data:", error);
-      } finally {
-        setRefreshing(false);
-      }
-    }, []);
-    
-    const profileIcons = {
-          empty_profile: empty_profile,
-          boy_1: boy_1,
-          boy_2: boy_2,
-          boy_3: boy_3,
-          boy_4: boy_4,
-          girl_1: girl_1,
-          girl_2: girl_2,
-          girl_3: girl_3,
-          girl_4: girl_4,
-          lgbt_1: lgbt_1,
-          lgbt_2: lgbt_2,
-          lgbt_3: lgbt_3,
-          lgbt_4: lgbt_4,
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+    } finally {
+      setRefreshing(false);
     }
-    
-    //Functions and theyre requirements
-    const [tempRating, setTempRating] = useState(0);
-    const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState('');
-    
-    const checkExistingRating = () => {
-      const existingFeedback = feedbacks?.find(
-        (feedback) => feedback.userId === user._id
-      );
-      if (existingFeedback) {
-        setRating(existingFeedback.rating);
-      } else{
-        setRating(0)
-      }
-    };
-    
-    const handleChange = useCallback(
-      async (value) => {
-        const roundedRating = Math.round(value);
-        setRating(roundedRating);
-    
-        try {
-          await postFeedbackRating(id, user._id, roundedRating, user, feedbacks);
-        } catch (error) {
-          console.log("Error posting feedback:", error);
-        }
-      },
-      [id, user, feedbacks, postFeedbackRating]
+  }, []);
+
+  const profileIcons = {
+    empty_profile: empty_profile,
+    boy_1: boy_1,
+    boy_2: boy_2,
+    boy_3: boy_3,
+    boy_4: boy_4,
+    girl_1: girl_1,
+    girl_2: girl_2,
+    girl_3: girl_3,
+    girl_4: girl_4,
+    lgbt_1: lgbt_1,
+    lgbt_2: lgbt_2,
+    lgbt_3: lgbt_3,
+    lgbt_4: lgbt_4,
+  };
+
+  //Functions and theyre requirements
+  const [tempRating, setTempRating] = useState(0);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
+  const checkExistingRating = () => {
+    const existingFeedback = feedbacks?.find(
+      (feedback) => feedback.userId === user._id
     );
-
-    const handleRemoveRating = async () => {
-      deleteRating(id, user._id)
+    if (existingFeedback) {
+      setRating(existingFeedback.rating);
+    } else {
+      setRating(0);
     }
-    
-    useEffect(() => {
-      checkExistingRating();
-    }, [feedbacks]);
+  };
 
-    const handleBookmarking = async () => {
-      await handleBookmark(id, user._id);
-    };
+  const handleChange = useCallback(
+    async (value) => {
+      const roundedRating = Math.round(value);
+      setRating(roundedRating);
 
-    
-    const handlePostComment = async () => {
-      console.log(comment);
-      if (comment.trim() !== '') {
-        await postFeedbackComment(id, user._id, comment, user, feedbacks);
-        setComment(''); // Clear comment after posting
-        refRBSheet.current.close(); // Close the sheet after posting
+      try {
+        await postFeedbackRating(id, user._id, roundedRating, user, feedbacks);
+      } catch (error) {
+        console.log("Error posting feedback:", error);
       }
+    },
+    [id, user, feedbacks, postFeedbackRating]
+  );
+
+  const handleRemoveRating = async () => {
+    deleteRating(id, user._id);
+  };
+
+  useEffect(() => {
+    checkExistingRating();
+  }, [feedbacks]);
+
+  const handleBookmarking = async () => {
+    await handleBookmark(id, user._id);
+  };
+
+  const handlePostComment = async () => {
+    console.log(comment);
+    if (comment.trim() !== "") {
+      await postFeedbackComment(id, user._id, comment, user, feedbacks);
+      setComment(""); // Clear comment after posting
+      refRBSheet.current.close(); // Close the sheet after posting
     }
+  };
 
-    const handleDeleteComment = async () => {
-      await deleteFeedbackComment(id, user._id, '', user, feedbacks);
-      setComment('');
-      refRBSheet.current.close(); 
-    };
+  const handleDeleteComment = async () => {
+    await deleteFeedbackComment(id, user._id, "", user, feedbacks);
+    setComment("");
+    refRBSheet.current.close();
+  };
 
-
-    
-    if (errorFetchingGuides){
-     return (
+  if (errorFetchingGuides) {
+    return (
       <>
-      <View className="w-full mt-10 px-4 py-4 bg-white flex flex-row justify-start items-center z-50 gap-4 dark:bg-background-dark">
-        <Text onPress={goBack}>
-          <AntDesign name="arrowleft" size={24} />
-        </Text>
-        <Text className="text-xl">
-          {" "}
-          {isFetchingGuides
-            ? ""
-            : `${
-                guide?.type[0]?.toUpperCase() + guide?.type?.substring(1)
-              } Guide`}
-        </Text>
-        <View className="flex-1" />
-        <Text>
-          <FontAwesome6 name="bookmark" size={24} />
-        </Text>
-        <Text>
-          <Entypo name="dots-three-vertical" size={24} color="black" />
-        </Text>
-      </View>
-      <View className='flex-1 items-center justify-center'>
-              <Text className='text-xl text-red-400 font-bold'>Unable to fetch guide.</Text>
-      </View>
+        <View className="w-full mt-10 px-4 py-4 bg-white flex flex-row justify-start items-center z-50 gap-4 dark:bg-background-dark">
+          <Text onPress={goBack}>
+            <AntDesign name="arrowleft" size={24} />
+          </Text>
+          <Text className="text-xl">
+            {" "}
+            {isFetchingGuides
+              ? ""
+              : `${
+                  guide?.type[0]?.toUpperCase() + guide?.type?.substring(1)
+                } Guide`}
+          </Text>
+          <View className="flex-1" />
+          <Text>
+            <FontAwesome6 name="bookmark" size={24} />
+          </Text>
+          <Text>
+            <Entypo name="dots-three-vertical" size={24} color="black" />
+          </Text>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-xl text-red-400 font-bold">
+            Unable to fetch guide.
+          </Text>
+        </View>
       </>
-      )
-    }
-    
+    );
+  }
+
   return (
     <View className="w-full h-full flex mt-10 bg-background dark:bg-background-dark">
       <View className="w-full px-4 py-4 bg-white flex flex-row justify-start items-center z-50 gap-4 dark:bg-[#2A2A2A]">
@@ -291,7 +307,7 @@ function Guide() {
             <View className="w-full items-start justify-center flex-col mb-4">
               <Text className="text-justify text-text text-lg dark:text-text-dark">
                 Posted by:{" "}
-                <Text className="font-black underline">
+                <Text className="font-black underline" onPress={() => {handleViewPoster()}}>
                   {guide?.posterInfo.name}
                 </Text>
               </Text>
@@ -475,7 +491,7 @@ function Guide() {
               borderTopRightRadius: 20,
               paddingHorizontal: 16,
               backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-              maxHeight: 120
+              maxHeight: 120,
             },
             draggableIcon: {
               backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
@@ -489,7 +505,11 @@ function Guide() {
             </Text>
             <TouchableOpacity
               className="bg-red-400 dark:bg-red-500 py-3 rounded-lg items-center mb-4"
-              onPress={() => {handleRemoveRating(); setRating(0); refRBSheet6?.current.close()}}
+              onPress={() => {
+                handleRemoveRating();
+                setRating(0);
+                refRBSheet6?.current.close();
+              }}
             >
               <Text className="text-white font-semibold">Delete</Text>
             </TouchableOpacity>
@@ -514,7 +534,14 @@ function Guide() {
               <Text className="text-text dark:text-text-dark">
                 You rated {rating} out of 5!
               </Text>
-              <Text className='underline text-red-600 dark:text-red-500' onPress={() => {refRBSheet6?.current.open()}}>Remove rating</Text>
+              <Text
+                className="underline text-red-600 dark:text-red-500"
+                onPress={() => {
+                  refRBSheet6?.current.open();
+                }}
+              >
+                Remove rating
+              </Text>
             </View>
           </>
         )}

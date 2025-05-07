@@ -327,7 +327,7 @@ const filteredGuides = guides
               filterSheet.current.close(); // Close the sheet after applying
             }}
           >
-            <Text className="text-lg font-bold text-text dark:text-text-dark">
+            <Text className="text-lg font-bold text-white dark:text-text-dark">
               Apply
             </Text>
           </TouchableOpacity>
