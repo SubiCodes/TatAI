@@ -217,6 +217,69 @@ export const getGuides = async (req, res) => {
   }
 };
 
+export const getGuidesAccepted = async (req, res) => {
+  try {
+    const latestGuides = await Guide.find({status: 'accepted'}).sort({ updatedAt: -1 });
+
+    const userIds = latestGuides.map(guide => guide.userID);
+    const guideIds = latestGuides.map(guide => guide._id);
+    
+    // Find all users whose IDs match those in the guides
+    const posters = await UserInfo.find({ _id: { $in: userIds } }, 'firstName lastName profileIcon');
+    
+    const allFeedback = await Feedback.find({ 
+      guideId: { $in: guideIds },  
+    });
+    
+    // Process feedback data manually
+    const feedbackMap = {};
+    
+    guideIds.forEach(guideId => {
+      const guideFeedback = allFeedback.filter(fb => fb.guideId.toString() === guideId.toString());
+      
+      // Count comments (feedback entries with non-empty comments)
+      const commentCount = guideFeedback.filter(fb => fb.comment && fb.comment.trim() !== '').length;
+      
+      // Calculate average rating (only for feedback entries with ratings)
+      const ratingsOnly = guideFeedback.filter(fb => typeof fb.rating === 'number');
+      const averageRating = ratingsOnly.length > 0 
+        ? ratingsOnly.reduce((sum, fb) => sum + fb.rating, 0) / ratingsOnly.length
+        : 0;
+      
+      feedbackMap[guideId.toString()] = {
+        averageRating: parseFloat(averageRating.toFixed(1)), // Round to 1 decimal place
+        commentCount,
+        ratingCount: ratingsOnly.length
+      };
+    });
+    
+    const posterMap = {};
+    posters.forEach(poster => {
+      posterMap[poster._id.toString()] = {
+        name: `${poster.firstName} ${poster.lastName}`,
+        profileIcon: poster.profileIcon
+      };
+    });
+    
+    const guidesWithData = latestGuides.map(guide => {
+      const guideObj = guide.toObject();
+      const userIdStr = guide.userID.toString();
+      const guideIdStr = guide._id.toString();
+      
+      return {
+        ...guideObj,
+        posterInfo: posterMap[userIdStr] || null,
+        feedbackInfo: feedbackMap[guideIdStr] || { averageRating: 0, commentCount: 0, ratingCount: 0 }
+      };
+    });
+
+    return res.status(200).json({ success: true, data: guidesWithData });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export const getGuidesPerType = async (req, res) => {
   try {
     const { type, amount } = req.body;
@@ -712,5 +775,101 @@ export const isBookmarked = async (req, res) => {
     return res.status(200).json({ success: true, message: "Guide is bookmarked", isBookmarked: true});
   } catch (error) {
     res.status(500).json({ success: false, error: `Error: ${error.message}` });
+  }
+};
+
+
+export const getUserAndGuideBaseOnSearch = async (req, res) => {
+  const { query } = req.body;  // Extract the search query from request body
+
+  try {
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    // Search for users whose name matches the search query (case-insensitive)
+    const users = await UserInfo.find({
+      $or: [
+        { firstName: { $regex: query, $options: 'i' } },
+        { lastName: { $regex: query, $options: 'i' } },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ['$firstName', ' ', '$lastName'] },
+              regex: query,
+              options: 'i'
+            }
+          }
+        }
+      ]
+    });
+
+    // Search for guides whose title matches the search query (case-insensitive)
+    const guides = await Guide.find({
+      title: { $regex: query, $options: "i" }  // "i" for case-insensitive search
+    });
+
+    // Find all users whose IDs match those in the guides (for poster info)
+    const userIds = guides.map(guide => guide.userID);
+    const posters = await UserInfo.find({ _id: { $in: userIds } }, 'firstName lastName profileIcon');
+    
+    const guideIds = guides.map(guide => guide._id);
+    const allFeedback = await Feedback.find({ guideId: { $in: guideIds } });
+
+    // Process feedback data manually
+    const feedbackMap = {};
+    
+    guideIds.forEach(guideId => {
+      const guideFeedback = allFeedback.filter(fb => fb.guideId.toString() === guideId.toString());
+      
+      // Count comments (feedback entries with non-empty comments)
+      const commentCount = guideFeedback.filter(fb => fb.comment && fb.comment.trim() !== '').length;
+      
+      // Calculate average rating (only for feedback entries with ratings)
+      const ratingsOnly = guideFeedback.filter(fb => typeof fb.rating === 'number');
+      const averageRating = ratingsOnly.length > 0 
+        ? ratingsOnly.reduce((sum, fb) => sum + fb.rating, 0) / ratingsOnly.length
+        : 0;
+      
+      feedbackMap[guideId.toString()] = {
+        averageRating: parseFloat(averageRating.toFixed(1)), // Round to 1 decimal place
+        commentCount,
+        ratingCount: ratingsOnly.length
+      };
+    });
+    
+    // Map user info to guides
+    const posterMap = {};
+    posters.forEach(poster => {
+      posterMap[poster._id.toString()] = {
+        name: `${poster.firstName} ${poster.lastName}`,
+        profileIcon: poster.profileIcon
+      };
+    });
+    
+    // Map the guide data to include user info and feedback info
+    const guidesWithData = guides.map(guide => {
+      const guideObj = guide.toObject();
+      const userIdStr = guide.userID.toString();
+      const guideIdStr = guide._id.toString();
+      
+      return {
+        ...guideObj,
+        posterInfo: posterMap[userIdStr] || null,
+        feedbackInfo: feedbackMap[guideIdStr] || { averageRating: 0, commentCount: 0, ratingCount: 0 }
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        users,
+        guides: guidesWithData  // This maintains the guides as a property within data
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

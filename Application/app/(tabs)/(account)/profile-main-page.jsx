@@ -73,7 +73,6 @@ const Profile = () => {
 
     return (
         <>
-            <StatusBar translucent={true} className='bg-background dark:bg-background-dark'/>
             {isLoading ? (
                     <FetchingDataScreen/>
                 ) : error ? (

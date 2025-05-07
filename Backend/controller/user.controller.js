@@ -1,7 +1,6 @@
 import User from "../models/user.model.js";
 import UserPreference from "../models/preference.model.js";
 
-
 export const getUserData = async (req, res) => {
 
     const {_id} = req.params;
@@ -24,6 +23,22 @@ export const getUserData = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const users = await User.find().select("email firstName lastName role gender birthday verificationToken status profileIcon");
+
+        if (!users || users.length === 0) {
+            return res.status(404).json({ success: false, message: "No users found." });
+        }
+
+        return res.status(200).json({ success: true, message: "Users fetched successfully", data: users });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: "Can't get users data.", error: error.message });
+    }
+};
+
+export const getAllUsersData = async (req, res) => {
+    try {
+        const users = await User.find()
 
         if (!users || users.length === 0) {
             return res.status(404).json({ success: false, message: "No users found." });
@@ -74,4 +89,5 @@ export const editUserData = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({success: false, message: "Cant update user data.", error: error.message})
     }
-}
+};
+

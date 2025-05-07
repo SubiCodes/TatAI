@@ -26,7 +26,7 @@ const guideStore = create((set) => ({
     getAllGuides: async () => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
-            const res = await axios.get(`${API_URL}guide`);
+            const res = await axios.get(`${API_URL}guide/accepted`);
             set({guides: res.data.data});
         } catch (error) {
             console.log(error.message);
@@ -79,7 +79,6 @@ const guideStore = create((set) => ({
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
             const res = await axios.get(`${API_URL}guide/${id}`);
-            console.log(res.data.data);
             set({guide: res.data.data})
         } catch (error) {
             console.log('error ins get guide', error.message);

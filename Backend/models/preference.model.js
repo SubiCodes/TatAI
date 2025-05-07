@@ -33,6 +33,10 @@ const preferenceSchema = new mongoose.Schema({
     previousPrompts: {
         type: [String],
         default: [] 
+    },
+    previousSearches: {
+        type: [String],
+        default: [] 
     }
 }, {
     collection: "UserPreferences",
