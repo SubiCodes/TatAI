@@ -19,6 +19,10 @@ const guideStore = create((set) => ({
     isFetchingFeedbacks: false,
     errorFetchingFeedbacks: null,
     isBookmarked: null,
+    viewUserData: null,
+    viewUserGuides: [],
+    viewUserInfoError: null, 
+    viewUserInfoLoading: false, 
     getAllGuides: async () => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
@@ -75,6 +79,7 @@ const guideStore = create((set) => ({
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
             const res = await axios.get(`${API_URL}guide/${id}`);
+            console.log(res.data.data);
             set({guide: res.data.data})
         } catch (error) {
             console.log('error ins get guide', error.message);
@@ -232,10 +237,37 @@ const guideStore = create((set) => ({
                 set({isBookmarked: false});
             }
         } catch (error) {
-            console.log("Error updating feedback:", error);
+            console.log("Error updating bookmark:", error);
             return error.message;
         }
-    }    
+    },
+    getUserInfo: async (userId) => {
+        try {
+            set({viewUserInfoLoading: true})
+            const res = await axios.get(`${API_URL}user/${userId}`);
+            set({viewUserData: res.data.data});
+        } catch (error) {
+            console.log("Error getting user's info:", error);
+            set({viewUserInfoError: "Something went wrong."})
+            return error.message;
+        } finally {
+            set({viewUserInfoLoading: false})
+        }
+    },
+    getUserGuides: async (userId) => {
+        try {
+            set({viewUserInfoLoading: true})
+            const res = await axios.get(`${API_URL}guide/user-guides/${userId}`);
+            console.log(res.data.data);
+            set({viewUserGuides: res.data.data});
+        } catch (error) {
+            console.log("Error getting user's info:", error);
+            set({viewUserInfoError: "Something went wrong."})
+            return error.message;
+        } finally {
+            set({viewUserInfoLoading: false})
+        }
+    }
 }));
 
 export default guideStore

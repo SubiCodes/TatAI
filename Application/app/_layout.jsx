@@ -9,6 +9,7 @@ export default function RootLayout() {
     <Stack.Screen name="(settings)" options={{headerShown: false}}/>
     <Stack.Screen name="index" options={{headerShown: false}}/>
     <Stack.Screen name="guide" options={{headerShown: false}}/>
+    <Stack.Screen name="user" options={{headerShown: false}}/>
   </Stack>
   )
 }
