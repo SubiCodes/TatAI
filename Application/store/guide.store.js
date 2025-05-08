@@ -41,7 +41,7 @@ const guideStore = create((set) => ({
     getLatestGuide: async () => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
-            const res = await axios.post(`${API_URL}admin/latest-guides`, {amount: 5});
+            const res = await axios.post(`${API_URL}guide/latest`, {amount: 5});
             set({latestGuides: res.data.data});
         } catch (error) {
             console.log(error.message);

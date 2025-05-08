@@ -9,9 +9,10 @@ import {
   RefreshControl,
   SafeAreaView,
 } from "react-native";
+import { Alert } from 'react-native';
 import React, { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter, useNavigation, useFocusEffect } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -118,6 +119,24 @@ const Home = () => {
   const checkVerified = async () => {
     try {
       if (user) {
+        if (user.status === 'Banned') {
+          Alert.alert(
+            "Account Banned",
+            "Your account has been banned. Please contact tataihomeassistant@gmail.com for more information.",
+            [
+              {
+                text: "OK",
+                onPress: async () => {
+                  await AsyncStorage.removeItem("token");
+                  await router.replace(`/(auth-screens)/signin`);
+                }
+              }
+            ],
+            { cancelable: false }
+          );
+          return;
+        }
+
         if (user.status === "Unverified") {
           await AsyncStorage.removeItem("token");
           await router.replace(`/(auth-screens)/verify-account/${user.email}`);
@@ -173,6 +192,12 @@ const Home = () => {
     };
     checkVerifications();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      checkVerified()
+    }, [])
+  )
 
 
   useEffect(() => {

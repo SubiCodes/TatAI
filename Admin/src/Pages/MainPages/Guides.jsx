@@ -41,8 +41,8 @@ function Guides() {
     return true;
   })
   .sort((a, b) => {
-    const dateA = new Date(a.createdAt);
-    const dateB = new Date(b.createdAt);
+    const dateA = new Date(a.upadatedAt);
+    const dateB = new Date(b.upadatedAt);
     return isLatestFirst ? dateB - dateA : dateA - dateB;
   });
 

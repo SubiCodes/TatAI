@@ -37,6 +37,7 @@ function Guide() {
   const refRBSheet5 = useRef(); //ref for reporting guide
   const refRBSheet6 = useRef(); //ref for confirming rating
   const user = userStore((state) => state.user);
+  const getUserInfo = userStore((state) => state.getUserInfo);
   const guide = guideStore((state) => state.guide);
   const getGuide = guideStore((state) => state.getGuide);
   const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
@@ -62,6 +63,57 @@ function Guide() {
   // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
+
+  const checkGuideStatus = async () => {
+    if (guide?.status !== "accepted") {
+      Alert.alert(
+        "Guide not accepted",
+        "This guide is currently unavailable because its status is either Pending or Rejected.",
+        [
+          {
+            text: "OK",
+            onPress: async () => {
+              navigation.goBack();
+            }
+          }
+        ],
+        { cancelable: false }
+      );
+      return
+    }
+  }
+
+  const checkVerified = async () => {
+    try {
+      if (user) {
+        if (user.status === "Banned") {
+          Alert.alert(
+            "Account Banned",
+            "Your account has been banned. Please contact tataihomeassistant@gmail.com for more information.",
+            [
+              {
+                text: "OK",
+                onPress: async () => {
+                  await AsyncStorage.removeItem("token");
+                  await router.replace(`/(auth-screens)/signin`);
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+          return;
+        }
+
+        if (user.status === "Unverified") {
+          await AsyncStorage.removeItem("token");
+          await router.replace(`/(auth-screens)/verify-account/${user.email}`);
+          return;
+        }
+      }
+    } catch (error) {
+      console.log("error at home: ", error.message);
+    }
+  };
 
   const handleViewPoster = () => {
     if (guide?.userID) {
@@ -100,6 +152,9 @@ function Guide() {
   useEffect(() => {
     getGuide(id);
     getFeedbacks(id);
+    getUserInfo();
+    checkVerified();
+    checkGuideStatus();
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -107,7 +162,9 @@ function Guide() {
     try {
       getGuide(id);
       getFeedbacks(id);
-
+      getUserInfo();
+      checkVerified();
+      checkGuideStatus();
     } catch (error) {
       console.error("Error refreshing data:", error);
     } finally {
@@ -596,7 +653,7 @@ function Guide() {
                 <View className="w-full flex flex-row gap-6 pr-6">
                   <TextInput
                     className="flex-1 border-b-[1px] border-b-gray-200 text-text dark:text-text-dark"
-                    placeholder="Write a comment"
+                    placeholder={user?.status === "Verified" ? "Write a comment" : "Your account has been restricted by an administrator. You are currently unable to post comments."}
                     placeholderTextColor={
                       colorScheme === "dark" ? "#A0A0A0" : "#7A7A7A"
                     }
@@ -604,12 +661,14 @@ function Guide() {
                     textAlignVertical="top"
                     value={comment}
                     onChangeText={setComment}
+                    editable={user?.status === 'Verified'}
                   />
                   <View className="flex justify-end">
                     <TouchableOpacity
                       onPress={() => {
                         handlePostComment();
                       }}
+                      disabled={!comment}
                     >
                       <Text className="text-primary dark:text-secondary">
                         <Ionicons name="send" size={24} />
@@ -653,7 +712,26 @@ function Guide() {
                     </View>
                     <View className="flex items-center justify-center">
                       <TouchableOpacity
-                        onPress={() => refRBSheet.current.open()}
+                        onPress={() => {
+                          if (user?.status === "Verified"){
+                            refRBSheet.current.open()
+                          } else {
+                            Alert.alert(
+                              "Account Restricted",
+                              "Your account has been Restricted. Unabling you to comment, post and edit guides.",
+                              [
+                                {
+                                  text: "OK",
+                                  onPress: async () => {
+                                    await AsyncStorage.removeItem("token");
+                                    await router.replace(`/(auth-screens)/signin`);
+                                  }
+                                }
+                              ],
+                              { cancelable: false }
+                            );
+                          }
+                        }}
                       >
                         <Text className="text-gray-600 dark:text-gray-300">
                           <Entypo name="dots-three-horizontal" size={18} />

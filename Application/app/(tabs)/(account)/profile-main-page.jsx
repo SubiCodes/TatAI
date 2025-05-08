@@ -87,6 +87,7 @@ const Profile = () => {
             <SafeAreaView className="h-screen w-screen flex-col items-center bg-background px-8 py-4 gap-4 dark:bg-background-dark">
                 
                 <View className='w-full flex flex-col justify-end items-center gap-4 pb-8' style={{height: '48%'}}>
+                   
                     <View className='w-52 h-52 flex flex-col justify-center items-center bg-[#A9A9A9] rounded-full'>
                         <Image source={profileIcons[user.profileIcon]} className='max-w-48 h-auto' resizeMode='contain'/>
                         <TouchableOpacity 
@@ -105,7 +106,10 @@ const Profile = () => {
                             </Text>
                         </TouchableOpacity>
                     </View>
-
+                    <View className='w-full items-center justify-center flex-row gap-4'>
+                        <View className={`w-2 h-2 rounded-full ${user?.status === "Verified" ? "bg-green-400" : "bg-red-500"}`}/>
+                        <Text className='text-text text-lg dark:text-text-dark'>{user?.status}</Text>
+                    </View>
                     <View className='w-auto h-auto flex-col items-center'>
                         <Text className='text-3xl text-secondary font-semibold'>{`${user.firstName} ${user.lastName}`}</Text>
                         <Text className='text-base text-text dark:text-text-dark'>{user.email}</Text>
