@@ -23,6 +23,9 @@ const guideStore = create((set) => ({
     viewUserGuides: [],
     viewUserInfoError: null, 
     viewUserInfoLoading: false, 
+    bookmarkedGuides: [],
+    isFetchingBookmarkedGuides: null,
+    fetchingBookmarkedGuidesError: null,
     getAllGuides: async () => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
@@ -218,8 +221,8 @@ const guideStore = create((set) => ({
     checkIfBookmarked: async (guideId, userId) => {
         try {
             const res = await axios.post(`${API_URL}guide/is-bookmarked`, {guideId: guideId, userId:userId});
-            console.log(res.data.isBookmarked);
             set({isBookmarked: res.data.isBookmarked});
+            return res.data.isBookmarked;
         } catch (error) {
             console.log("Error updating feedback:", error);
             return error.message;
@@ -265,6 +268,21 @@ const guideStore = create((set) => ({
             return error.message;
         } finally {
             set({viewUserInfoLoading: false})
+        }
+    },
+    getBookmarkedGuides: async (userId) => {
+        try {
+            set({isFetchingBookmarkedGuides: true})
+            console.log(userId);
+            const res = await axios.post(`${API_URL}guide/get-bookmarked-guides`, {userId: userId});
+            console.log(res.data.data);
+            set({bookmarkedGuides: res.data.data});
+        } catch (error) {
+            console.log("Error getting user's info:", error);
+            set({fetchingBookmarkedGuidesError: "Something went wrong."})
+            return error.message;
+        } finally {
+            set({isFetchingBookmarkedGuides: false})
         }
     }
 }));

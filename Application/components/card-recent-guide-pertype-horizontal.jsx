@@ -1,8 +1,9 @@
 import { View, Text, Image, Platform, TouchableOpacity } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback, } from 'react';
 import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
@@ -21,41 +22,67 @@ import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { useColorScheme } from 'nativewind';
+import Fontisto from '@expo/vector-icons/Fontisto';
+import { useColorScheme } from "nativewind";
 
-    const profileIcons = {
-          empty_profile: empty_profile,
-          boy_1: boy_1,
-          boy_2: boy_2,
-          boy_3: boy_3,
-          boy_4: boy_4,
-          girl_1: girl_1,
-          girl_2: girl_2,
-          girl_3: girl_3,
-          girl_4: girl_4,
-          lgbt_1: lgbt_1,
-          lgbt_2: lgbt_2,
-          lgbt_3: lgbt_3,
-          lgbt_4: lgbt_4,
-    }
+import guideStore from "@/store/guide.store";
+import userStore from '@/store/user.store';
+
+const profileIcons = {
+  empty_profile: empty_profile,
+  boy_1: boy_1,
+  boy_2: boy_2,
+  boy_3: boy_3,
+  boy_4: boy_4,
+  girl_1: girl_1,
+  girl_2: girl_2,
+  girl_3: girl_3,
+  girl_4: girl_4,
+  lgbt_1: lgbt_1,
+  lgbt_2: lgbt_2,
+  lgbt_3: lgbt_3,
+  lgbt_4: lgbt_4,
+};
 
 const CardRecentGuidePerTypeHorizontal = ({guide}) => {
     const { colorScheme, toggleColorScheme } = useColorScheme();
 
     const router = useRouter();
+
+    const [bookmark, setBookmark] = useState();
+
+    const user = userStore((state) => state.user);
+    const isBookmarked = guideStore((state) => state.isBookmarked);
+    const checkIfBookmarked = guideStore((state) => state.checkIfBookmarked);
+    const handleBookmark = guideStore((state) => state.handleBookmark);
     
     const handlePress = () => {
       if (guide?._id) {
         router.push(`/guide/${guide._id}`);
-      } 
-      else {
+      } else {
         Alert.alert(
-          'Guide Not Found',
-          'This guide may have been deleted or its link is no longer valid.',
-          [{ text: 'OK' }]
+          "Guide Not Found",
+          "This guide may have been deleted or its link is no longer valid.",
+          [{ text: "OK" }]
         );
       }
     };
+
+    const handleBookmarking = async () => {
+      setBookmark(!bookmark)
+      await handleBookmark(guide?._id, user._id);
+    };
+
+    const fetchBookmarkStatus = async () => {
+      const status = await checkIfBookmarked(guide?._id, user?._id);
+      setBookmark(status);
+    };
+
+    useFocusEffect(
+      useCallback(() => {
+        fetchBookmarkStatus();
+      }, [])
+    );
 
     useEffect(() => {
         const loadTheme = async () => {
@@ -148,11 +175,21 @@ const CardRecentGuidePerTypeHorizontal = ({guide}) => {
             </View>
 
             {/* Bookmark */}
-            <View className="flex-row items-center gap-1">
-              <Text className="dark:text-text-dark">
-                <FontAwesome6 name="bookmark" size={16} />
-              </Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                handleBookmarking();
+              }}
+            >
+              {bookmark ? (
+                <Text className="text-primary dark:text-secondary">
+                  <Fontisto name="bookmark-alt" size={24} />
+                </Text>
+              ) : (
+                <Text className="text-text dark:text-text-dark">
+                  <Fontisto name="bookmark" size={24} />
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
       </View>

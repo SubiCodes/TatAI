@@ -141,7 +141,7 @@ const Profile = () => {
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
-                    <View className='w-full flex-row justify-start items-center gap-2'>
+                    <TouchableOpacity className='w-full flex-row justify-start items-center gap-2' onPress={() => {router.push('/saved/saved-guides')}}>
                         <View className='w-12 h-auto border-0 items-center justify-cente'>
                             <Text className="text-text text-2xl dark:text-text-dark">
                                 <FontAwesome name="bookmark" size={20}/>
@@ -149,7 +149,7 @@ const Profile = () => {
                         </View>
                         <Text className='text-xl font-bold dark:text-text-dark'>Saved</Text>
                         <Text className="text-text text-xl ml-auto dark:text-text-dark"><AntDesign name="right" size={20}/></Text>
-                    </View>
+                    </TouchableOpacity>
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
