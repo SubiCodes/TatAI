@@ -79,12 +79,27 @@ function Guide() {
     navigation.goBack();
   };
 
+  const [bookmark, setBookmark] = useState();
+
+  const fetchBookmarkStatus = async () => {
+    const status = await checkIfBookmarked(id, user?._id);
+    setBookmark(status);
+  };
+
+  const handleBookmarking = async () => {
+    await handleBookmark(id, user._id);
+    fetchBookmarkStatus(id, user._id);
+  };
+
+  useEffect(() => {
+    fetchBookmarkStatus();
+  }, []);
+
   const navigation = useNavigation();
 
   useEffect(() => {
     getGuide(id);
     getFeedbacks(id);
-    checkIfBookmarked(id, user._id);
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -92,7 +107,7 @@ function Guide() {
     try {
       getGuide(id);
       getFeedbacks(id);
-      checkIfBookmarked(id, user._id);
+
     } catch (error) {
       console.error("Error refreshing data:", error);
     } finally {
@@ -153,10 +168,6 @@ function Guide() {
   useEffect(() => {
     checkExistingRating();
   }, [feedbacks]);
-
-  const handleBookmarking = async () => {
-    await handleBookmark(id, user._id);
-  };
 
   const handlePostComment = async () => {
     console.log(comment);
@@ -225,7 +236,7 @@ function Guide() {
             handleBookmarking();
           }}
         >
-          {isBookmarked ? (
+          {bookmark ? (
             <Text className="text-primary dark:text-secondary">
               <Fontisto name="bookmark-alt" size={24} />
             </Text>

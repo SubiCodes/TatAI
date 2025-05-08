@@ -16,7 +16,6 @@ isLoading: false,
 error: null,
 userLogin: async (email, password) => {
     set({ error: null, isLoading: true });
-    console.log('API_URL:', API_URL); 
     try {
       if (email.trim() === '' || password.trim() === '') {
         set({ error: 'Please fill all fields.', isLoading: false });
@@ -147,7 +146,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
       const token = await AsyncStorage.getItem('token');
       const decryptedToken = await jwtDecode(token);
       const res = await axios.get(`${API_URL}preference/${decryptedToken.userID}`);
-      console.log(res.data.data);
       set({preference: res.data.data})
     } catch (error) {
       Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
@@ -159,7 +157,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
       console.log("Id: ", id);
       console.log("search: ", search);
       const res = await axios.post(`${API_URL}preference/add-search`, {userId: id, search: search});
-      console.log(res.data.data);
       set({preference: res.data.data})
     } catch (error) {
       Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
@@ -171,7 +168,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
       console.log("Id: ", id);
       console.log("search: ", search);
       const res = await axios.post(`${API_URL}preference/remove-search`, {userId: id, search: search});
-      console.log(res.data.data);
       set({preference: res.data.data})
     } catch (error) {
       Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
@@ -182,7 +178,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
     try {
       console.log("Id: ", id);
       const res = await axios.post(`${API_URL}preference/clear-search`, {userId: id});
-      console.log(res.data.data);
       set({preference: res.data.data})
     } catch (error) {
       Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");

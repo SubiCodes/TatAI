@@ -19,27 +19,24 @@ import CardRecentGuidePerTypeVertical from "@/components/card-recent-guide-perty
 import RBSheet from "react-native-raw-bottom-sheet";
 
 import guideStore from "@/store/guide.store";
+import userStore from "@/store/user.store";
 
-const Type = () => {
-  const { type } = useLocalSearchParams();
+const SavedGuides = () => {
   const router = useRouter();
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const [refreshing, setRefreshing] = useState(false);
 
-  const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
-  const errorFetchingGuides = guideStore((state) => state.errorFetchingGuides);
+  const user = userStore((state) => state.user);
+  const bookmarkedGuides = guideStore((state) => state.bookmarkedGuides);
+  const fetchingBookmarkedGuidesError = guideStore((state) => state.fetchingBookmarkedGuidesError);
+  const getBookmarkedGuides = guideStore((state) => state.getBookmarkedGuides);
+  const isFetchingBookmarkedGuides = guideStore((state) => state.isFetchingBookmarkedGuides);
 
-  const getAllGuides = guideStore((state) => state.getAllGuides);
-  const guides = guideStore((state) => state.guides);
-  const getLatestGuidePerTypeAll = guideStore(
-    (state) => state.getLatestGuidePerTypeAll
-  );
 
   const handleGoBack = () => {
     router.back();
   }
 
-  const sheetHeight = type === 'recent' ? 450 : 320;
 
   const filterSheet = useRef();
 
@@ -69,7 +66,7 @@ const Type = () => {
   const [searchText, setSearchText] = useState('');
 
 // Filter Guides
-const filteredGuides = guides
+const filteredGuides = bookmarkedGuides
   .filter((guide) => {
     // Text search filter
     const matchesSearch = searchText === '' || 
@@ -105,11 +102,8 @@ const filteredGuides = guides
   });
 
   const fetchGuides = async () => {
-    if (type === "recent") {
-      getAllGuides();
-      return;
-    }
-    getLatestGuidePerTypeAll(type);
+    console.log("USER ID: ", user._id);
+    getBookmarkedGuides(user?._id)
   };
 
   const onRefresh = useCallback(async () => {
@@ -121,7 +115,7 @@ const filteredGuides = guides
     } finally {
       setRefreshing(false);
     }
-  }, [type]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -184,8 +178,8 @@ const filteredGuides = guides
             borderTopRightRadius: 20,
             paddingHorizontal: 16,
             backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-            maxHeight: sheetHeight,
-            minHeight: sheetHeight,
+            maxHeight: 450,
+            minHeight: 450,
           },
           draggableIcon: {
             backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
@@ -198,65 +192,63 @@ const filteredGuides = guides
         }}
       >
         <View className="w-full h-full flex py-4">
-          {type === "recent" ? (
-            <View className="w-full flex flex-col gap-4">
-              <Text className="text-text text-2xl font-bold dark:text-text-dark mb-2 mt-2">
-                Filter category
-              </Text>
-              <View className="w-full flex-row gap-6 items-center flex-wrap">
-                <View className="flex-row gap-2 items-center">
-                  <CheckBox
-                    className="border-white dark:border-black"
-                    value={tempCategory === "all"}
-                    onValueChange={() => setTempCategory("all")}
-                  />
-                  <Text className="text-lg text-text dark:text-text-dark">
-                    All
-                  </Text>
-                </View>
-                <View className="flex-row gap-2 items-center">
-                  <CheckBox
-                    className="border-white dark:border-black"
-                    value={tempCategory === "repair"}
-                    onValueChange={() => setTempCategory("repair")}
-                  />
-                  <Text className="text-lg text-text dark:text-text-dark">
-                    Repair
-                  </Text>
-                </View>
-                <View className="flex-row gap-2 items-center">
-                  <CheckBox
-                    className="border-white dark:border-black"
-                    value={tempCategory === "tool"}
-                    onValueChange={() => setTempCategory("tool")}
-                  />
-                  <Text className="text-lg text-text dark:text-text-dark">
-                    Tool
-                  </Text>
-                </View>
-                <View className="flex-row gap-2 items-center">
-                  <CheckBox
-                    className="border-white dark:border-black"
-                    value={tempCategory === "diy"}
-                    onValueChange={() => setTempCategory("diy")}
-                  />
-                  <Text className="text-lg text-text dark:text-text-dark">
-                    DIY
-                  </Text>
-                </View>
-                <View className="flex-row gap-2 items-center">
-                  <CheckBox
-                    className="border-white dark:border-black"
-                    value={tempCategory === "cooking"}
-                    onValueChange={() => setTempCategory("cooking")}
-                  />
-                  <Text className="text-lg text-text dark:text-text-dark">
-                    Cooking
-                  </Text>
-                </View>
+          <View className="w-full flex flex-col gap-4">
+            <Text className="text-text text-2xl font-bold dark:text-text-dark mb-2 mt-2">
+              Filter category
+            </Text>
+            <View className="w-full flex-row gap-6 items-center flex-wrap">
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempCategory === "all"}
+                  onValueChange={() => setTempCategory("all")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  All
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempCategory === "repair"}
+                  onValueChange={() => setTempCategory("repair")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  Repair
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempCategory === "tool"}
+                  onValueChange={() => setTempCategory("tool")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  Tool
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempCategory === "diy"}
+                  onValueChange={() => setTempCategory("diy")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  DIY
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempCategory === "cooking"}
+                  onValueChange={() => setTempCategory("cooking")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  Cooking
+                </Text>
               </View>
             </View>
-          ) : null}
+          </View>
           <View className="w-full flex flex-col gap-4">
             <Text className="text-text text-2xl font-bold dark:text-text-dark mb-2 mt-4">
               Filter date
@@ -353,13 +345,13 @@ const filteredGuides = guides
         {/* Page Title */}
         <View className="w-full py-4 px-6">
           <Text className="text-text text-2xl font-bold dark:text-text-dark">
-            {type[0].toUpperCase() + type.substring(1)} Guides
+            Saved Guides
           </Text>
         </View>
 
         {/* Guides Content */}
         <View className="w-full flex flex-col items-center gap-4 px-6">
-          {isFetchingGuides ? (
+          {isFetchingBookmarkedGuides ? (
             <View className="w-full items-center py-4">
               <ActivityIndicator size="large" color="blue" />
             </View>
@@ -374,4 +366,4 @@ const filteredGuides = guides
   );
 };
 
-export default Type;
+export default SavedGuides;
