@@ -3,13 +3,20 @@ import CheckBox from 'expo-checkbox'
 import Toast from '@/components/toast/error-toast.jsx'
 import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import { API_URL } from '@/constants/links.js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { jwtDecode } from 'jwt-decode'
 import { router } from 'expo-router'
 import { useColorScheme } from 'nativewind'
 
+import userStore from '@/store/user.store'
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
 const ChangePassword = () => {
+
+  const user = userStore((state) => state.user);
 
   const {colorScheme, toggleColorScheme} = useColorScheme();
 
@@ -73,9 +80,7 @@ const ChangePassword = () => {
 
     try {
       if (!currentPasswordError && !newPasswordError && !newReEnteredPasswordError){
-        const token = await AsyncStorage.getItem('token');
-        const decryptedToken = await jwtDecode(token);
-        const changePass = await axios.post(`${API_URL}/api/v1/auth/change-password/${decryptedToken.userID}`, {currentPassword: currentPassword, newPassword: newPassword}, 
+        const changePass = await axios.post(`${API_URL}auth/change-password/${user?._id}`, {currentPassword: currentPassword, newPassword: newPassword}, 
           { 
             validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
           });
