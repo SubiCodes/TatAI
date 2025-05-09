@@ -381,7 +381,6 @@ const Personalization = () => {
     if (loading){
         return (
           <View className='w-screen h-screen items-center justify-center gap-4'>
-            <StatusBar translucent={true} backgroundColor={'transparent'}/>
             <ActivityIndicator size={32} color={'blue'}/>
             <Text>Loading Assets...</Text>
           </View>

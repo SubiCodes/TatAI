@@ -219,7 +219,11 @@ const ModalAddAccount = forwardRef(({ isSuperAdmin, shouldReload}, ref) => {
                         <input
                             type="date"
                             className="input border-gray-600 border-1 rounded-lg font-normal"
-                            value={date ? date.toISOString().split("T")[0] : ""}
+                            value={
+                                date instanceof Date && !isNaN(date)
+                                    ? date.toISOString().split("T")[0]
+                                    : ""
+                                }
                             onChange={(e) => {
                                 const selectedDate = new Date(e.target.value);
                                 setDate(selectedDate);

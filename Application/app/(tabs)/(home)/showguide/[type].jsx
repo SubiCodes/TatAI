@@ -201,7 +201,7 @@ const filteredGuides = guides
           {type === "recent" ? (
             <View className="w-full flex flex-col gap-4">
               <Text className="text-text text-2xl font-bold dark:text-text-dark mb-2 mt-2">
-                Filter category
+                Filter by category
               </Text>
               <View className="w-full flex-row gap-6 items-center flex-wrap">
                 <View className="flex-row gap-2 items-center">
@@ -259,7 +259,7 @@ const filteredGuides = guides
           ) : null}
           <View className="w-full flex flex-col gap-4">
             <Text className="text-text text-2xl font-bold dark:text-text-dark mb-2 mt-4">
-              Filter date
+              Filter by date
             </Text>
             <View className="w-full flex-row gap-6 items-center flex-wrap">
               <View className="flex-row gap-2 items-center">

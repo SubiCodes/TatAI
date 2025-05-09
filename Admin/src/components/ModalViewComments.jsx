@@ -228,10 +228,10 @@ const ModalViewComments = forwardRef((_, ref) => {
                   <div className="flex flex-row h-4">
                     <div className="flex flex-col">
                       <h3 className="text-md font-semibold">
-                        {comment?.userInfo?.name || "John Doe"}
+                        {comment?.userInfo?.name || "Deleted User"}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {comment?.userInfo?.email || "johndoe@example.com"}
+                        {comment?.userInfo?.email || ""}
                       </p>
                     </div>
                   </div>

@@ -10,7 +10,7 @@ export const getUserData = async (req, res) => {
         const user = await User.findOne({_id: _id});
 
         if (!user) {
-            return res.status(404).json({success: false, message: "User does not exist."})
+            return res.status(400).json({success: false, message: "User does not exist."})
         }
 
         return res.status(200).json({success: true, message: "User data fethced successfully", data: user})

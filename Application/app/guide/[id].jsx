@@ -569,7 +569,7 @@ function Guide() {
         >
           <View className="py-4">
             <Text className="text-xl font-bold mb-4 text-text dark:text-text-dark">
-              Delete Rating?
+              Remove Rating?
             </Text>
             <TouchableOpacity
               className="bg-red-400 dark:bg-red-500 py-3 rounded-lg items-center mb-4"
@@ -704,7 +704,7 @@ function Guide() {
                     />
                     <View className="mr-4">
                       <Text className="text-md font-semibold dark:text-text-dark">
-                        {comment?.userInfo?.name || "Anonymous"}
+                        {comment?.userInfo?.name || "Deleted User"}
                       </Text>
                       <Text className="text-sm text-gray-500">
                         {comment?.userInfo?.email || ""}
