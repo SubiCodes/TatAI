@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const SettingsMainPage = () => {
 
     const {colorScheme, toggleColorScheme} = useColorScheme();

@@ -8,7 +8,13 @@ import axios from 'axios';
 import { API_URL } from '@/constants/links.js';
 import { useColorScheme } from 'nativewind';
 
+import userStore from '@/store/user.store';
+
 const PreferredName = () => {
+
+  const preference = userStore((state) => state.preference);
+  const getUserPreference = userStore((state) => state.getUserPreference);
+  const updateUserPreference = userStore((state) => state.updateUserPreference);
 
   const {colorScheme, toggleColorScheme} = useColorScheme();
   const [preferredName, setPreferredName] = useState('Something');
@@ -18,21 +24,11 @@ const PreferredName = () => {
   
   const [loading, setLoading] = useState(false);
   
-  const getUserPreference = async () => {
+  const getPreference = async () => {
     setFetchingData(true);
-    const token = await AsyncStorage.getItem('token');
-    const decryptedToken = jwtDecode(token);
     try {
-      const preference = await axios.get(`${API_URL}/api/v1/preference/${decryptedToken.userID}`, { 
-        validateStatus: (status) => status < 500,
-      });
-      
-      if (!preference.data.success) {
-        Alert.alert("⚠️Oops", preference.data.message);
-        return;
-      }
-      setPreferredName(preference.data.data.preferredName);
-      return;
+      const res = await getUserPreference();
+      setPreferredName(preference?.preferredName);
     } catch (error) {
       console.log(error.message);
       setFetchingError(true);
@@ -44,19 +40,11 @@ const PreferredName = () => {
 
   const handleSaveChange = async () => {
     setLoading(true);
-    const token = await AsyncStorage.getItem('token');
-    const decryptedToken = jwtDecode(token);
     try {
-        const res = await axios.put(`${API_URL}/api/v1/preference/${decryptedToken.userID}`, {preferredName: preferredName},{ 
-            validateStatus: (status) => status < 500,
-        });
-        if(!res.data.success){
-            Alert.alert("⚠️Oops", res.data.message);
-            return;
-        };
-        Alert.alert("Change Successful", res.data.message);
+        const res = await updateUserPreference({preferredName: preferredName})
+        Alert.alert("Change Successful", res);
     } catch (error) {
-        Alert.alert("⚠️Oops", error.message);
+        Alert.alert("Oops", error.message);
     }finally{
         setLoading(false);
         getUserPreference();
@@ -65,7 +53,7 @@ const PreferredName = () => {
 
   useFocusEffect(
       useCallback(() => {
-          getUserPreference();
+        getPreference();
       }, [])
   );
 

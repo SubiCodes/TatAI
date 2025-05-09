@@ -113,33 +113,36 @@ getUserInfo: async () => {
     }    
 },
 editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, userID) => {
-    set({ error: null, isLoading: true });
-    try {
-      const res = await axios.put(`${API_URL}user/${userID}`, {
+  set({ error: null, isLoading: true });
+  try {
+    const res = await axios.put(`${API_URL}user/${userID}`, {
+      firstName: firstName,
+      lastName: lastName,
+      birthday: birthDate,
+      gender: gender,
+      profileIcon: activeProfileIcon,
+    });
+
+    // Show success message
+    Alert.alert("Success", "Your changes have been saved.");
+
+    // Update the user in store with new values
+    set((state) => ({
+      user: state.user ? {
+        ...state.user,
         firstName: firstName,
         lastName: lastName,
         birthday: birthDate,
         gender: gender,
         profileIcon: activeProfileIcon,
-      });
-  
-      // Update the user in store with new values
-      set((state) => ({
-        user: state.user ? {
-          ...state.user,
-          firstName: firstName,
-          lastName: lastName,
-          birthday: birthDate,
-          gender: gender,
-          profileIcon: activeProfileIcon,
-        } : null, // Handle the case where user might be null
-      }));
-    } catch (error) {
-      Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
-      console.log('Error in the store: ',error.message);
-    } finally {
-      set({ isLoading: false });
-    }
+      } : null,
+    }));
+  } catch (error) {
+    Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
+    console.log('Error in the store: ', error.message);
+  } finally {
+    set({ isLoading: false });
+  }
 },
   getUserPreference: async () => {
     try {
@@ -147,9 +150,29 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
       const decryptedToken = await jwtDecode(token);
       const res = await axios.get(`${API_URL}preference/${decryptedToken.userID}`);
       set({preference: res.data.data})
+      return res.data.data;
     } catch (error) {
-      Alert.alert("Oops", "Cannot apply changes. Please check your connection or contact customer support.");
+      Alert.alert("Oops", "Cannot fetch preferences. Please check your connection or contact customer support.");
       console.log('Error in the store preference: ',error.message);
+    }
+  },
+  updateUserPreference: async (updatedFields) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const decryptedToken = await jwtDecode(token);
+      const res = await axios.put(
+        `${API_URL}preference/${decryptedToken.userID}`,
+        updatedFields
+      );
+      console.log("Updated user preference:", res.data.data);
+      set({ preference: res.data.data });
+      return res.data.message
+    } catch (error) {
+      Alert.alert(
+        "Oops",
+        "Cannot apply changes. Please check your connection or contact customer support."
+      );
+      console.log("Error updating user preference:", error.message);
     }
   },
   addSearch: async (id, search) => {

@@ -9,7 +9,13 @@ import axios from 'axios';
 import { API_URL } from '@/constants/links';
 import { useFocusEffect } from 'expo-router';
 
+import userStore from '@/store/user.store';
+
 const RepairExpertise = () => {
+
+    const preference = userStore((state) => state.preference);
+    const getUserPreference = userStore((state) => state.getUserPreference);
+    const updateUserPreference = userStore((state) => state.updateUserPreference);
 
     const [activeRadioButton, setActiveRadioButton] = useState('formal');
 
@@ -19,51 +25,37 @@ const RepairExpertise = () => {
     const [loading, setLoading] = useState(false);
 
     const handleSaveChange = async () => {
-        setLoading(true);
-        const token = await AsyncStorage.getItem('token');
-        const decryptedToken = jwtDecode(token);
-        try {
-            const res = await axios.put(`${API_URL}/api/v1/preference/${decryptedToken.userID}`, {skillLevel: activeRadioButton},{ 
-                validateStatus: (status) => status < 500,
-            });
-            if(!res.data.success){
-                Alert.alert("Oops", res.data.message);
-                return;
-            };
-            Alert.alert("Change Successful", res.data.message);
-        } catch (error) {
-            Alert.alert("Oops", error.message);
-        }finally{
-            setLoading(false);
-            getUserPreference();
-        }
-    }
+      setLoading(true);
+      try {
+        const res = await updateUserPreference({
+            skillLevel: activeRadioButton,
+        });
+        Alert.alert("Change Successful", res);
+      } catch (error) {
+        Alert.alert("Oops", error.message);
+      } finally {
+        setLoading(false);
+        getUserPreference();
+      }
+    };
 
-    const getUserPreference = async () => {
-        setFetchingData(true);
-        const token = await AsyncStorage.getItem('token');
-        const decryptedToken = jwtDecode(token);
-        try {
-            const preference = await axios.get(`${API_URL}/api/v1/preference/${decryptedToken.userID}`, { 
-                validateStatus: (status) => status < 500,
-            });
-            if(!preference.data.success){
-                Alert.alert("Oops", preference.data.message);
-                return;
-            };
-            setActiveRadioButton(preference.data.data.skillLevel);
-            return;
-        } catch (error) {
-            setFetchingError(true)
-            Alert.alert("Oops", 'Error fetching data.');
-        }finally{
-            setFetchingData(false);
-        }
+    const getPreference = async () => {
+      setFetchingData(true);
+      try {
+        const res = await getUserPreference();
+        setActiveRadioButton(preference?.skillLevel);
+      } catch (error) {
+        console.log(error.message);
+        setFetchingError(true);
+        Alert.alert("⚠️Oops", "Error Fetching User Preference");
+      } finally {
+        setFetchingData(false);
+      }
     };
 
     useFocusEffect(
         useCallback(() => {
-            getUserPreference();
+            getPreference();
         }, [])
     )
 
