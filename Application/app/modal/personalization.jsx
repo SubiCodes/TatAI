@@ -1,12 +1,16 @@
 import { View, Text, SafeAreaView, StatusBar, FlatList, Dimensions, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Image, ActivityIndicator } from 'react-native'
 import React, { useCallback, useRef, useState } from 'react'
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router'
-import { API_URL } from '@/constants/links.js'
+import Constants from 'expo-constants';
+import axios from 'axios';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
 
 import illustration from '@/assets/images/illustrations/preference_illustration.png'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
-import axios from 'axios'
 
 const {width, height} = Dimensions.get('window');
 
@@ -34,7 +38,7 @@ const Personalization = () => {
             }
             const decodedToken = await jwtDecode(token);
             setUserID(decodedToken.userID);
-            const preference = await axios.get(`${API_URL}/api/v1/preference/${decodedToken.userID}`, 
+            const preference = await axios.get(`${API_URL}preference/${decodedToken.userID}`, 
                 { 
                   validateStatus: (status) => status < 500,
                 }
@@ -45,7 +49,7 @@ const Personalization = () => {
             }
             setLoading(false);
         } catch (error) {
-            Alert.alert("Oops⚠️", "Error adding preference to your account");
+            Alert.alert("Oops⚠️", "Error loading preference of your account");
             console.log(error.message);
             setLoading(false);
         }
@@ -276,12 +280,14 @@ const Personalization = () => {
 
     const submitPreference = async() => {
         setButtonLoading(true);
-        console.log(`${preferredNameToBeCalled}, ${preferredToneToBeUsed}, ${toolKnowledgeLevel}, ${skillLevel}`);
+        console.log(`----------------------- ${userID} ${preferredNameToBeCalled}, ${preferredToneToBeUsed}, ${toolKnowledgeLevel}, ${skillLevel}`);
         try {
-            const res = await axios.post(`${API_URL}/api/v1/preference`, {userId: userID, preferredTone: preferredToneToBeUsed, toolFamiliarity: toolKnowledgeLevel, skillLevel: skillLevel}, 
+            const res = await axios.post(`${API_URL}preference`, {userId: userID, preferredTone: preferredToneToBeUsed, toolFamiliarity: toolKnowledgeLevel, skillLevel: skillLevel}, 
                 { 
                   validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
                 })
+            console.log("result on submit pref: ", res);
+            
             if (!res.data.success){
                 Alert.alert("Oops⚠️", res.data.message, [
                     {text: "Okay"}
@@ -357,7 +363,7 @@ const Personalization = () => {
 
     const Indicator = () => {
         return(
-            <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center", height: height * .10}} className='mt-14'>
+            <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center", height: height * .10}} >
                 <View style={{width: 280, height: 8, backgroundColor: '#D3D3D3'}} className='rounded'>
                     <View 
                          style={{
@@ -385,7 +391,6 @@ const Personalization = () => {
 
   return (
     <>
-        <StatusBar translucent={true} backgroundColor="transparent" />
         <SafeAreaView style={{ flex: 1}}>
             <Indicator/>
             <FlatList 

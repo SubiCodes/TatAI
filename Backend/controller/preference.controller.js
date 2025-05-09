@@ -3,16 +3,16 @@ import User from "../models/user.model.js";
 import mongoose from "mongoose";
 
 export const getPreference = async (req, res) => {
-    const { _id } = req.params;
+    const { userId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(_id)) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
         return res.status(400).json({ success: false, message: "Invalid user ID format." });
     }
 
     try {
-        const preference = await UserPreference.findOne({ userId: _id });
+        const preference = await UserPreference.findOne({ userId });
         if (!preference) {
-            return res.status(404).json({ success: false, message: "User yet to set up preference not." });
+            return res.status(200).json({ success: false, message: "User yet to set up preference not." });
         }
         res.status(200).json({ success: true, message: "Preference retrieved successfully.", data: preference });
     } catch (error) {

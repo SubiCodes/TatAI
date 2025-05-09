@@ -113,8 +113,6 @@ const guideStore = create((set) => ({
                 userId,
                 rating,
             });
-
-            console.log("Rating res: ", res.data.data);
     
             const newFeedback = {
                 ...res.data.data,
@@ -147,8 +145,6 @@ const guideStore = create((set) => ({
                 userId,
                 comment,
             });
-            
-            console.log("Comment res: ", res.data.data);
             
 
             const newFeedback = {
@@ -196,7 +192,6 @@ const guideStore = create((set) => ({
                 comment,
             });
     
-            console.log("Feedback updated: ", res.data.data);
     
             // Update the feedbacks state with the updated feedback
             set((state) => ({
@@ -212,7 +207,6 @@ const guideStore = create((set) => ({
     deleteRating: async (guideId, userId) => {
         try {
             const res = await axios.post(`${API_URL}guide/delete-rating`, {guideId: guideId, userId: userId});
-            console.log(res.data.data);
         } catch (error) {
             console.log("Error updating feedback:", error);
             return error.message;
@@ -231,7 +225,6 @@ const guideStore = create((set) => ({
     handleBookmark: async (guideId, userId) => {
         try {
             const res = await axios.post(`${API_URL}guide/bookmark`, {guideId: guideId, userId:userId})
-            console.log(res.data);
             if (res.data.message === 'created') { 
                 set({isBookmarked: true});
                 return;
@@ -260,7 +253,6 @@ const guideStore = create((set) => ({
         try {
             set({viewUserInfoLoading: true})
             const res = await axios.get(`${API_URL}guide/user-guides/${userId}`);
-            console.log(res.data.data);
             set({viewUserGuides: res.data.data});
         } catch (error) {
             console.log("Error getting user's info:", error);
@@ -273,9 +265,7 @@ const guideStore = create((set) => ({
     getBookmarkedGuides: async (userId) => {
         try {
             set({isFetchingBookmarkedGuides: true})
-            console.log(userId);
             const res = await axios.post(`${API_URL}guide/get-bookmarked-guides`, {userId: userId});
-            console.log(res.data.data);
             set({bookmarkedGuides: res.data.data});
         } catch (error) {
             console.log("Error getting user's info:", error);

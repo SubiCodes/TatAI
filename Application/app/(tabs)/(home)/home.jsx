@@ -118,8 +118,7 @@ const Home = () => {
 
   const checkVerified = async () => {
     try {
-      if (user) {
-        if (user.status === 'Banned') {
+        if (user?.status === 'Banned') {
           Alert.alert(
             "Account Banned",
             "Your account has been banned. Please contact tataihomeassistant@gmail.com for more information.",
@@ -137,21 +136,15 @@ const Home = () => {
           return;
         }
 
-        if (user.status === "Unverified") {
+        if (user?.status === "Unverified") {
           await AsyncStorage.removeItem("token");
-          await router.replace(`/(auth-screens)/verify-account/${user.email}`);
+          await router.replace(`/(auth-screens)/verify-account/${user?.email}`);
           return;
         }
 
-        const preference = await axios.get(`${API_URL}preference/${user._id}`, {
-          validateStatus: (status) => status < 500,
-        });
-
-        if (!preference.data.success) {
-          await router.push("/modal/personalization");
-          return;
-        }
-      }
+        const preference = await getUserPreference()
+        console.log("Preference: ",  preference);
+      
     } catch (error) {
       console.log("error at home: ", error.message);
     }
@@ -186,25 +179,12 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const checkVerifications = async () => {
-      await checkUserLoggedIn();
-      await checkVerified();
-    };
-    checkVerifications();
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      checkVerified()
-    }, [])
-  )
-
-
-  useEffect(() => {
+    checkUserLoggedIn();
     fetchGuides();
     getUsers();
     getGuides();
     getUserPreference();
+    checkVerified();
   }, []);
 
 

@@ -1,6 +1,5 @@
 import { View, Text, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Alert, StatusBar } from 'react-native'
 import WelcomeBotHeader from '@/components/welcomeBotHeader.jsx';
-import { API_URL } from '@/constants/links';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode'
 import { useEffect, useRef, useState } from 'react';
@@ -8,7 +7,12 @@ import { useNavigation, useRouter } from 'expo-router';
 import React from 'react'
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Constants from 'expo-constants';
 import axios from 'axios';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
 
 const AskName = () => {
     const navigation = useNavigation();
@@ -54,7 +58,7 @@ const AskName = () => {
 
         try {
             const res = await axios.put(
-                `${API_URL}/api/v1/user/${userID}`,
+                `${API_URL}user/${userID}`,
                 { preferredName: lastUserMessage },
                 { validateStatus: (status) => status < 500 }
             );
@@ -229,8 +233,7 @@ const AskName = () => {
             <WelcomeBotHeader />
 
             <ScrollView className='w-full h-screen flex-col border-0 pt-0 px-4' contentContainerStyle={{ gap: 12 }} ref={scrollViewRef}>
-                <StatusBar translucent={true} backgroundColor={'#FAF9F6'} />
-                <View className='w-40 h-40 justify-center items-center rounded-full bg-gray-200 self-center mb-8'></View>
+                <View className='w-40 h-40 justify-center items-center rounded-full bg-gray-200 self-center'></View>
 
                 {messages.map((msg, index) => (
                     <View
@@ -266,7 +269,7 @@ const AskName = () => {
                 )}
             </ScrollView>
 
-            <View className='w-full h-auto justify-center items-center flex-row gap-2 pb-0 bg-transparent'>
+            <View className='w-full h-auto justify-center items-center flex-row gap-2 pb-0 bg-transparent pb-4'>
                 <TextInput className='w-72 h-12 rounded bg-gray-200 p-2' placeholder='Send a message...' value={typedMessage} onChangeText={setTypedMessage} editable={!waitingForResponse} />
                 <TouchableOpacity className='w-12 h-12 rounded bg-secondary items-center justify-center' onPress={handleSendMessage} disabled={waitingForResponse}>
                     <FontAwesome name="send" size={24} color="white" />

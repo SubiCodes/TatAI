@@ -60,7 +60,7 @@ logoutUser: async () => {
             try {
               await AsyncStorage.removeItem('token');
               set({ user: null });
-              router.replace('/(auth-screens)/signin');
+              router.dismissTo('/(auth-screens)/signin');
             } catch (error) {
               set({ error: error.message });
             }
@@ -147,13 +147,21 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
   getUserPreference: async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const decryptedToken = await jwtDecode(token);
+      const decryptedToken = jwtDecode(token);
       const res = await axios.get(`${API_URL}preference/${decryptedToken.userID}`);
+      if (!res.data.success) {
+        await router.push("/modal/personalization");
+        return;
+      }
       set({preference: res.data.data})
       return res.data.data;
     } catch (error) {
-      Alert.alert("Oops", "Cannot fetch preferences. Please check your connection or contact customer support.");
+      Alert.alert(
+        "Oops",
+        error.message
+      );
       console.log('Error in the store preference: ',error.message);
+      return { success: false }
     }
   },
   updateUserPreference: async (updatedFields) => {
@@ -177,8 +185,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
   },
   addSearch: async (id, search) => {
     try {
-      console.log("Id: ", id);
-      console.log("search: ", search);
       const res = await axios.post(`${API_URL}preference/add-search`, {userId: id, search: search});
       set({preference: res.data.data})
     } catch (error) {
@@ -188,8 +194,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
   },
   removeSearch: async (id, search) => {
     try {
-      console.log("Id: ", id);
-      console.log("search: ", search);
       const res = await axios.post(`${API_URL}preference/remove-search`, {userId: id, search: search});
       set({preference: res.data.data})
     } catch (error) {
@@ -199,7 +203,6 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
   },
   clearSearch: async (id) => {
     try {
-      console.log("Id: ", id);
       const res = await axios.post(`${API_URL}preference/clear-search`, {userId: id});
       set({preference: res.data.data})
     } catch (error) {

@@ -6,7 +6,7 @@ const preferenceRouter = Router();
 preferenceRouter.post('/add-search', addSearchHistory)
 preferenceRouter.post('/remove-search', removeSearch)
 preferenceRouter.post('/clear-search', clearSearch)
-preferenceRouter.get('/:_id', getPreference);
+preferenceRouter.get('/:userId', getPreference);
 preferenceRouter.post('/', createPreference);
 preferenceRouter.put('/:id', updatePreference);
 
