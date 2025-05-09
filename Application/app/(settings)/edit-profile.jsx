@@ -184,7 +184,7 @@ const EditProfile = () => {
 
                 <View className='w-full h-auto items-center justify-center'>
                   <TouchableOpacity className='w-4/5 h-12 bg-primary items-center justify-center rounded-3xl' onPress={handleChangeActiveProfileIcon}>
-                    <Text className='text-lg font-extrabold text-white'>Save</Text>
+                    <Text className='text-lg font-extrabold text-white'>Select</Text>
                   </TouchableOpacity>
                 </View>
 

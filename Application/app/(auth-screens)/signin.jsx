@@ -168,7 +168,7 @@ const SignIn = () => {
 
             <View className="flex-column items-center min-w-full w-full mt-2 mb-2">
               <Text className='text-gray-400 text-sm'>By continuing your aggreeing to our</Text>
-              <Text className='text-gray-400 text-sm'><Link className='text-black font-bold text-sm' href={'/user-agreement'} >User agreement</Link> and <Link className='text-black font-bold text-sm' href={'/privacy-policy'}>Privacy Policy.</Link></Text>  
+              <Text className='text-gray-400 text-sm'><Link className='text-black font-bold text-sm' href={'/user-agreement'} >Terms and Conditions</Link> and <Link className='text-black font-bold text-sm' href={'/privacy-policy'}>Privacy Policy.</Link></Text>  
             </View>
 
           </View>

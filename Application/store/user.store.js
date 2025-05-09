@@ -85,8 +85,20 @@ checkUserLoggedIn: async () => {
       const res = await axios.get(`${API_URL}user/${decodedToken.userID}`);
       set({ user: res.data.data });
     } catch (error) {
+      await AsyncStorage.removeItem('token')
+      Alert.alert(
+      "Oops",
+      "Unable to login.",
+      [
+        {
+          text: "OK",
+          onPress: () => router.dismissTo("/(auth-screens)/signin"),
+        },
+      ],
+      { cancelable: false }
+    );
       console.error('checkUserLoggedIn error:', error.message);
-      set({ error: error.message });
+      set({ error: "User not found"});
     } finally {
       set({ isLoading: false });
       if (shouldRedirect) {

@@ -158,15 +158,34 @@ const Home = () => {
     if (toolGuides.length === 0) getLatestGuidePerType("tool");
   };
 
+  const retry = () => {
+    fetchGuides();
+    getUsers();
+    getGuides();
+    checkVerified();
+    loadTheme();
+  }
+
+  const loadTheme = async () => {
+      try {
+        const storedTheme = await AsyncStorage.getItem("theme");
+        if (storedTheme && storedTheme !== colorScheme) {
+          toggleColorScheme();
+        }
+      } catch (error) {
+        console.error("Failed to load theme:", error);
+      }
+    };
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      loadTheme()
       await getLatestGuide();
       await getLatestGuidePerType("repair");
       await getLatestGuidePerType("diy");
       await getLatestGuidePerType("cooking");
       await getLatestGuidePerType("tool");
-      await checkUserLoggedIn();
       fetchGuides();
       getUsers();
       getGuides();
@@ -183,22 +202,11 @@ const Home = () => {
     fetchGuides();
     getUsers();
     getGuides();
-    getUserPreference();
     checkVerified();
   }, []);
 
 
   useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        const storedTheme = await AsyncStorage.getItem("theme");
-        if (storedTheme && storedTheme !== colorScheme) {
-          toggleColorScheme();
-        }
-      } catch (error) {
-        console.error("Failed to load theme:", error);
-      }
-    };
     loadTheme();
   }, []);
 
@@ -209,7 +217,10 @@ const Home = () => {
         <Text className="text-3xl font-extrabold text-red-500">
           {error || errorFetchingGuides}
         </Text>
-        <Text>Please connect to a stable internet.</Text>
+        <Text className="text-text dark:text-text-dark">Please connect to a stable internet.</Text>
+        <TouchableOpacity className="px-4 py-2 items-center justify-center bg-primary dark:bg-secondary mt-4 rounded-lg" onPress={retry}>
+          <Text>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }

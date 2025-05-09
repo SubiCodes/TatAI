@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload, deleteImageByUrl, createGuide, updateGuide, getGuides, getGuidesPerType, getGuide, getUserGuides, deleteGuide, updateGuideStatus, addFeedback, getFeedback, getUserFeedback, getAllComments, hideFeedback, handleBookmark, isBookmarked, deleteRating, getGuidesAccepted, getUserAndGuideBaseOnSearch, getBookmarkedGuides, getLatestGuides } from "../controller/guide.controller.js";
+import { upload, deleteImageByUrl, createGuide, updateGuide, getGuides, getGuidesPerType, getGuide, getUserGuides, deleteGuide, updateGuideStatus, addFeedback, getFeedback, getUserFeedback, getAllComments, hideFeedback, handleBookmark, isBookmarked, deleteRating, getGuidesAccepted, getUserAndGuideBaseOnSearch, getBookmarkedGuides, getLatestGuides, getUserGuidesAccepted } from "../controller/guide.controller.js";
 
 const guideRouter = Router();
 
@@ -16,6 +16,7 @@ guideRouter.get('/accepted', getGuidesAccepted);
 guideRouter.post('/pertype', getGuidesPerType);
 guideRouter.post('/latest', getLatestGuides);
 guideRouter.get('/user-guides/:_id', getUserGuides);
+guideRouter.get('/user-guides-accepted/:_id', getUserGuidesAccepted);
 guideRouter.post('/addFeedback', addFeedback);
 guideRouter.post('/delete-rating', deleteRating)
 guideRouter.put('/guideStatus/:_id', updateGuideStatus);

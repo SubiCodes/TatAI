@@ -252,7 +252,7 @@ const guideStore = create((set) => ({
     getUserGuides: async (userId) => {
         try {
             set({viewUserInfoLoading: true})
-            const res = await axios.get(`${API_URL}guide/user-guides/${userId}`);
+            const res = await axios.get(`${API_URL}guide/user-guides-accepted/${userId}`);
             set({viewUserGuides: res.data.data});
         } catch (error) {
             console.log("Error getting user's info:", error);

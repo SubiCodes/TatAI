@@ -66,11 +66,11 @@ const VerifyAccount = () => {
                     {text: 'OK'},
                 ]);
                 return;
-            }
+            }   
             Alert.alert('Congratulations', `${verifyUser.data.message}. Please login to continue`, [
                 {text: 'OK'},
             ]);
-            router.replace('/(auth-screens)/signin');
+            router.dismissTo('/(auth-screens)/signin');
         } catch (error) {
             Alert.alert('⚠️ Oops!', `Can't verify accounts at this time. Please contact Customer Support`, [
                 {text: 'OK'},
