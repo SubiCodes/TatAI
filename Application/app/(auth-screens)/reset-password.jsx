@@ -4,10 +4,18 @@ import React, { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import { API_URL } from '@/constants/links';
+
+import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
+
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
 
 const ResetPassword = () => {
   const router = useRouter();
+  const navigation = useNavigation();
 
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(true);
@@ -19,6 +27,8 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
 
   const checkPasswordStrength = async () => {
+
+    
     let score = 0;
     const hasMinLength = password.length > 7;
     const hasLetter = /[a-zA-Z]/.test(password);
@@ -79,7 +89,7 @@ const ResetPassword = () => {
         setLoading(false);
         return
       };
-      const res = await axios.post(`${API_URL}/api/v1/auth/reset-password`, {email: email, resetToken: token, newPassword: password}, 
+      const res = await axios.post(`${API_URL}auth/reset-password`, {email: email, resetToken: token, newPassword: password}, 
         { 
           validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
         }
@@ -96,9 +106,11 @@ const ResetPassword = () => {
       await AsyncStorage.removeItem('reset-request-token');
 
       Alert.alert('✅ Congratulations!', `Your password was changed successfully, re-directing you to sign in page.`, [
-        {text: 'OK'},
+        {text: 'OK', onPress: () => {
+          // Use router.replace with special params to reset navigation history
+          router.dismissAll()
+        }},
       ]);
-      router.replace('/(auth-screens)/signin');
       setLoading(false);
 
     } catch (error) {

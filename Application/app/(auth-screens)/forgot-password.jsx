@@ -2,11 +2,12 @@ import { View, Text, SafeAreaView, ScrollView, TextInput, TouchableOpacity, Acti
 import React, { useState } from 'react'
 import { useRouter } from 'expo-router'
 import axios from 'axios'
-import { API_URL } from '@/constants/links.js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-//testing purposes
-//border-2 border-yellow-300
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
 
 const ForgotPassword = () => {
 
@@ -15,50 +16,84 @@ const ForgotPassword = () => {
     const [errors, setErrors] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const submitEmail = async() => {
+    const submitEmail = async () => {
         setErrors('');
         setLoading(true);
+      
         try {
-            if (email.trim() === ""){
-                setLoading(false);
-                setErrors("Please enter a valid email.");
-                Alert.alert('Empty Field', 'Please enter a valid email.', [
-                    {text: 'OK'},
-                ]);
-                return;
-            }
-            const res = await axios.post(`${API_URL}/api/v1/auth/forgot-password`, {email: email}, 
-                { 
-                  validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
-                }
-              );
-            if(!res.data.success) {
-                setLoading(false);
-                setErrors(res.data.message);
-                Alert.alert('⚠️ Oops!', res.data.message, [
-                    {text: 'OK'},
-                ]);
-                return;
-            };
-            if(res.data.success){
-                setLoading(false);
-                const emailRes = await axios.post(`${API_URL}/api/v1/auth/resend-reset-password-token`, {email: res.data.userEmail, token: res.data.resetToken.toUpperCase()});
-                if (!emailRes.data.success){
-                    Alert.alert('⚠️ Oops!', res.data.message, [
-                        {text: 'OK'},
-                    ]);
-                    return;
-                }
-                await AsyncStorage.setItem('reset-request-email', res.data.userEmail);
-                await AsyncStorage.setItem('reset-request-token', res.data.resetToken);
-                await router.push('/(auth-screens)/reset-token');
-            };
-
-        } catch (error) {
+          if (email.trim() === "") {
             setLoading(false);
-            console.log(error.message);
+            setErrors("Please enter a valid email.");
+            Alert.alert('Empty Field', 'Please enter a valid email.', [
+              { text: 'OK' },
+            ]);
+            return;
+          }
+      
+          const res = await axios.post(
+            `${API_URL}auth/forgot-password`,
+            { email: email },
+            {
+              validateStatus: (status) => status < 500, // Only throw for 500+
+            }
+          );
+      
+          console.log("Forgot Pass:", res.data);
+      
+          if (!res.data.success) {
+            setLoading(false);
+            setErrors(res.data.message);
+            Alert.alert('⚠️ Oops!', res.data.message, [
+              { text: 'OK' },
+            ]);
+            return;
+          }
+      
+          // Optionally: remove this if the token was already sent in the forgot-password response
+          try {
+            const emailRes = await axios.post(
+              `${API_URL}auth/resend-reset-password-token`,
+              {
+                email: res.data.userEmail,
+                token: res.data.resetToken.toUpperCase(),
+              },
+              {
+                validateStatus: (status) => status < 500,
+              }
+            );
+      
+            if (!emailRes.data.success) {
+              console.log("Resend Token API Error:", emailRes.data);
+              Alert.alert('⚠️ Oops!', emailRes.data.message, [
+                { text: 'OK' },
+              ]);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.log("Failed to resend token:", err.response?.data || err.message);
+            Alert.alert('⚠️ Oops!', 'Failed to resend the reset token.', [
+              { text: 'OK' },
+            ]);
+            setLoading(false);
+            return;
+          }
+      
+          await AsyncStorage.setItem('reset-request-email', res.data.userEmail);
+          await AsyncStorage.setItem('reset-request-token', res.data.resetToken);
+          await router.push('/(auth-screens)/reset-token');
+      
+        } catch (error) {
+          console.log("Unexpected error:", error.message);
+          Alert.alert('⚠️ Error', 'Something went wrong. Please try again later.', [
+            { text: 'OK' },
+          ]);
+          setErrors("Unexpected error occurred.");
+        } finally {
+          setLoading(false);
         }
-    }
+      };
+      
 
     return (
             <SafeAreaView className='h-[100%] w-screen flex items-center flex-col bg-background pt-32 md:pt-0 md:justify-center'>

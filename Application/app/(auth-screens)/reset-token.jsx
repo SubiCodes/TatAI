@@ -4,7 +4,11 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { OtpInput } from "react-native-otp-entry";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL } from '@/constants/links';
+
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
 
 const ResetToken = () => {
 
@@ -46,7 +50,7 @@ const ResetToken = () => {
         setResetTimer(59);
         
         try {
-            const resToken = await axios.post(`${API_URL}/api/v1/auth/get-reset-token`, {email: email}, 
+            const resToken = await axios.post(`${API_URL}auth/get-reset-token`, {email: email}, 
                 { 
                   validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
                 }
@@ -56,7 +60,7 @@ const ResetToken = () => {
             }
             console.log(resToken.data.resetToken);
             
-            const res = await axios.post(`${API_URL}/api/v1/auth/resend-reset-password-token`, {email: email, token: resToken.data.resetToken.toUpperCase()}, 
+            const res = await axios.post(`${API_URL}auth/resend-reset-password-token`, {email: email, token: resToken.data.resetToken.toUpperCase()}, 
             { 
               validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
             });
@@ -84,7 +88,7 @@ const ResetToken = () => {
         setLoading(true);
         setErrors('');
         try {
-            const res = await axios.post(`${API_URL}/api/v1/auth/get-reset-token`, {email: email}, 
+            const res = await axios.post(`${API_URL}auth/get-reset-token`, {email: email}, 
                 { 
                   validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
                 }

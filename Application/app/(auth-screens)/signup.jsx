@@ -17,8 +17,13 @@ import CheckBox from "expo-checkbox";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import { API_URL } from "@/constants/links.js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import userStore from '@/store/user.store'
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
 
 const SignUp = () => {
   const router = useRouter();
@@ -204,7 +209,7 @@ const SignUp = () => {
         return;
       }
 
-      const res = await axios.post(`${API_URL}/api/v1/auth/sign-up`, {firstName: firstName, lastName: lastName, gender: gender, birthday: birthDate, email: email, password: password}, 
+      const res = await axios.post(`${API_URL}auth/sign-up`, {firstName: firstName, lastName: lastName, gender: gender, birthday: birthDate, email: email, password: password}, 
         { 
           validateStatus: (status) => status < 500, // Only throw errors for 500+ status codes
         }
