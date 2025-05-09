@@ -54,9 +54,10 @@ export default function RootLayout() {
           ),}}/>
     <Stack.Screen name="contactus" options={{ 
         headerShown: true,
-        headerTransparent: true,
+        headerTransparent: false,
         headerTitle: 'Contact Us',
-        headerBlurEffect: 'regular',}}/>
+        headerBlurEffect: 'regular',
+        headerTitleAlign: 'center'}}/>
     <Stack.Screen name="verify-account/[email]" options={{ 
         headerShown: true,
         headerTransparent: false,

@@ -65,3 +65,43 @@ export const sendVerificationToken = (to, otp) =>  {
         }
     });
 }
+
+export const sendConcern = (from, message) => {
+  const htmlTemplate = `
+  <div style="font-family: Arial, sans-serif; background-color: #f0f8ff; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);">
+      <h2 style="color: #333333; text-align: center;">User Concern Submitted</h2>
+      <p style="font-size: 16px; color: #555;">You have received a new concern from a user via TatAi.</p>
+      
+      <div style="margin-top: 20px;">
+        <p style="margin: 8px 0;"><strong>Email:</strong> ${from}</p>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <p style="font-size: 15px; color: #333;"><strong>Message:</strong></p>
+        <div style="white-space: pre-wrap; background-color: #f9f9f9; border-left: 4px solid #007bff; padding: 12px; border-radius: 4px; color: #444;">
+          ${message}
+        </div>
+      </div>
+
+      <p style="margin-top: 30px; font-size: 14px; color: #888;">Please address this concern at your earliest convenience.</p>
+    </div>
+  </div>
+`;
+
+  transporter.sendMail(
+    {
+      from: from,
+      to: "tataihomeassistant@gmail.com",
+      subject: "User concern",
+      html: htmlTemplate,
+    },
+    (err, info) => {
+      if (err) {
+        console.error("Error sending email:", err);
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    }
+  );
+};
