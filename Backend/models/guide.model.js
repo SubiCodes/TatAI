@@ -54,9 +54,9 @@ const guideSchema = new mongoose.Schema({
         required: true
     },
     stepImg: {
-        type: [{url: String, public_id: String}],
-        default: [],
-        required: true
+    type: [{ url: String, public_id: String, mimeType: String }],
+    default: [],
+    required: true
     },
     closingMessage: {
         type: String,

@@ -19,6 +19,7 @@ export const upload = async (req, res) => {
         const fileStr = req.body.data; // base64 encoded image
         const uploadResponse = await cloudinary.uploader.upload(fileStr, {
             folder: 'tataiUploads',
+            resource_type: 'auto',
           });
           
         res.json({ 
@@ -33,31 +34,44 @@ export const upload = async (req, res) => {
 
 export const deleteImageByUrl = async (req, res) => {
   try {
-    // Get the public_id from the request body
-    const { public_id } = req.body;  
-    console.log('Received public_id:', public_id);
-  
-    // Check if the public_id is provided
-    if (!public_id) {
-      return res.status(400).json({ error: 'Public ID is required' });
+    const { images } = req.body; // Expecting an array of { url, public_id }
+
+    if (!images || !Array.isArray(images)) {
+      return res.status(400).json({ error: 'Images array is required' });
     }
-  
-    // Delete the image from Cloudinary using the public_id
-    const result = await cloudinary.uploader.destroy(public_id);
-    console.log('Cloudinary deletion result:', result);
-  
-    // If deletion is successful, return a success message
-    if (result.result === 'ok') {
-      res.json({ message: 'Image deleted successfully' });
-    } else {
-      // If deletion fails, return an error message with details
-      res.status(200).json({ error: 'Failed to delete image', details: result });
+
+    const deletionResults = [];
+
+    for (const { public_id, url } of images) {
+      if (!public_id || !url) {
+        deletionResults.push({ public_id, url, result: 'skipped', reason: 'Missing public_id or url' });
+        continue;
+      }
+
+      let resource_type = 'image'; // Default fallback
+
+      if (url.includes('/video/')) {
+        resource_type = 'video';
+      }
+
+      const result = await cloudinary.uploader.destroy(public_id, { resource_type });
+      console.log(`Deleting ${resource_type}:`, result);
+
+      deletionResults.push({
+        public_id,
+        url,
+        result: result.result,
+      });
     }
+
+    res.json({ message: 'Deletion completed', results: deletionResults });
+
   } catch (error) {
-    console.error('Server error:', error);
-    res.status(500).json({ error: 'Server error while deleting image' });
+    console.error('Server error during deletion:', error);
+    res.status(500).json({ error: 'Server error while deleting media' });
   }
 };
+
 export const createGuide = async (req, res) => {
     try {
         const { userID, type, title, description, coverImg, toolsNeeded, materialsNeeded, stepTitles, stepDescriptions, stepImg, closingMessage, additionalLink } = req.body;
@@ -804,27 +818,69 @@ export const hideFeedback = async (req, res) => {
     }
 };
 
+
 export const updateGuide = async (req, res) => {
   try {
-    const { guideID, userID, ...updatedFields } = req.body;
-    console.log(guideID)
+    const { guideID, userID, deletedImagePublicIds = [], deletedVideoPublicIds = [], ...updatedFields } = req.body;
     const guide = await Guide.findById(guideID);
     const user = await UserInfo.findById(userID);
 
     if (!guide) return res.status(404).json({ success: false, error: "Guide not found" });
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
-    Object.keys(updatedFields).forEach(key => {
+    // Handle deleting any removed images
+    for (const public_id of deletedImagePublicIds) {
+      await cloudinary.uploader.destroy(public_id, { resource_type: 'image' });
+    }
+
+    // Handle deleting any removed videos
+    for (const public_id of deletedVideoPublicIds) {
+      await cloudinary.uploader.destroy(public_id, { resource_type: 'video' });
+    }
+
+    // Handle new uploads
+    if (req.files) {
+      // Handle cover image
+      if (req.files.coverPhoto) {
+        if (guide.coverImg?.public_id) {
+          // Delete the old cover image from Cloudinary
+          await cloudinary.uploader.destroy(guide.coverImg.public_id, { resource_type: 'image' });
+        }
+        const uploadedCover = await cloudinary.uploader.upload(req.files.coverPhoto.path, { resource_type: 'image' });
+        updatedFields.coverImg = { url: uploadedCover.secure_url, public_id: uploadedCover.public_id };
+      }
+
+      // Handle step images or videos
+      if (req.files.stepFiles && Array.isArray(req.files.stepFiles)) {
+        updatedFields.stepImg = [];
+
+        // Process each file (either image or video)
+        for (const stepFile of req.files.stepFiles) {
+          const uploadResult = await cloudinary.uploader.upload(stepFile.path, {
+            resource_type: stepFile.mimetype.startsWith('video/') ? 'video' : 'image',
+          });
+
+        updatedFields.stepImg.push({
+          url: uploadResult.secure_url,
+          public_id: uploadResult.public_id,
+          mimeType: stepFile.mimetype, // Include the MIME type
+        });
+        }
+      }
+    }
+
+    // Update the guide with new fields
+    Object.keys(updatedFields).forEach((key) => {
       guide[key] = updatedFields[key] || guide[key];
     });
 
     const updatedGuide = await guide.save();
     res.status(200).json({ success: true, guide: updatedGuide });
+
   } catch (error) {
     res.status(500).json({ success: false, error: `Error: ${error.message}` });
   }
 };
-
 export const handleBookmark = async (req, res) => {
   try {
     const {guideId, userId} = req.body;

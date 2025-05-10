@@ -110,16 +110,55 @@ const handleContentChange = (index, value) => {
 
 // Handle file upload at specific index
 const handleFileChange = (index, file) => {
-  const newFiles = [...stepFiles];
-  newFiles[index] = file;
-  setStepFiles(newFiles);
+  // Check if the file is a video
+  if (file && file.type.startsWith('video/')) {
+    // Create a temporary video element to check duration
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    
+    // Create an object URL for the video file
+    const objectUrl = URL.createObjectURL(file);
+    video.src = objectUrl;
+    
+    // Wait for metadata to load to access duration
+    video.onloadedmetadata = () => {
+      // Revoke the object URL to free up memory
+      URL.revokeObjectURL(objectUrl);
+      
+      // Check if video is longer than 60 seconds (1 minute)
+      if (video.duration > 60) {
+        alert('Videos must be 1 minute or less. Please select a shorter video.');
+        return; // Don't update state with this video
+      } else {
+        // Video is within length limit, proceed with updating state
+        const newFiles = [...stepFiles];
+        newFiles[index] = file;
+        setStepFiles(newFiles);
 
-  if (file) {
+        const newPreviews = [...stepFilesPreviews];
+        newPreviews[index] = URL.createObjectURL(file);
+        setStepFilesPreviews(newPreviews);
+      }
+    };
+    
+    // Handle errors in loading video metadata
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      alert('Failed to process video file. Please try another file.');
+    };
+  } else {
+    // Handle image files or other non-video files directly
+    const newFiles = [...stepFiles];
+    newFiles[index] = file;
+    setStepFiles(newFiles);
+
+    if (file) {
       const newPreviews = [...stepFilesPreviews];
       newPreviews[index] = URL.createObjectURL(file);
       setStepFilesPreviews(newPreviews);
+    }
   }
-};
+}
 
 
 const handlePostGuide = async () => {
@@ -399,13 +438,13 @@ useEffect(() => {
               </div>
               <div className="w-full flex flex-col gap-4">
                 <fieldset className="border border-gray-400 p-2 rounded-sm">
-                  <legend className="text-base px-1">Post a photo.</legend>
+                  <legend className="text-base px-1">Post a photo or a video maximum of 1 minute.</legend>
                   <input
-                    type="file"
-                    className="file-input border-gray-400 border w-full h-auto rounded-sm"
-                    onChange={(e) => handleFileChange(index, e.target.files[0])}
-                    accept="image/*"
-                  />
+                      type="file"
+                      className="file-input border-gray-400 border w-full h-auto rounded-sm"
+                      onChange={(e) => handleFileChange(index, e.target.files[0])}
+                      accept="image/*,video/*"
+                    />
                   {stepFiles[index] && (
                     <div className="mt-2 text-sm text-green-600">
                       File selected: {stepFiles[index].name}

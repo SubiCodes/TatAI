@@ -180,10 +180,16 @@ function Guides() {
           {filteredGuides.map((guide) => {
             
          
-             const coverImgPublicId = guide.coverImg.public_id;
-             const stepImgPublicIds = guide.stepImg && Array.isArray(guide.stepImg) ? guide.stepImg.map(img => img.public_id) : [];
-             const imageIDs = coverImgPublicId ? [coverImgPublicId, ...stepImgPublicIds] : stepImgPublicIds;
-         
+            const coverImgObj = guide.coverImg
+              ? { url: guide.coverImg.url, public_id: guide.coverImg.public_id }
+              : null;
+
+            const stepImgObjs = Array.isArray(guide.stepImg)
+              ? guide.stepImg.map(img => ({ url: img.url, public_id: img.public_id }))
+              : [];
+
+            const imageData = coverImgObj ? [coverImgObj, ...stepImgObjs] : stepImgObjs;
+                    
             return (
             <div key={guide._id} className="card bg-gray-50 border-1 border-gray-400 rounded-lg w-72 h-fit shadow-sm hover:shadow-2xl transition-all duration-600 ease-in-out">
               <figure className="px-6 pt-10 h-64 w-full flex justify-center items-center rounded-xl overflow-hidden">
@@ -225,7 +231,7 @@ function Guides() {
                   <button className='text-md text-white bg-primary cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => { setSelectedGuide(guide); openViewRef();}}>
                     View Guide
                   </button>
-                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => {setSelectedGuide(guide); setSelectedGuideImgs(imageIDs); openDeleteRef();
+                  <button className='text-md text-white bg-[#d9534f] cursor-pointer px-4 py-2 rounded-lg text-xs' onClick={() => {setSelectedGuide(guide); setSelectedGuideImgs(imageData); openDeleteRef();
                   }}>
                     Delete Guide
                   </button>
