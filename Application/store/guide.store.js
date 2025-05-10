@@ -1,9 +1,12 @@
 import { create } from "zustand";
 import axios from "axios";
 import Constants from 'expo-constants';
+import { Alert } from "react-native";
 
 const API_URL =
   Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
+
 
 const guideStore = create((set) => ({
     guide: null,
@@ -78,14 +81,42 @@ const guideStore = create((set) => ({
             set({isFetchingGuides: false});
         }
     },
-    getGuide: async (id) => {
+    getGuide: async (id, navigation) => {
         try {
             set({isFetchingGuides: true, errorFetchingGuides: null});
             const res = await axios.get(`${API_URL}guide/${id}`);
+            if (res.data.data?.status !== "accepted") {
+                  Alert.alert(
+                    "Guide not accepted",
+                    "This guide is currently unavailable because its status is either Pending or Rejected.",
+                    [
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          navigation.goBack();
+                        }
+                      }
+                    ],
+                    { cancelable: false }
+                  );
+                  return
+            }
             set({guide: res.data.data})
         } catch (error) {
+            Alert.alert(
+                    "Unable to view Guide",
+                    "This guide might no longer exist.",
+                    [
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          navigation.goBack();
+                        }
+                      }
+                    ],
+                    { cancelable: false }
+                  );
             console.log('error ins get guide', error.message);
-            set({errorFetchingGuides: error.message});
         } finally {
             set({isFetchingGuides: false});
         }
