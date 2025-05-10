@@ -7,6 +7,7 @@ import { useNavigation, useRouter } from 'expo-router';
 import React from 'react'
 
 import chatbotImage from "@/assets/images/chat-bot/tatai-chatbot.png"
+import chatBotLBlue from "@/assets/images/chat-bot/chatbot-lightblue.png";
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Constants from 'expo-constants';
@@ -231,55 +232,84 @@ const AskName = () => {
     }, []);
 
     return (
-        <SafeAreaView className='w-screen h-screen flex items-center gap-4'>
-            <WelcomeBotHeader />
+      <SafeAreaView className="w-screen h-screen flex items-center gap-4">
+        <WelcomeBotHeader />
 
-            <ScrollView className='w-full h-screen flex-col border-0 pt-0 px-4' contentContainerStyle={{ gap: 12 }} ref={scrollViewRef}>
-                <View className='w-40 h-40 justify-center items-center rounded-full  self-center'>
-                    <Image source={chatbotImage} className='max-w-44 h-auto' resizeMode='contain'/>
-                </View>
+        <ScrollView
+          className="w-full h-screen flex-col border-0 pt-0 px-4"
+          contentContainerStyle={{ gap: 12 }}
+          ref={scrollViewRef}
+        >
+          <View className="w-40 h-40 justify-center items-center rounded-full  self-center">
+            <Image
+              source={chatBotLBlue}
+              className="w-52 h-52"
+              resizeMode="contain"
+            />
+          </View>
 
-                {messages.map((msg, index) => (
-                    <View
-                        key={index}
-                        className={`w-auto h-auto justify-center p-4 rounded-xl ${msg.sender === "bot" ? "self-start bg-gray-200" : "self-end bg-blue-200"}`}
-                    >
-                        <Text>{msg.message}</Text>
-                    </View>
-                ))}
-
-                {waitingForResponse && (
-                    <View className="w-auto h-auto justify-center flex-row gap-2 p-4 rounded-xl self-start bg-gray-200">
-                        <View className='w-2 h-2 rounded-full bg-gray-400' />
-                        <View className='w-2 h-2 rounded-full bg-gray-400' />
-                        <View className='w-2 h-2 rounded-full bg-gray-400' />
-                    </View>
-                )}
-
-                {showNameSuggestion && (
-                    <View className='w-full h-auto flex-wrap flex-row justify-center gap-2 p-2 rounded-3xl self-center mt-4'>
-                        {nameSuggestions.map((name, index) => (
-                            <TouchableOpacity key={index} className='w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4' onPress={() => handleSendSuggestedName(name)}>
-                                <Text className='text-black text-base'>{name}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
-
-                {showReplySuggestion && (
-                    <TouchableOpacity className='w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4' onPress={handleSendSuggestedMessage}>
-                        <Text className='text-black text-base'>{replySuggestion}</Text>
-                    </TouchableOpacity>
-                )}
-            </ScrollView>
-
-            <View className='w-full h-auto justify-center items-center flex-row gap-2 pb-0 bg-transparent pb-4'>
-                <TextInput className='w-72 h-12 rounded bg-gray-200 p-2' placeholder='Send a message...' value={typedMessage} onChangeText={setTypedMessage} editable={!waitingForResponse} />
-                <TouchableOpacity className='w-12 h-12 rounded bg-secondary items-center justify-center' onPress={handleSendMessage} disabled={waitingForResponse}>
-                    <FontAwesome name="send" size={24} color="white" />
-                </TouchableOpacity>
+          {messages.map((msg, index) => (
+            <View
+              key={index}
+              className={`w-auto h-auto justify-center p-4 rounded-xl ${
+                msg.sender === "bot"
+                  ? "self-start bg-gray-200"
+                  : "self-end bg-blue-200"
+              }`}
+            >
+              <Text>{msg.message}</Text>
             </View>
-        </SafeAreaView>
+          ))}
+
+          {waitingForResponse && (
+            <View className="w-auto h-auto justify-center flex-row gap-2 p-4 rounded-xl self-start bg-gray-200">
+              <View className="w-2 h-2 rounded-full bg-gray-400" />
+              <View className="w-2 h-2 rounded-full bg-gray-400" />
+              <View className="w-2 h-2 rounded-full bg-gray-400" />
+            </View>
+          )}
+
+          {showNameSuggestion && (
+            <View className="w-full h-auto flex-wrap flex-row justify-center gap-2 p-2 rounded-3xl self-center mt-4">
+              {nameSuggestions.map((name, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className="w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4"
+                  onPress={() => handleSendSuggestedName(name)}
+                >
+                  <Text className="text-black text-base">{name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {showReplySuggestion && (
+            <TouchableOpacity
+              className="w-auto h-auto justify-center p-4 rounded-3xl self-center bg-blue-200 mt-4"
+              onPress={handleSendSuggestedMessage}
+            >
+              <Text className="text-black text-base">{replySuggestion}</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+
+        <View className="w-full h-auto justify-center items-center flex-row gap-2 pb-0 bg-transparent pb-4">
+          <TextInput
+            className="w-72 h-12 rounded bg-gray-200 p-2"
+            placeholder="Send a message..."
+            value={typedMessage}
+            onChangeText={setTypedMessage}
+            editable={!waitingForResponse}
+          />
+          <TouchableOpacity
+            className="w-12 h-12 rounded bg-secondary items-center justify-center"
+            onPress={handleSendMessage}
+            disabled={waitingForResponse}
+          >
+            <FontAwesome name="send" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
 };
 

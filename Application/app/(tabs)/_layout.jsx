@@ -1,15 +1,18 @@
 import { Tabs } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { View } from "react-native";
+import { View, Image } from "react-native";
 import { useColorScheme } from "nativewind";
 
-export default function Layout() {
+import chatbotBlue from '@/assets/images/chat-bot/chatbot-blue.png'
+import chatbotLBlue from '@/assets/images/chat-bot/chatbot-lightblue.png'
+import chatbotBlack from '@/assets/images/chat-bot/chatbot-black.png'
+import chatbotGray from '@/assets/images/chat-bot/chatbot-gray.png'
 
+export default function Layout() {
   const {colorScheme} = useColorScheme();
 
   return (
-
     <Tabs screenOptions={{
       tabBarStyle: {
         borderRadius: 0,
@@ -44,8 +47,13 @@ export default function Layout() {
         name="chatbot"
         options={{
           title: "TatAI", 
-          tabBarIcon: ({ color, focused}) => (
-            <MaterialCommunityIcons name={focused ? "robot-excited" : "robot-excited-outline"} size={24} color={color} />
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Image 
+              source={focused ? chatbotLBlue : (colorScheme === 'dark' ? chatbotGray : chatbotGray)}
+              style={{ width: 48, height: 48 }}
+              resizeMode="contain"
+            />
           ),
         }}
       />
