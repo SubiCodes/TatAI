@@ -86,6 +86,15 @@ export default function RootLayout() {
             headerStyle,
             headerTintColor,
             }}/>
+            <Stack.Screen name="contact-us" options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: 'Dark Mode',
+            headerTitleAlign: 'center',
+            headerBlurEffect: 'regular',
+            headerStyle,
+            headerTintColor,
+            }}/>
         </Stack>
     )
 }

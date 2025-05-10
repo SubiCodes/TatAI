@@ -106,7 +106,7 @@ const SettingsMainPage = () => {
                 <View className='w-full h-auto gap-8 mb-8'>
                     <Text className='text-lg font-bold text-text dark:text-text-dark'>Others</Text>
                     <View className='w-full h-auto gap-4'>
-                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
+                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center' onPress={() => router.push('/(settings)/contact-us')}>
                             <Text className='text-text dark:text-text-dark'><MaterialCommunityIcons name="headphones-box" size={24}/></Text>
                             <Text className='text-lg text-text dark:text-text-dark'>Contact Us</Text>
                         </TouchableOpacity>
