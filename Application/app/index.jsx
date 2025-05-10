@@ -5,7 +5,7 @@ import SplashScreen from "@/components/splash-screen";
 import { useCallback, useState, useRef } from "react";
 import { Link, router, useFocusEffect, useRouter } from "expo-router";
 
-import logo from '@/assets/images/auth-images/logo1.png'
+import logo from '@/assets/images/auth-images/tatai-only.png'
 
 const {width, height} = Dimensions.get('window');
 

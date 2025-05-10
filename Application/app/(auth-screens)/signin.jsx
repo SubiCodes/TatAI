@@ -10,7 +10,7 @@ import axios from 'axios'
 import { API_URL } from '@/constants/links.js'
 
 import illustration from '../../assets/images/signin-illustration.png'
-import signinImage from '../../assets/images/auth-images/logo1.png'
+import signinImage from '../../assets/images/auth-images/tatai-sub.png';
 import { useColorScheme } from 'nativewind';
 
 
