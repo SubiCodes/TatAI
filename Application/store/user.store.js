@@ -70,15 +70,15 @@ logoutUser: async () => {
       { cancelable: true }
     );
 },
-checkUserLoggedIn: async () => {
+checkUserLoggedIn: async (route) => {
     set({ error: null, isLoading: true });
     let shouldRedirect = false;
     try {
       const token = await AsyncStorage.getItem('token');
   
       if (!token) {
-        shouldRedirect = true;
-        return;
+        route.dismissTo("/(auth-screens)/signin");
+        return
       }
   
       const decodedToken = jwtDecode(token);     
@@ -86,13 +86,13 @@ checkUserLoggedIn: async () => {
       set({ user: res.data.data });
     } catch (error) {
       await AsyncStorage.removeItem('token')
+      route.dismissTo("/(auth-screens)/signin")
       Alert.alert(
       "Oops",
       "Unable to login.",
       [
         {
-          text: "OK",
-          onPress: () => router.dismissTo("/(auth-screens)/signin"),
+          text: "OK"
         },
       ],
       { cancelable: false }
@@ -101,9 +101,6 @@ checkUserLoggedIn: async () => {
       set({ error: "User not found"});
     } finally {
       set({ isLoading: false });
-      if (shouldRedirect) {
-        router.replace('/(auth-screens)/signin');
-      }
     }
   },
 getUserInfo: async () => {
@@ -162,7 +159,7 @@ editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, 
       const decryptedToken = jwtDecode(token);
       const res = await axios.get(`${API_URL}preference/${decryptedToken.userID}`);
       if (!res.data.success) {
-        await router.push("/modal/personalization");
+        await router.dismissTo("/modal/personalization");
         return;
       }
       set({preference: res.data.data})
