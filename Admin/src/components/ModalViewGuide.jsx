@@ -240,15 +240,26 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
                           </span>
                           <h1 className="text-2xl font-semibold">{title}</h1>
                         </div>
-      
+
                         {guide.stepImg && guide.stepImg[index]?.url && (
-                          <img
-                            src={guide.stepImg[index]?.url}
-                            alt={`Step ${index + 1}`}
-                            className="w-3/4 h-auto object-contain rounded-lg"
-                          />
+                          // Check the URL to determine whether it's an image or video
+                          guide.stepImg[index].url.includes('/image/') ? (
+                            <img
+                              src={guide.stepImg[index].url}
+                              alt={`Step ${index + 1}`}
+                              className="w-3/4 h-auto object-contain rounded-lg"
+                            />
+                          ) : guide.stepImg[index].url.includes('/video/') ? (
+                            <video
+                              src={guide.stepImg[index].url}
+                              controls
+                              className="w-full h-auto rounded-lg"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : null
                         )}
-      
+
                         {guide.stepDescriptions && guide.stepDescriptions[index] && (
                           <p className="text-base">{guide.stepDescriptions[index]}</p>
                         )}
