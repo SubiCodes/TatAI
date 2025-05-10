@@ -1,10 +1,12 @@
-import { View, Text, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Alert, StatusBar } from 'react-native'
+import { View, Text, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Alert, StatusBar, Image } from 'react-native'
 import WelcomeBotHeader from '@/components/welcomeBotHeader.jsx';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode'
 import { useEffect, useRef, useState } from 'react';
 import { useNavigation, useRouter } from 'expo-router';
 import React from 'react'
+
+import chatbotImage from "@/assets/images/chat-bot/tatai-chatbot.png"
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Constants from 'expo-constants';
@@ -233,7 +235,9 @@ const AskName = () => {
             <WelcomeBotHeader />
 
             <ScrollView className='w-full h-screen flex-col border-0 pt-0 px-4' contentContainerStyle={{ gap: 12 }} ref={scrollViewRef}>
-                <View className='w-40 h-40 justify-center items-center rounded-full bg-gray-200 self-center'></View>
+                <View className='w-40 h-40 justify-center items-center rounded-full  self-center'>
+                    <Image source={chatbotImage} className='max-w-44 h-auto' resizeMode='contain'/>
+                </View>
 
                 {messages.map((msg, index) => (
                     <View
