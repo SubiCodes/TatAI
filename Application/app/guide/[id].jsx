@@ -27,6 +27,7 @@ import lgbt_3 from '@/assets/images/profile-icons/lgbt_3.png'
 import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 import RBSheet from 'react-native-raw-bottom-sheet'
 import { useNavigation } from '@react-navigation/native';
+import { Video } from 'expo-av';
 
 function Guide() {
   const { id } = useLocalSearchParams();
@@ -439,41 +440,59 @@ function Guide() {
                 {guide?.type === "tool" ? "Tool Uses" : "Procedures"}
               </Text>
             </View>
-            {guide?.stepTitles.map((title, index) => (
-              <View key={index} className="w-full flex-col gap-4">
-                {/* Step Title */}
-                <View className="w-full flex flex-row gap-4">
-                  <View className="w-auto flex items-start justify-start">
-                    <View className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center">
-                      <Text>{`${index + 1}`}</Text>
+            {guide?.stepTitles.map((title, index) => {
+              const mediaUrl = guide.stepImg[index]?.url;
+              const isVideo = mediaUrl?.toLowerCase().includes("video");
+
+              return (
+                <View key={index} className="w-full flex-col gap-4">
+                  {/* Step Title */}
+                  <View className="w-full flex flex-row gap-4">
+                    <View className="w-auto flex items-start justify-start">
+                      <View className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center">
+                        <Text>{`${index + 1}`}</Text>
+                      </View>
+                    </View>
+                    <View className="flex-1 justify-center">
+                      <Text className="text-left text-lg font-semibold text-text dark:text-text-dark">
+                        {title}
+                      </Text>
                     </View>
                   </View>
-                  <View className="flex-1 justify-center">
-                    <Text className="text-left text-lg font-semibold text-text dark:text-text-dark">
-                      {title}
+
+                  {/* Step Images or Video */}
+                  <View className="w-auto h-[250px] items-start justify-start mb-2 py-0">
+                    {isVideo ? (
+                      <Video
+                        source={{ uri: mediaUrl }}
+                        rate={1.0}
+                        volume={1.0}
+                        isMuted={false}
+                        resizeMode="contain"
+                        shouldPlay={false}
+                        useNativeControls
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    ) : (
+                      <Image
+                        className="w-full h-full"
+                        source={{
+                          uri: mediaUrl || "https://via.placeholder.com/400x250",
+                        }}
+                        resizeMode="contain"
+                      />
+                    )}
+                  </View>
+
+                  {/* Step Descriptions */}
+                  <View className="w-auto flex items-start justify-start mb-6">
+                    <Text className="text-justify text-text text-lg dark:text-text-dark">
+                      {guide?.description}
                     </Text>
                   </View>
                 </View>
-                {/* Step Images */}
-                <View className="w-auto h-[250px] items-start justify-start mb-2 py-0">
-                  <Image
-                    className="w-full h-full"
-                    source={{
-                      uri:
-                        guide.stepImg[index]?.url ||
-                        "https://via.placeholder.com/400x250",
-                    }}
-                    resizeMode="contain"
-                  />
-                </View>
-                {/* Step Descriptions */}
-                <View className="w-auto flex items-start justify-start mb-6">
-                  <Text className="text-justify text-text text-lg dark:text-text-dark">
-                    {guide?.description}
-                  </Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
             {/* Closing Message */}
             <View className="w-full items-start justify-start mb-4">
               <Text className="text-start text-text text-3xl font-bold dark:text-text-dark">
