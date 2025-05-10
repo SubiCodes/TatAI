@@ -1,8 +1,10 @@
 import User from '../models/user.model.js';
 import Feedback from '../models/feedback.model.js';
 import Guide from '../models/guide.model.js';
+import UserPreference from '../models/preference.model.js'
 import jwt from 'jsonwebtoken';
 
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { sendVerificationToken } from '../nodemailer/email.js';
 
@@ -59,6 +61,9 @@ export const deleteAccount = async (req, res) => {
 
         // Delete all feedback posted by the user
         await Feedback.deleteMany({ userId: _id });
+
+        //Delete User Preference
+        await UserPreference.deleteOne({ userId: new mongoose.Types.ObjectId(_id) });
 
         // Finally, delete the user
         await user.deleteOne();

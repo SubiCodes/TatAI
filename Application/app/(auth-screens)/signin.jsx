@@ -107,7 +107,7 @@ const SignIn = () => {
         contentContainerStyle={{alignItems: 'center', justifyContent: 'center', gap: 20}} showsVerticalScrollIndicator={false}>
 
           <View className='min-h-30 h-40 items-center justify-center rounded-lg overflow-visible' >
-            <Image source={signinImage} resizeMode="contain" style={{maxWidth: '100%'}} className='rounded'/>
+            <Image source={signinImage} resizeMode="contain" style={{maxWidth: '80%'}} className='rounded'/>
           </View> 
 
           <View className='flex-row justify-between items-center gap-2 w-[300]'>

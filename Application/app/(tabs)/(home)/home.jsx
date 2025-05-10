@@ -44,7 +44,6 @@ const Home = () => {
   const user = userStore((state) => state.user);
   const isLoading = userStore((state) => state.isLoading);
   const error = userStore((state) => state.error);
-  const getUserInfo = userStore((state) => state.getUserInfo);
   const checkUserLoggedIn = userStore((state) => state.checkUserLoggedIn);
 
   // Guide store
@@ -159,6 +158,7 @@ const Home = () => {
   };
 
   const retry = () => {
+    checkUserLoggedIn(router);
     fetchGuides();
     getUsers();
     getGuides();
@@ -181,6 +181,7 @@ const Home = () => {
     setRefreshing(true);
     try {
       loadTheme()
+      await checkUserLoggedIn(router)
       await getLatestGuide();
       await getLatestGuidePerType("repair");
       await getLatestGuidePerType("diy");
@@ -198,7 +199,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    checkUserLoggedIn();
+    checkUserLoggedIn(router);
     fetchGuides();
     getUsers();
     getGuides();
