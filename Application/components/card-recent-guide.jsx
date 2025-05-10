@@ -48,7 +48,7 @@ const CardRecentGuide = ({ guide }) => {
           />
         </View>
         <View className="w-full px-2 py-4 flex flex-col">
-          <Text className="text-2xl text-text font-semibold dark:text-text-dark">
+          <Text className="text-2xl text-text font-semibold dark:text-text-dark" numberOfLines={1} ellipsizeMode="tail">
             {guide?.title || 'Guide Title'}
           </Text>
         </View>

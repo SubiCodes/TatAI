@@ -64,25 +64,6 @@ function Guide() {
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
 
-  const checkGuideStatus = async () => {
-    if (guide?.status !== "accepted") {
-      Alert.alert(
-        "Guide not accepted",
-        "This guide is currently unavailable because its status is either Pending or Rejected.",
-        [
-          {
-            text: "OK",
-            onPress: async () => {
-              navigation.goBack();
-            }
-          }
-        ],
-        { cancelable: false }
-      );
-      return
-    }
-  }
-
   const checkVerified = async () => {
     try {
       if (user) {
@@ -150,11 +131,10 @@ function Guide() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    getGuide(id);
+    getGuide(id, navigation);
     getFeedbacks(id);
     getUserInfo();
     checkVerified();
-    checkGuideStatus();
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -164,7 +144,6 @@ function Guide() {
       getFeedbacks(id);
       getUserInfo();
       checkVerified();
-      checkGuideStatus();
     } catch (error) {
       console.error("Error refreshing data:", error);
     } finally {
