@@ -266,7 +266,7 @@ function Dashboard() {
     ],
     series: [
       {
-        name: 'Direct',
+        name: 'Total',
         type: 'bar',
         barWidth: '60%',
         data: monthlyCount,
@@ -368,7 +368,22 @@ function Dashboard() {
          
           <div className="w-full h-120 flex items-center justify-between mt-22 px-12 pt-12 gap-4">
             <div className="w-3/5 h-full flex flex-col items-center justify-center bg-white shadow-md rounded-lg px-12 py-8 gap-12">
-              <h2 className="text-2xl text-start self-start font-bold">Monthly Guide Uploads</h2>
+              <div className='w-full flex flex-row justify-center'>  
+                <h2 className="text-2xl text-start self-start font-bold">Monthly Guide Uploads</h2>
+                <div className='flex flex-1' />
+                <div className="dropdown">
+                  <div tabIndex={0} role="button" className="btn px-4 py-2 bg-white border border-gray-300 shadow-sm rounded-md flex items-center justify-between gap-2">
+                    2025
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <ul tabIndex={0} className="dropdown-content menu bg-white rounded-md shadow-lg mt-1 w-40 p-2 z-10 border border-gray-200">
+                    <li><a>2025</a></li>
+                  </ul>
+                </div>
+              </div>
+                
               <ReactECharts option={optionBar} style={{ height: '100%', width: '100%' }} />
             </div>
             <div className="w-2/5 h-full p-4 bg-white shadow-md rounded-lg flex flex-col px-12 pt-4 gap-8">
