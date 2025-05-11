@@ -39,6 +39,7 @@ function Dashboard() {
     const [userGuideCount, setUserGuideCount] = useState();
     const [liveGuideCount, setLiveGuideCount] = useState();
     const [ratingsCount, setRatingsCount] = useState();
+    const [monthlyCount, setMonthlyCount] = useState();
     const roundedRating = Number(ratingsCount?.roundedRating);
     const [latestFeedback, setLatestFeedback] = useState();
     const [latestGuides, setLatestGuides] = useState();
@@ -149,6 +150,20 @@ function Dashboard() {
       }
     };
 
+  const getMonthlyGuide = async () => {
+    try {
+      setFetchingData(true);
+      const res = await axios.post(`${import.meta.env.VITE_URI}guide/monthly`, { year: 2025 });
+      console.log("Monthly guides:", res.data.data);
+      setMonthlyCount(res.data.data);
+    } catch (error) {
+      console.log("Error fetching guides:", error.message);
+      setErrorFetching(true);
+    } finally {
+      setFetchingData(false); // Ensure this is called even in case of errors
+    }
+  }
+
     //UseEffect Calls
     useEffect(() => {
       getUserGuideCount();
@@ -156,6 +171,7 @@ function Dashboard() {
       getRatingsCount();
       getLatestFeedback();
       getLatestGuide();
+      getMonthlyGuide();
     }, []);
 
 
@@ -253,7 +269,7 @@ function Dashboard() {
         name: 'Direct',
         type: 'bar',
         barWidth: '60%',
-        data: [10, 52, 200, 334, 390, 330, 220],
+        data: monthlyCount,
         itemStyle: {
           color: '#2d8bba'
         }
@@ -352,7 +368,7 @@ function Dashboard() {
          
           <div className="w-full h-120 flex items-center justify-between mt-22 px-12 pt-12 gap-4">
             <div className="w-3/5 h-full flex flex-col items-center justify-center bg-white shadow-md rounded-lg px-12 py-8 gap-12">
-              <h2 className="text-2xl text-start self-start font-bold">App Visits</h2>
+              <h2 className="text-2xl text-start self-start font-bold">Monthly Guide Uploads</h2>
               <ReactECharts option={optionBar} style={{ height: '100%', width: '100%' }} />
             </div>
             <div className="w-2/5 h-full p-4 bg-white shadow-md rounded-lg flex flex-col px-12 pt-4 gap-8">
