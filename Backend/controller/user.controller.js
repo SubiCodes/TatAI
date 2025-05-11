@@ -1,6 +1,6 @@
 import User from "../models/user.model.js";
 import UserPreference from "../models/preference.model.js";
-import { sendConcern } from '../nodemailer/email.js';
+import { sendConcern, sendReportEmail } from '../nodemailer/email.js';
 
 export const getUserData = async (req, res) => {
 
@@ -110,5 +110,29 @@ export const sendUserConcern = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({success: false, message: "Cant send user email.", error: error.message})
     }
-}
+};
+
+export const sendUserReport = async (req, res) => {
+    try {
+        const { from, type, guideTitle, comment, posterName } = req.body;
+
+        if (!from) {
+            return res.status(400).json({success: false, message: "Email can't be empty."})
+        };
+
+        if (!type) {
+            return res.status(400).json({success: false, message: "Message can't be empty."})
+        };
+
+        if (!posterName) {
+            return res.status(400).json({success: false, message: "Message can't be empty."})
+        };
+
+        await sendReportEmail({from, type, guideTitle, comment, posterName});
+        return res.status(200).json({success: true, message: "Report sent."})
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({success: false, message: "Cant send user email.", error: error.message})
+    }
+};
 

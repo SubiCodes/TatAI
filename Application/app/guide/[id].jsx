@@ -28,6 +28,12 @@ import lgbt_4 from '@/assets/images/profile-icons/lgbt_4.png'
 import RBSheet from 'react-native-raw-bottom-sheet'
 import { useNavigation } from '@react-navigation/native';
 import { Video } from 'expo-av';
+import axios from 'axios';
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
 
 function Guide() {
   const { id } = useLocalSearchParams();
@@ -64,6 +70,58 @@ function Guide() {
   // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
+
+const reportGuide = async () => {
+
+  Alert.alert("Reporting Guide", "Please wait...", [], { cancelable: false });
+  let success = false;
+
+  try {
+    const res = await axios.post(`${API_URL}user/report`, {from: user?.email, type: "Guide", guideTitle: guide?.title, comment: "", posterName: guide?.uploader})
+    success = true
+  } catch (error) {
+    console.error("Report error:", error);
+    success = false;
+  } finally {
+    // Step 3: Dismiss the first alert (workaround using timeout)
+    setTimeout(() => {
+      // Step 4: Show result alert
+      Alert.alert(
+        success ? "Report Submitted" : "Report Failed",
+        success
+          ? "Your report has been sent successfully."
+          : "There was an error submitting your report. Please try again."
+      );
+    }, 500); // Wait briefly before showing final alert
+  }
+};
+
+const reportComment = async (comment, commenter) => {
+
+  Alert.alert("Reporting Guide", "Please wait...", [], { cancelable: false });
+  let success = false;
+
+  try {
+    console.log(`${API_URL}user/report`);
+    console.log(`from: ${user?.email}, type: ${"Guide"}, title: "", comment: ${comment}, posterName: ${commenter}`);
+    const res = await axios.post(`${API_URL}user/report`, {from: user?.email, type: "Comment", guideTitle: guide?.title, comment: comment, posterName: commenter})
+    success = true
+  } catch (error) {
+    console.error("Report error:", error);
+    success = false;
+  } finally {
+    // Step 3: Dismiss the first alert (workaround using timeout)
+    setTimeout(() => {
+      // Step 4: Show result alert
+      Alert.alert(
+        success ? "Report Submitted" : "Report Failed",
+        success
+          ? "Your report has been sent successfully."
+          : "There was an error submitting your report. Please try again."
+      );
+    }, 500); // Wait briefly before showing final alert
+  }
+};
 
   const checkVerified = async () => {
     try {
@@ -314,7 +372,7 @@ function Guide() {
         }}
       >
         <View className="py-4 gap-4">
-          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80">
+          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => {reportGuide(); refRBSheet5?.current.close()}}>
             <Text className="text-center text-white text-lg font-semibold">
               Report Guide
             </Text>
@@ -975,16 +1033,6 @@ function Guide() {
                         {comment?.userInfo?.email || ""}
                       </Text>
                     </View>
-                    <View className="flex items-center justify-center">
-                      <TouchableOpacity>
-                        <Text
-                          className="text-gray-600 dark:text-gray-300"
-                          onPress={() => refRBSheet2.current.open()}
-                        >
-                          <Entypo name="dots-three-horizontal" size={18} />
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
                   </View>
                   {/* Comment Text */}
                   <View className="flex-row gap-4">
@@ -1015,38 +1063,6 @@ function Guide() {
                       })}
                     </Text>
                   </View>
-                  <RBSheet
-                    ref={refRBSheet2}
-                    closeOnDragDown={true}
-                    closeOnPressMask={true}
-                    animationType="slide"
-                    customStyles={{
-                      wrapper: {
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                      },
-                      container: {
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
-                        paddingHorizontal: 16,
-                        backgroundColor:
-                          colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-                        maxHeight: 80, // Maximum constraint to prevent taking up the entire screen
-                      },
-                      draggableIcon: {
-                        backgroundColor:
-                          colorScheme === "dark" ? "#A0A0A0" : "#000",
-                        width: 60,
-                      },
-                    }}
-                  >
-                    <View className="py-4 gap-4">
-                      <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80">
-                        <Text className="text-center text-white text-lg font-semibold">
-                          Report Comment
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </RBSheet>
                 </View>
               ))}
           </View>
