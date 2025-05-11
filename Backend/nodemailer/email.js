@@ -105,3 +105,45 @@ export const sendConcern = (from, message) => {
     }
   );
 };
+
+export const sendReportEmail = ({ from, type, guideTitle, comment, posterName }) => {
+  const subject = `User Report - ${type === "Guide" ? "Guide" : "Comment"}`;
+
+  const htmlTemplate = `
+    <div style="font-family: Arial, sans-serif; background-color: #f0f8ff; padding: 20px;">
+      <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);">
+        <h2 style="color: #333333; text-align: center;">User Report Submitted</h2>
+
+        <div style="margin-top: 20px;">
+          <p style="margin: 8px 0;"><strong>Reporter:</strong> ${from}</p>
+          <p style="margin: 8px 0;"><strong>Type:</strong>Reported ${type}</p>
+          ${
+            type === "Guide"
+              ? `<p style="margin: 8px 0;"><strong>Guide Title:</strong> ${guideTitle}</p>
+                 <p style="margin: 8px 0;"><strong>Posted By:</strong> ${posterName}</p>`
+              : `<p style="margin: 8px 0;"><strong>Comment:</strong> ${comment}</p>
+                 <p style="margin: 8px 0;"><strong>Commented By:</strong> ${posterName}</p>`
+          }
+        </div>
+
+        <p style="margin-top: 30px; font-size: 14px; color: #888;">Please review this report in the admin dashboard.</p>
+      </div>
+    </div>
+  `;
+
+  transporter.sendMail(
+    {
+      from: from,
+      to: "tataihomeassistant@gmail.com",
+      subject,
+      html: htmlTemplate,
+    },
+    (err, info) => {
+      if (err) {
+        console.error("Error sending report email:", err);
+      } else {
+        console.log("Report email sent:", info.response);
+      }
+    }
+  );
+};

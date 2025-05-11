@@ -68,7 +68,7 @@ const CardUser = ({user}) => {
             borderTopRightRadius: 20,
             paddingHorizontal: 16,
             backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-            maxHeight: 140, // Maximum constraint to prevent taking up the entire screen
+            maxHeight: 80, // Maximum constraint to prevent taking up the entire screen
           },
           draggableIcon: {
             backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
@@ -80,11 +80,6 @@ const CardUser = ({user}) => {
           <TouchableOpacity className="w-full bg-primary dark:bg-secondary py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => handleViewUser()}>
             <Text className="text-center text-white text-lg font-semibold">
               View
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80">
-            <Text className="text-center text-white text-lg font-semibold">
-              Report User
             </Text>
           </TouchableOpacity>
         </View>
