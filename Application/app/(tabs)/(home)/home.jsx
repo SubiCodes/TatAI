@@ -153,7 +153,6 @@ const Home = () => {
     if (latestGuides.length === 0) getLatestGuide();
     if (repairGuides.length === 0) getLatestGuidePerType("repair");
     if (diyGuides.length === 0) getLatestGuidePerType("diy");
-    if (cookingGuides.length === 0) getLatestGuidePerType("cooking");
     if (toolGuides.length === 0) getLatestGuidePerType("tool");
   };
 
@@ -185,7 +184,6 @@ const Home = () => {
       await getLatestGuide();
       await getLatestGuidePerType("repair");
       await getLatestGuidePerType("diy");
-      await getLatestGuidePerType("cooking");
       await getLatestGuidePerType("tool");
       fetchGuides();
       getUsers();
@@ -286,13 +284,7 @@ const Home = () => {
                     CardRecentGuidePerTypeHorizontal,
                     "horizontal",
                   ],
-                  ["Cooking", cookingGuides, CardRecentGuidePerTypeVertical],
-                  [
-                    "Tools",
-                    toolGuides,
-                    CardRecentGuidePerTypeHorizontal,
-                    "horizontal",
-                  ],
+                  ["Tools", toolGuides, CardRecentGuidePerTypeVertical]
                 ].map(([title, guides, CardComponent, orientation]) => (
                   <View key={title} className="mb-6">
                     <View className="flex-row justify-between items-center mb-2">
