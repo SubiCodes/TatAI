@@ -68,7 +68,7 @@ const CardUser = ({user}) => {
             borderTopRightRadius: 20,
             paddingHorizontal: 16,
             backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-            maxHeight: 80, // Maximum constraint to prevent taking up the entire screen
+            maxHeight: 140, // Maximum constraint to prevent taking up the entire screen
           },
           draggableIcon: {
             backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",

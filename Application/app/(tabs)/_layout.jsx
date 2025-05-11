@@ -18,7 +18,7 @@ export default function Layout() {
         tabBarStyle: {
           borderRadius: 0,
           width: "100%",
-          height: 56,
+          height: 60,
           alignSelf: "center",
           display: "flex",
           alignItems: "center",
@@ -43,6 +43,20 @@ export default function Layout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="add-guide"
+        options={{
+          title: "Create",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "add-circle" : "add-circle-outline"}
               size={24}
               color={color}
             />
