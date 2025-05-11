@@ -190,7 +190,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         ref={dialogRef}
         className="p-6 w-96 rounded-lg bg-white shadow-lg backdrop:bg-black/50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       >
-        <h2 className="text-xl font-semibold mb-4">Login Unsuccessful</h2>
+        <h2 className="text-xl font-semibold mb-4">Logout?</h2>
         <p className="mb-4 text-gray-600">Are you sure you want to logout?</p>
         <div className="w-full flex justify-end gap-2">
           <button onClick={closeModal} className="px-4 py-2 bg-primary text-white rounded hover:bg-secondary hover:cursor-pointer transition duration-400">

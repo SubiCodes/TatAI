@@ -1150,3 +1150,45 @@ export const getLatestGuides = async (req, res) => {
       return res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
+export const getMonthlyGuideCountsByYear = async (req, res) => {
+  try {
+    const { year } = req.body;
+
+    if (!year || isNaN(year)) {
+      return res.status(400).json({ error: 'Invalid or missing year in request body' });
+    }
+
+    const parsedYear = parseInt(year);
+    const start = new Date(`${parsedYear}-01-01`);
+    const end = new Date(`${parsedYear + 1}-01-01`);
+
+    const results = await Guide.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: start,
+            $lt: end,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const monthlyCounts = Array(12).fill(0);
+    results.forEach(({ _id, count }) => {
+      monthlyCounts[_id - 1] = count;
+    });
+
+    return res.status(200).json({ success: true, data: monthlyCounts });
+
+  } catch (error) {
+    console.error('Error fetching monthly guide counts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

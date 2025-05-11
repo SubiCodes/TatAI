@@ -243,7 +243,7 @@ const AskName = () => {
           <View className="w-40 h-40 justify-center items-center rounded-full  self-center">
             <Image
               source={chatBotLBlue}
-              className="w-52 h-52"
+              className="w-40 h-40"
               resizeMode="contain"
             />
           </View>
