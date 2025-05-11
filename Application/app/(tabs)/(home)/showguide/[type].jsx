@@ -244,16 +244,6 @@ const filteredGuides = guides
                     DIY
                   </Text>
                 </View>
-                <View className="flex-row gap-2 items-center">
-                  <CheckBox
-                    className="border-white dark:border-black"
-                    value={tempCategory === "cooking"}
-                    onValueChange={() => setTempCategory("cooking")}
-                  />
-                  <Text className="text-lg text-text dark:text-text-dark">
-                    Cooking
-                  </Text>
-                </View>
               </View>
             </View>
           ) : null}
