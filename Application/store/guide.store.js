@@ -83,7 +83,7 @@ const guideStore = create((set) => ({
     },
     getGuide: async (id, navigation) => {
         try {
-            set({isFetchingGuides: true, errorFetchingGuides: null});
+            set({isFetchingGuides: true, errorFetchingGuides: null, guide: null});
             const res = await axios.get(`${API_URL}guide/${id}`);
             if (res.data.data?.status !== "accepted") {
                   Alert.alert(
