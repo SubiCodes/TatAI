@@ -18,6 +18,7 @@ export default function RootLayout() {
         <Stack.Screen name="modal" options={{ headerShown: false }} />
         <Stack.Screen name="user" options={{ headerShown: false }} />
         <Stack.Screen name="saved" options={{ headerShown: false }} />
+        <Stack.Screen name="my-guides" options={{ headerShown: false }} />
       </Stack>
     </>
   );

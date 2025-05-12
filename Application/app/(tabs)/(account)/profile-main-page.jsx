@@ -133,15 +133,15 @@ const Profile = () => {
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>
-                    <View className='w-full flex-row justify-start items-center gap-2'>
-                        <View className='w-12 h-auto border-0 items-center justify-cente'>
+                    <TouchableOpacity className='w-full flex-row justify-start items-center gap-2' onPress={() => {router.push('/my-guides/user-guides')}}>
+                        <View className='w-12 h-auto border-0 items-center justify-center'>
                             <Text className="text-text text-2xl dark:text-text-dark">
                                 <FontAwesome name="book" size={20} />
                             </Text>
                         </View>
                         <Text className='text-xl font-bold dark:text-text-dark'>My Guides</Text>
                         <Text className="text-text text-xl ml-auto dark:text-text-dark"><AntDesign name="right" size={20}/></Text>
-                    </View>
+                    </TouchableOpacity>
                 </View>
 
                 <View className='w-full flex flex-col justify-center items-center gap-4 px-2' style={{paddingVertical: 2}}>

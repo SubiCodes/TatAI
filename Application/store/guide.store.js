@@ -86,11 +86,11 @@ const guideStore = create((set) => ({
       set({ isFetchingGuides: false });
     }
   },
-  getGuide: async (id, navigation) => {
+  getGuide: async (id, navigation, userID) => {
     try {
       set({ isFetchingGuides: true, errorFetchingGuides: null, guide: null });
       const res = await axios.get(`${API_URL}guide/${id}`);
-      if (res.data.data?.status !== "accepted") {
+      if (res.data.data?.status !== "accepted" && userID !== res.data.data.userID) {
         Alert.alert(
           "Guide not accepted",
           "This guide is currently unavailable because its status is either Pending or Rejected.",
@@ -297,6 +297,21 @@ const guideStore = create((set) => ({
       set({ viewUserInfoLoading: true });
       const res = await axios.get(
         `${API_URL}guide/user-guides-accepted/${userId}`
+      );
+      set({ viewUserGuides: res.data.data });
+    } catch (error) {
+      console.log("Error getting user's info:", error);
+      set({ viewUserInfoError: "Something went wrong." });
+      return error.message;
+    } finally {
+      set({ viewUserInfoLoading: false });
+    }
+  },
+  getUserGuidesAll: async (userId) => {
+    try {
+      set({ viewUserInfoLoading: true });
+      const res = await axios.get(
+        `${API_URL}guide/user-guides/${userId}`
       );
       set({ viewUserGuides: res.data.data });
     } catch (error) {

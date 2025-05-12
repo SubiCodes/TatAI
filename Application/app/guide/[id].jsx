@@ -191,7 +191,7 @@ function Guide() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    getGuide(id, navigation);
+    getGuide(id, navigation, user._id);
     getFeedbacks(id);
     getUserInfo();
     checkVerified();
@@ -200,7 +200,7 @@ function Guide() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      getGuide(id);
+      getGuide(id, navigation, user._id);
       getFeedbacks(id);
       getUserInfo();
       checkVerified();
@@ -423,7 +423,16 @@ function Guide() {
                   month: "short",
                   day: "numeric",
                 })}
-              </Text>
+                </Text>
+                {guide?.userID === user._id ? (
+                  <Text className="text-justify text-text text-lg dark:text-text-dark">
+                    Guide Status: {" "}
+                    <Text className="font-black">
+                      {guide?.status?.charAt(0).toUpperCase() + guide?.status?.slice(1)}
+                    </Text>
+                  </Text>
+                ) : null}
+
             </View>
             <View className="w-full flex flex-row gap-6">
               <View className="flex flex-row items-center justify-center gap-2">
