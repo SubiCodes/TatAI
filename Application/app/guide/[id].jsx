@@ -43,6 +43,7 @@ function Guide() {
   const refRBSheet4 = useRef(); //ref for confirmng delete
   const refRBSheet5 = useRef(); //ref for reporting guide
   const refRBSheet6 = useRef(); //ref for confirming rating
+  const refRBSheetRatings = useRef(); //ref for confirming rating
   const user = userStore((state) => state.user);
   const getUserInfo = userStore((state) => state.getUserInfo);
   const guide = guideStore((state) => state.guide);
@@ -71,57 +72,57 @@ function Guide() {
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
 
-const reportGuide = async () => {
+  const reportGuide = async () => {
 
-  Alert.alert("Reporting Guide", "Please wait...", [], { cancelable: false });
-  let success = false;
+    Alert.alert("Reporting Guide", "Please wait...", [], { cancelable: false });
+    let success = false;
 
-  try {
-    const res = await axios.post(`${API_URL}user/report`, {from: user?.email, type: "Guide", guideTitle: guide?.title, comment: "", posterName: guide?.uploader})
-    success = true
-  } catch (error) {
-    console.error("Report error:", error);
-    success = false;
-  } finally {
-    // Step 3: Dismiss the first alert (workaround using timeout)
-    setTimeout(() => {
-      // Step 4: Show result alert
-      Alert.alert(
-        success ? "Report Submitted" : "Report Failed",
-        success
-          ? "Your report has been sent successfully."
-          : "There was an error submitting your report. Please try again."
-      );
-    }, 500); // Wait briefly before showing final alert
-  }
-};
+    try {
+      const res = await axios.post(`${API_URL}user/report`, { from: user?.email, type: "Guide", guideTitle: guide?.title, comment: "", posterName: guide?.uploader })
+      success = true
+    } catch (error) {
+      console.error("Report error:", error);
+      success = false;
+    } finally {
+      // Step 3: Dismiss the first alert (workaround using timeout)
+      setTimeout(() => {
+        // Step 4: Show result alert
+        Alert.alert(
+          success ? "Report Submitted" : "Report Failed",
+          success
+            ? "Your report has been sent successfully."
+            : "There was an error submitting your report. Please try again."
+        );
+      }, 500); // Wait briefly before showing final alert
+    }
+  };
 
-const reportComment = async (comment, commenter) => {
+  const reportComment = async (comment, commenter) => {
 
-  Alert.alert("Reporting Guide", "Please wait...", [], { cancelable: false });
-  let success = false;
+    Alert.alert("Reporting Guide", "Please wait...", [], { cancelable: false });
+    let success = false;
 
-  try {
-    console.log(`${API_URL}user/report`);
-    console.log(`from: ${user?.email}, type: ${"Guide"}, title: "", comment: ${comment}, posterName: ${commenter}`);
-    const res = await axios.post(`${API_URL}user/report`, {from: user?.email, type: "Comment", guideTitle: guide?.title, comment: comment, posterName: commenter})
-    success = true
-  } catch (error) {
-    console.error("Report error:", error);
-    success = false;
-  } finally {
-    // Step 3: Dismiss the first alert (workaround using timeout)
-    setTimeout(() => {
-      // Step 4: Show result alert
-      Alert.alert(
-        success ? "Report Submitted" : "Report Failed",
-        success
-          ? "Your report has been sent successfully."
-          : "There was an error submitting your report. Please try again."
-      );
-    }, 500); // Wait briefly before showing final alert
-  }
-};
+    try {
+      console.log(`${API_URL}user/report`);
+      console.log(`from: ${user?.email}, type: ${"Guide"}, title: "", comment: ${comment}, posterName: ${commenter}`);
+      const res = await axios.post(`${API_URL}user/report`, { from: user?.email, type: "Comment", guideTitle: guide?.title, comment: comment, posterName: commenter })
+      success = true
+    } catch (error) {
+      console.error("Report error:", error);
+      success = false;
+    } finally {
+      // Step 3: Dismiss the first alert (workaround using timeout)
+      setTimeout(() => {
+        // Step 4: Show result alert
+        Alert.alert(
+          success ? "Report Submitted" : "Report Failed",
+          success
+            ? "Your report has been sent successfully."
+            : "There was an error submitting your report. Please try again."
+        );
+      }, 500); // Wait briefly before showing final alert
+    }
+  };
 
   const checkVerified = async () => {
     try {
@@ -290,9 +291,8 @@ const reportComment = async (comment, commenter) => {
             {" "}
             {isFetchingGuides
               ? ""
-              : `${
-                  guide?.type[0]?.toUpperCase() + guide?.type?.substring(1)
-                } Guide`}
+              : `${guide?.type[0]?.toUpperCase() + guide?.type?.substring(1)
+              } Guide`}
           </Text>
           <View className="flex-1" />
           <Text>
@@ -321,9 +321,8 @@ const reportComment = async (comment, commenter) => {
           {" "}
           {isFetchingGuides
             ? ""
-            : `${
-                guide?.type[0]?.toUpperCase() + guide?.type?.substring(1)
-              } Guide`}
+            : `${guide?.type[0]?.toUpperCase() + guide?.type?.substring(1)
+            } Guide`}
         </Text>
         <View className="flex-1" />
         <TouchableOpacity
@@ -372,7 +371,7 @@ const reportComment = async (comment, commenter) => {
         }}
       >
         <View className="py-4 gap-4">
-          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => {reportGuide(); refRBSheet5?.current.close()}}>
+          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => { reportGuide(); refRBSheet5?.current.close() }}>
             <Text className="text-center text-white text-lg font-semibold">
               Report Guide
             </Text>
@@ -413,7 +412,7 @@ const reportComment = async (comment, commenter) => {
             <View className="w-full items-start justify-center flex-col mb-4">
               <Text className="text-justify text-text text-lg dark:text-text-dark">
                 Posted by:{" "}
-                <Text className="font-black underline" onPress={() => {handleViewPoster()}}>
+                <Text className="font-black underline" onPress={() => { handleViewPoster() }}>
                   {guide?.posterInfo.name}
                 </Text>
               </Text>
@@ -640,6 +639,73 @@ const reportComment = async (comment, commenter) => {
           </View>
         </RBSheet>
 
+      <RBSheet
+        ref={refRBSheetRatings}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        customStyles={{
+          wrapper: {
+            backgroundColor: "rgba(0,0,0,0.5)",
+          },
+          container: {
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 16,
+            backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+            maxHeight: 450,
+            minHeight: 450,
+          },
+          draggableIcon: {
+            backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
+            width: 60,
+          },
+        }}
+        customModalProps={{
+          animationType: "slide",
+          statusBarTranslucent: true,
+        }}
+      >
+          <ScrollView
+            className="flex-1 z-50"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 50, paddingTop: 20 }}
+          >
+            {isFetchingFeedbacks || isFetchingGuides ? null : (
+              <View className="w-full flex flex-col gap-2 px-6 mb-4">
+                {feedbacks
+                  ?.filter(
+                    (feedback) =>
+                      feedback?.rating // Only feedbacks with rating, exclude own
+                  )
+                  .map((feedback) => (
+                    <View key={feedback._id} className="flex flex-col mb-6 w-full">
+                      {/* User Info */}
+                      <View className="flex-row gap-4 mb-4">
+                        <Image
+                          source={
+                            profileIcons[feedback?.userInfo?.profileIcon || "empty_profile"]
+                          }
+                          className="w-16 h-16 rounded-full"
+                        />
+                        <View className="mr-4">
+                          <Text className="text-md font-semibold dark:text-text-dark">
+                            {feedback?.userInfo?.name || "Anonymous"}
+                          </Text>
+                          <Text className="text-sm text-gray-500">
+                            {feedback?.userInfo?.email || ""}
+                          </Text>
+                          <Text className="text-base text-gray-700 dark:text-gray-200">
+                            Rating: {feedback.rating} ⭐
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+              </View>
+            )}
+          </ScrollView>
+        </RBSheet>
+
         {!isFetchingFeedbacks && !isFetchingGuides && (
           <>
             <View className="w-full items-center justify-start mb-8">
@@ -665,6 +731,9 @@ const reportComment = async (comment, commenter) => {
                 }}
               >
                 Remove rating
+              </Text>
+              <Text className='underline text-text dark:text-text-dark' onPress={() => refRBSheetRatings?.current.open()}>
+                Click to View Ratings.
               </Text>
             </View>
           </>
@@ -753,7 +822,7 @@ const reportComment = async (comment, commenter) => {
                     <Image
                       source={
                         profileIcons[
-                          comment?.userInfo?.profileIcon || "empty_profile"
+                        comment?.userInfo?.profileIcon || "empty_profile"
                         ]
                       }
                       className="w-12 h-12 rounded-full"
@@ -769,7 +838,7 @@ const reportComment = async (comment, commenter) => {
                     <View className="flex items-center justify-center">
                       <TouchableOpacity
                         onPress={() => {
-                          if (user?.status === "Verified"){
+                          if (user?.status === "Verified") {
                             refRBSheet.current.open()
                           } else {
                             Alert.alert(
@@ -798,11 +867,10 @@ const reportComment = async (comment, commenter) => {
                   {/* Comment Text */}
                   <View className="flex-row gap-4">
                     <Text
-                      className={`text-lg ${
-                        comment.hidden
+                      className={`text-lg ${comment.hidden
                           ? "text-gray-400"
                           : "text-black dark:text-white"
-                      }`}
+                        }`}
                     >
                       {comment.comment}
                     </Text>
@@ -1020,7 +1088,7 @@ const reportComment = async (comment, commenter) => {
                     <Image
                       source={
                         profileIcons[
-                          comment?.userInfo?.profileIcon || "empty_profile"
+                        comment?.userInfo?.profileIcon || "empty_profile"
                         ]
                       }
                       className="w-12 h-12 rounded-full"
@@ -1037,11 +1105,10 @@ const reportComment = async (comment, commenter) => {
                   {/* Comment Text */}
                   <View className="flex-row gap-4">
                     <Text
-                      className={`text-lg ${
-                        comment.hidden
+                      className={`text-lg ${comment.hidden
                           ? "text-gray-400"
                           : "text-black dark:text-white"
-                      }`}
+                        }`}
                     >
                       {comment?.hidden
                         ? "This comment was hidden by the admin due to inappropriate content"
