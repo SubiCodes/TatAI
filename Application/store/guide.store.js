@@ -398,7 +398,7 @@ createGuide: async (guideData, coverImageUri, stepMediaArray) => {
     const successMessage = `Successfully created "${guideData.title}"`;
     set({ message: successMessage });
     Alert.alert("Success", successMessage);
-    return successMessage;
+    return true;
   } catch (error) {
     const errorMessage = `Failed to create guide: ${error.message}`;
     console.error("Error creating guide:", errorMessage);

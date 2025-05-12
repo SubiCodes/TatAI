@@ -161,7 +161,7 @@ function Guides() {
               </ul>
             </div>
           </div>
-            {['all', 'repair', 'tool', 'diy', 'cooking'].map((type) => (
+            {['all', 'repair', 'tool', 'diy'].map((type) => (
               <div key={type} className="flex flex-row items-center gap-2">
                 <input
                   type="radio"
