@@ -21,16 +21,15 @@ import RBSheet from "react-native-raw-bottom-sheet";
 import guideStore from "@/store/guide.store";
 import userStore from "@/store/user.store";
 
-const SavedGuides = () => {
+const UserGuides = () => {
   const router = useRouter();
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const [refreshing, setRefreshing] = useState(false);
 
   const user = userStore((state) => state.user);
-  const bookmarkedGuides = guideStore((state) => state.bookmarkedGuides);
-  const fetchingBookmarkedGuidesError = guideStore((state) => state.fetchingBookmarkedGuidesError);
-  const getBookmarkedGuides = guideStore((state) => state.getBookmarkedGuides);
-  const isFetchingBookmarkedGuides = guideStore((state) => state.isFetchingBookmarkedGuides);
+  const viewUserGuides = guideStore((state) => state.viewUserGuides);
+  const getUserGuidesAll = guideStore((state) => state.getUserGuidesAll);
+  const viewUserInfoLoading = guideStore((state) => state.viewUserInfoLoading);
 
 
   const handleGoBack = () => {
@@ -49,10 +48,12 @@ const SavedGuides = () => {
 
   //filter states
   const [tempCategory, setTempCategory] = useState('all');
+  const [tempStatus, setTempStatus] = useState('all');
   const [tempDate, setTempDate] = useState('latest first');
   const [tempRatings, setTempRatings] = useState('any');
 
   const [category, setCategory] = useState('all');
+  const [status, setStatus] = useState('all');
   const [date, setDate] = useState('latest first');
   const [ratings, setRatings] = useState('any');
 
@@ -60,50 +61,43 @@ const SavedGuides = () => {
     setCategory(tempCategory);
     setDate(tempDate);
     setRatings(tempRatings);
+    setStatus(tempStatus);
   }
 
   //Setup Filters
   const [searchText, setSearchText] = useState('');
 
 // Filter Guides
-const filteredGuides = bookmarkedGuides
+const filteredGuides = viewUserGuides
   .filter((guide) => {
-    // Text search filter
-    const matchesSearch = searchText === '' || 
+    const matchesSearch =
+      searchText === '' ||
       guide.title.toLowerCase().includes(searchText.toLowerCase()) ||
       guide.posterInfo.name.toLowerCase().includes(searchText.toLowerCase());
-    
-    // Category filter
-    const matchesCategory = category === 'all' || guide.type === category.toLowerCase();
-    
-    return matchesSearch && matchesCategory;
+
+    const matchesCategory =
+      category === 'all' || guide.type === category.toLowerCase();
+
+    const matchesStatus =
+      status === 'all' || guide.status === status.toLowerCase(); // Add this
+
+    return matchesSearch && matchesCategory && matchesStatus; // Include status
   })
-  // Date filter
   .sort((a, b) => {
     const dateA = new Date(a.updatedAt);
     const dateB = new Date(b.updatedAt);
-    
-    if (date === 'latest first') {
-      return dateB - dateA; // Newest first
-    } else {
-      return dateA - dateB; // Oldest first
-    }
+    return date === 'latest first' ? dateB - dateA : dateA - dateB;
   })
-  // Ratings filter (applied after sorting by date)
   .sort((a, b) => {
-    if (ratings === 'any') {
-      return 0; // Keep the date sorting
-    } else if (ratings === 'most') {
-      return b.feedbackInfo.ratingCount - a.feedbackInfo.ratingCount;
-    } else if (ratings === 'highest') {
-      return b.feedbackInfo.averageRating - a.feedbackInfo.averageRating;
-    }
+    if (ratings === 'any') return 0;
+    if (ratings === 'most') return b.feedbackInfo.ratingCount - a.feedbackInfo.ratingCount;
+    if (ratings === 'highest') return b.feedbackInfo.averageRating - a.feedbackInfo.averageRating;
     return 0;
   });
 
   const fetchGuides = async () => {
     console.log("USER ID: ", user._id);
-    getBookmarkedGuides(user?._id)
+    getUserGuidesAll(user?._id)
   };
 
   const onRefresh = useCallback(async () => {
@@ -178,8 +172,8 @@ const filteredGuides = bookmarkedGuides
             borderTopRightRadius: 20,
             paddingHorizontal: 16,
             backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-            maxHeight: 450,
-            minHeight: 450,
+            maxHeight: 525,
+            minHeight: 525,
           },
           draggableIcon: {
             backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
@@ -235,6 +229,53 @@ const filteredGuides = bookmarkedGuides
                 />
                 <Text className="text-lg text-text dark:text-text-dark">
                   DIY
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View className="w-full flex flex-col gap-4">
+            <Text className="text-text text-2xl font-bold dark:text-text-dark mb-2 mt-2">
+              Filter by status
+            </Text>
+            <View className="w-full flex-row gap-6 items-center flex-wrap">
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempStatus === "all"}
+                  onValueChange={() => setTempStatus("all")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  All
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempStatus === "accepted"}
+                  onValueChange={() => setTempStatus("accepted")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  Accepted
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempStatus === "pending"}
+                  onValueChange={() => setTempStatus("pending")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  Pending
+                </Text>
+              </View>
+              <View className="flex-row gap-2 items-center">
+                <CheckBox
+                  className="border-white dark:border-black"
+                  value={tempStatus === "rejected"}
+                  onValueChange={() => setTempStatus("rejected")}
+                />
+                <Text className="text-lg text-text dark:text-text-dark">
+                  Rejected
                 </Text>
               </View>
             </View>
@@ -335,13 +376,13 @@ const filteredGuides = bookmarkedGuides
         {/* Page Title */}
         <View className="w-full py-4 px-6">
           <Text className="text-text text-2xl font-bold dark:text-text-dark">
-            Saved Guides
+            Your Guides
           </Text>
         </View>
 
         {/* Guides Content */}
         <View className="w-full flex flex-col items-center gap-4 px-6">
-          {isFetchingBookmarkedGuides ? (
+          {viewUserInfoLoading ? (
             <View className="w-full items-center py-4">
               <ActivityIndicator size="large" color="blue" />
             </View>
@@ -359,4 +400,4 @@ const filteredGuides = bookmarkedGuides
   );
 };
 
-export default SavedGuides;
+export default UserGuides;

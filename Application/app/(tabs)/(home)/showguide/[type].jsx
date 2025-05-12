@@ -348,17 +348,19 @@ const filteredGuides = guides
         </View>
 
         {/* Guides Content */}
-        <View className="w-full flex flex-col items-center gap-4 px-6">
-          {isFetchingGuides ? (
-            <View className="w-full items-center py-4">
-              <ActivityIndicator size="large" color="blue" />
-            </View>
-          ) : (
-            filteredGuides.map((guide) => (
-              <CardRecentGuidePerTypeVertical key={guide._id} guide={guide} />
-            ))
-          )}
-        </View>
+       <View className="w-full flex flex-col items-center gap-4 px-6">
+        {isFetchingGuides ? (
+          <View className="w-full items-center py-4">
+            <ActivityIndicator size="large" color="blue" />
+          </View>
+        ) : filteredGuides.length === 0 ? (
+          <Text className="text-gray-500 text-center py-4">Nothing to see here</Text>
+        ) : (
+          filteredGuides.map((guide) => (
+            <CardRecentGuidePerTypeVertical key={guide._id} guide={guide} />
+          ))
+        )}
+      </View>
       </ScrollView>
     </>
   );
