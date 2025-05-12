@@ -3,8 +3,13 @@ import { FontAwesome } from '@expo/vector-icons';
 import React, { useState, useRef } from 'react';
 
 import BotHeader from "@/components/chatbot-header";
+import Entypo from '@expo/vector-icons/Entypo';
 import chatBotLBlue from "@/assets/images/chat-bot/chatbot-lightblue.png";
 import chatBotBlack from "@/assets/images/chat-bot/chatbot-black.png";
+
+import userStore from "@/store/user.store";
+import Constants from "expo-constants";
+import axios from 'axios';
 
 const INITIAL_MESSAGES = [
   { id: 1, text: "Hello, I'm TatAI!", sender: 'bot' },
@@ -12,35 +17,81 @@ const INITIAL_MESSAGES = [
   { id: 3, text: "I'd love to get to know you and assist you with your home improvement needs.", sender: 'bot' }
 ];
 
+const OPENAI_KEY =
+  Constants.expoConfig?.extra?.OPENAI_KEY ?? Constants.manifest?.extra?.OPENAI_KEY;
+
+const API_URL =
+  Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
+
 const ChatBot = () => {
+  const preference = userStore((state) => state.preference);
+  const user = userStore((state) => state.user);
+
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
+  const [aiTyping, setAiTyping] = useState(false);
   const scrollViewRef = useRef();
 
-  const handleSendMessage = () => {
-    if (inputText.trim() === '') return;
-    
-    // Add user message
-    const newUserMessage = {
-      id: messages.length + 1,
-      text: inputText,
-      sender: 'user'
-    };
-    
-    // Add bot response
-    const newBotMessage = {
-      id: messages.length + 2,
-      text: `I'm still under development, so I might not have the answer right now. Let’s check again later!`,
-      sender: 'bot'
-    };
-    
-    setMessages([...messages, newUserMessage, newBotMessage]);
-    setInputText('');
-    
-    // Scroll to bottom after adding new messages
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+  const handleSendMessage = async () => {
+    try {
+      if (inputText.trim() === '') return;
+
+      setAiTyping(true);
+
+      const initialMessage = `You are a bot named TatAi whose purpose is to teach home repairs and DIY home projects. Any question outside that, say that it is outside your scope. The user you're currently talking to prefers to be called "${preference?.preferredName}", is ${user?.gender}, has ${preference?.toolFamiliarity} tool familiarity, and is at a ${preference?.skillLevel} skill level.`;
+
+      const newUserMessage = {
+        id: messages.length + 1,
+        text: inputText,
+        sender: 'user',
+      };
+
+      const updatedMessages = [...messages, newUserMessage];
+      setMessages(updatedMessages);
+      setInputText('');
+
+      const formattedMessages = [
+        { role: 'system', content: initialMessage },
+        ...updatedMessages.map((msg) => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text,
+        })),
+      ];
+
+      const response = await axios.post(`${API_URL}user/call-ai`, {
+        messages: formattedMessages,
+      });
+
+      const aiReply = response.data.message.choices[0].message.content;
+
+      console.log(response.data.message)
+
+      const newBotMessage = {
+        id: updatedMessages.length + 1,
+        text:
+          aiReply ||
+          `I'm still under development, so I might not have the answer right now. Let’s check again later!`,
+        sender: 'bot',
+      };
+
+      setMessages((prev) => [...prev, newBotMessage]);
+
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    } catch (error) {
+      console.log('Error:', error.response?.data || error.message);
+
+      const fallbackBotMessage = {
+        id: messages.length + 2,
+        text: `Sorry, something went wrong. Let's try again later.`,
+        sender: 'bot',
+      };
+
+      setMessages((prev) => [...prev, fallbackBotMessage]);
+    } finally {
+      setAiTyping(false); // 👈 Stop "typing" indicator
+    }
   };
 
   const handleClearChat = () => {
@@ -73,8 +124,8 @@ const ChatBot = () => {
 
           {/* Dynamic message list */}
           {messages.map((message) => (
-            <View 
-              key={message.id} 
+            <View
+              key={message.id}
               className={`${message.sender === 'user' ? 'self-end bg-secondary' : 'self-start bg-gray-200'} p-4 rounded-xl max-w-[80%]`}
             >
               <Text className={message.sender === 'user' ? 'text-white' : 'text-black'}>
@@ -82,6 +133,13 @@ const ChatBot = () => {
               </Text>
             </View>
           ))}
+
+          {/* Typing indicator */}
+          {aiTyping && (
+            <View className="self-start bg-gray-200 p-4 rounded-xl max-w-[80%]">
+              <Text className="text-gray-600"><Entypo name="dots-three-horizontal" size={24} /></Text>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -92,8 +150,9 @@ const ChatBot = () => {
           value={inputText}
           onChangeText={setInputText}
           onSubmitEditing={handleSendMessage}
+          editable={!aiTyping}
         />
-        <TouchableOpacity 
+        <TouchableOpacity
           className="w-12 h-12 rounded bg-secondary items-center justify-center"
           onPress={handleSendMessage}
         >
