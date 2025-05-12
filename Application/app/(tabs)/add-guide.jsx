@@ -8,6 +8,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { Video } from 'expo-av';
 
 const AddGuide = () => {
@@ -27,6 +28,22 @@ const AddGuide = () => {
 
     const [displayImage, setDisplayImage] = useState();
     const [isOpen, setIsOpen] = useState(false);
+
+    const clearAll = () => {
+        setType('repair')
+        setTitle('');
+        setDescription('');
+        setCoverImage(null);
+        setToolInput('');
+        setTools([]);
+        setMaterialsNeeded('');
+        setStepTitles(['']);
+        setStepDescriptions(['']);
+        setStepMedia([null]);
+        setClosingMessage('');
+        setAdditionalLinks('');
+        setDisplayImage();
+    }
 
     // Add a new step when the button is clicked
     const addStep = () => {
@@ -201,8 +218,37 @@ const AddGuide = () => {
         <View className='w-full h-full bg-background dark:bg-background-dark'>
 
             {/* Floating Header */}
-            <View className='w-full items-center justify-center py-4 bg-white dark:bg-[#2A2A2A]'>
-                <Text className='text-text text-xl dark:text-text-dark'>Create guide</Text>
+            <View className='w-full flex-row justify-center py-4 px-6 bg-white dark:bg-[#2A2A2A]'>
+                <View className='items-center justify-center'>
+                    <Text className='text-text text-xl dark:text-text-dark font-bold'>Create guide</Text>
+                </View>
+                <View className='flex-1' />
+                <View className='flex-1 items-end justify-center'>
+                    <TouchableOpacity
+                        className='items-center justify-center flex-row bg-red-400 px-6 py-2 rounded-full'
+                        onPress={() => {
+                            Alert.alert(
+                                "Clear Guide",
+                                "Are you sure you want to clear all guide fields?",
+                                [
+                                    {
+                                        text: "Cancel",
+                                        style: "cancel",
+                                    },
+                                    {
+                                        text: "Yes, Clear",
+                                        style: "destructive",
+                                        onPress: () => clearAll(),
+                                    },
+                                ]
+                            );
+                        }}
+                    >
+                        <Text className='text-text-dark'>
+                            <EvilIcons name="trash" size={24} />
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <ScrollView
