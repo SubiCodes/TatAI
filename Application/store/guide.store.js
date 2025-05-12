@@ -1,13 +1,11 @@
 import { create } from "zustand";
 import axios from "axios";
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 import { Alert } from "react-native";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from "expo-file-system";
 
 const API_URL =
   Constants.expoConfig?.extra?.API_URL ?? Constants.manifest?.extra?.API_URL;
-
-
 
 const guideStore = create((set) => ({
   guide: null,
@@ -31,6 +29,7 @@ const guideStore = create((set) => ({
   isFetchingBookmarkedGuides: null,
   fetchingBookmarkedGuidesError: null,
   isPosting: false,
+  isDeleting: false,
   getAllGuides: async () => {
     try {
       set({ isFetchingGuides: true, errorFetchingGuides: null });
@@ -90,7 +89,10 @@ const guideStore = create((set) => ({
     try {
       set({ isFetchingGuides: true, errorFetchingGuides: null, guide: null });
       const res = await axios.get(`${API_URL}guide/${id}`);
-      if (res.data.data?.status !== "accepted" && userID !== res.data.data.userID) {
+      if (
+        res.data.data?.status !== "accepted" &&
+        userID !== res.data.data.userID
+      ) {
         Alert.alert(
           "Guide not accepted",
           "This guide is currently unavailable because its status is either Pending or Rejected.",
@@ -310,9 +312,7 @@ const guideStore = create((set) => ({
   getUserGuidesAll: async (userId) => {
     try {
       set({ viewUserInfoLoading: true });
-      const res = await axios.get(
-        `${API_URL}guide/user-guides/${userId}`
-      );
+      const res = await axios.get(`${API_URL}guide/user-guides/${userId}`);
       set({ viewUserGuides: res.data.data });
     } catch (error) {
       console.log("Error getting user's info:", error);
@@ -337,120 +337,173 @@ const guideStore = create((set) => ({
       set({ isFetchingBookmarkedGuides: false });
     }
   },
-createGuide: async (guideData, coverImageUri, stepMediaArray) => {
-  try {
-    set({ isPosting: true });
-    
-    // Format the cover image properly if it exists
-    let coverPhotoData = null;
-    if (coverImageUri) {
-      try {
-        // Create a proper media item object from the URI string
-        const coverMediaItem = { 
-          uri: coverImageUri, 
-          type: 'image' 
-        };
-        
-        console.log('Processing cover photo:', coverMediaItem);
-        const base64 = await convertToBase64(coverMediaItem);
-        const res = await axios.post(`${API_URL}guide/upload`, { data: base64 });
-        coverPhotoData = {
-          ...res.data,
-          mimeType: 'image/jpeg', // Default for cover images
-        };
-      } catch (error) {
-        console.error('Failed to process cover photo:', error);
-        // Continue with the process even if cover photo fails
-      }
-    }
-    
-    // Handle step media files
-    const stepFilesData = [];
-    if (Array.isArray(stepMediaArray)) {
-      for (let i = 0; i < stepMediaArray.length; i++) {
-        const mediaItem = stepMediaArray[i];
+  createGuide: async (guideData, coverImageUri, stepMediaArray) => {
+    try {
+      set({ isPosting: true });
+
+      // Format the cover image properly if it exists
+      let coverPhotoData = null;
+      if (coverImageUri) {
         try {
-          if (mediaItem && mediaItem.uri) {
-            console.log(`Processing step media ${i + 1}:`, mediaItem);
-            const base64 = await convertToBase64(mediaItem);
-            const res = await axios.post(`${API_URL}guide/upload`, { data: base64 });
-            stepFilesData.push({
-              ...res.data,
-              mimeType: mediaItem.type === 'video' ? 'video/mp4' : 'image/jpeg',
-            });
-          } else {
-            console.log(`Skipping empty step media at index ${i}`);
-          }
+          // Create a proper media item object from the URI string
+          const coverMediaItem = {
+            uri: coverImageUri,
+            type: "image",
+          };
+
+          console.log("Processing cover photo:", coverMediaItem);
+          const base64 = await convertToBase64(coverMediaItem);
+          const res = await axios.post(`${API_URL}guide/upload`, {
+            data: base64,
+          });
+          coverPhotoData = {
+            ...res.data,
+            mimeType: "image/jpeg", // Default for cover images
+          };
         } catch (error) {
-          console.error(`Failed to process step media ${i + 1}:`, error);
-          // Continue processing other files even if this one fails
+          console.error("Failed to process cover photo:", error);
+          // Continue with the process even if cover photo fails
         }
       }
-    } else {
-      console.warn('stepMediaArray is not an array:', stepMediaArray);
+
+      // Handle step media files
+      const stepFilesData = [];
+      if (Array.isArray(stepMediaArray)) {
+        for (let i = 0; i < stepMediaArray.length; i++) {
+          const mediaItem = stepMediaArray[i];
+          try {
+            if (mediaItem && mediaItem.uri) {
+              console.log(`Processing step media ${i + 1}:`, mediaItem);
+              const base64 = await convertToBase64(mediaItem);
+              const res = await axios.post(`${API_URL}guide/upload`, {
+                data: base64,
+              });
+              stepFilesData.push({
+                ...res.data,
+                mimeType:
+                  mediaItem.type === "video" ? "video/mp4" : "image/jpeg",
+              });
+            } else {
+              console.log(`Skipping empty step media at index ${i}`);
+            }
+          } catch (error) {
+            console.error(`Failed to process step media ${i + 1}:`, error);
+            // Continue processing other files even if this one fails
+          }
+        }
+      } else {
+        console.warn("stepMediaArray is not an array:", stepMediaArray);
+      }
+
+      // Prepare final payload
+      const payload = {
+        ...guideData,
+        coverImg: coverPhotoData || {},
+        stepImg: stepFilesData.filter(Boolean),
+      };
+
+      console.log("Sending guide creation request");
+
+      const res = await axios.post(`${API_URL}guide/create`, payload, {
+        withCredentials: true,
+      });
+
+      const newGuide = res.data.guide;
+      set((state) => ({
+        guides: [newGuide, ...state.guides],
+      }));
+
+      const successMessage = `Successfully created "${guideData.title}"`;
+      set({ message: successMessage });
+      Alert.alert("Success", successMessage);
+      return true;
+    } catch (error) {
+      const errorMessage = `Failed to create guide: ${error.message}`;
+      console.error("Error creating guide:", errorMessage);
+      set({ message: errorMessage });
+      Alert.alert("Error", errorMessage);
+      return errorMessage;
+    } finally {
+      set({ isPosting: false });
     }
-    
-    // Prepare final payload
-    const payload = {
-      ...guideData,
-      coverImg: coverPhotoData || {},
-      stepImg: stepFilesData.filter(Boolean),
-    };
-    
-    console.log('Sending guide creation request');
-    
-    const res = await axios.post(
-      `${API_URL}guide/create`,
-      payload,
-      { withCredentials: true }
-    );
-    
-    const newGuide = res.data.guide;
-    set((state) => ({
-      guides: [newGuide, ...state.guides],
-    }));
-    
-    const successMessage = `Successfully created "${guideData.title}"`;
-    set({ message: successMessage });
-    Alert.alert("Success", successMessage);
-    return true;
-  } catch (error) {
-    const errorMessage = `Failed to create guide: ${error.message}`;
-    console.error("Error creating guide:", errorMessage);
-    set({ message: errorMessage });
-    Alert.alert("Error", errorMessage);
-    return errorMessage;
-  } finally {
-    set({ isPosting: false });
-  }
-}
+  },
+  deleteGuide: async (guide, imageIDs) => {
+    try {
+      set({isDeleting: true});
+      // Check if imageIDs is valid
+      if (!Array.isArray(imageIDs) || imageIDs.length === 0) {
+        console.error("No images to delete");
+        return `No images associated with guide '${guide.title}'`;
+      }
+
+      // Delete associated images first
+      for (const { public_id, url } of imageIDs) {
+        if (!public_id || !url) {
+          console.error(`Invalid image data: public_id or url missing`);
+          continue; // Skip this image if it's invalid
+        }
+        try {
+          const deleteRes = await axios.post(
+            `${API_URL}guide/deleteImage`,
+            {
+              images: [{ public_id, url }], // Send an array of images as expected by backend
+            }
+          );
+          console.log(deleteRes.data);
+        } catch (deleteError) {
+          console.error("Error deleting media:", deleteError);
+          // Continue deleting other images even if one fails
+        }
+      }
+
+      // Delete the guide itself
+      const guideDeleteRes = await axios.post(
+        `${API_URL}guide/${guide._id}`
+      );
+      console.log(guideDeleteRes.data);
+
+      // Update state to remove the deleted guide
+      set((state) => ({
+        guides: state.guides.filter((g) => g._id !== guide._id),
+      }));
+
+      return `Successfully deleted '${guide.title}' by '${guide.posterInfo.name}'`;
+    } catch (error) {
+      console.error(error);
+      set({ message: `Something went wrong: ${error.message}` });
+      return `Something went wrong while deleting '${guide.title}' by '${guide.posterInfo.name}'`;
+    } finally {
+      set({isDeleting: false});
+    }
+  },
 }));
 
 const convertToBase64 = async (mediaItem) => {
   try {
     // Validate we have a media item with a URI
     if (!mediaItem || !mediaItem.uri) {
-      console.error('Invalid media item or missing URI:', mediaItem);
-      throw new Error('Invalid media item: missing URI');
+      console.error("Invalid media item or missing URI:", mediaItem);
+      throw new Error("Invalid media item: missing URI");
     }
-    
+
     const uri = mediaItem.uri;
-    console.log('Converting file to base64:', uri);
-    
+    console.log("Converting file to base64:", uri);
+
     // Read the file as base64
     const base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    
+
     // Set the correct MIME type based on the media type
-    const mimeType = mediaItem.type === 'video' 
-      ? 'video/mp4'  // Default video type
-      : 'image/jpeg'; // Default image type
-    
+    const mimeType =
+      mediaItem.type === "video"
+        ? "video/mp4" // Default video type
+        : "image/jpeg"; // Default image type
+
     return `data:${mimeType};base64,${base64}`;
   } catch (error) {
-    console.error('Base64 conversion error:', error);
+    console.error("Base64 conversion error:", error);
     throw error;
   }
 };
-export default guideStore
+export default guideStore;

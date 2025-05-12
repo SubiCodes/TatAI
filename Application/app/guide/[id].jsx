@@ -29,6 +29,7 @@ import RBSheet from 'react-native-raw-bottom-sheet'
 import { useNavigation } from '@react-navigation/native';
 import { Video } from 'expo-av';
 import axios from 'axios';
+import { Modal } from 'react-native';
 import Constants from 'expo-constants';
 
 const API_URL =
@@ -47,6 +48,8 @@ function Guide() {
   const user = userStore((state) => state.user);
   const getUserInfo = userStore((state) => state.getUserInfo);
   const guide = guideStore((state) => state.guide);
+  const deleteGuide = guideStore((state) => state.deleteGuide);
+  const isDeleting = guideStore((state) => state.isDeleting);
   const getGuide = guideStore((state) => state.getGuide);
   const isFetchingGuides = guideStore((state) => state.isFetchingGuides);
   const errorFetchingGuides = guideStore((state) => state.errorFetchingGuides);
@@ -71,6 +74,45 @@ function Guide() {
   // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
+
+  const handleDeleteGuide = async () => {
+    try {
+      Alert.alert(
+        "Delete Guide",
+        "Are you sure you want to delete this guide?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                console.log("Guide deleted");
+                const coverImgObj = guide.coverImg
+                  ? { url: guide.coverImg.url, public_id: guide.coverImg.public_id }
+                  : null;
+
+                const stepImgObjs = Array.isArray(guide.stepImg)
+                  ? guide.stepImg.map(img => ({ url: img.url, public_id: img.public_id }))
+                  : [];
+
+                const imageData = coverImgObj ? [coverImgObj, ...stepImgObjs] : stepImgObjs;
+                console.log(imageData);
+                const res = await deleteGuide(guide, imageData);
+                router.back();
+              } catch (error) {
+                console.error("Error deleting guide:", error);
+                Alert.alert("Error", "Something went wrong while deleting the guide.");
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      Alert.alert("Error", "An unexpected error occurred.");
+    }
+  };
 
   const reportGuide = async () => {
 
@@ -371,11 +413,22 @@ function Guide() {
         }}
       >
         <View className="py-4 gap-4">
-          <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => { reportGuide(); refRBSheet5?.current.close() }}>
-            <Text className="text-center text-white text-lg font-semibold">
-              Report Guide
-            </Text>
-          </TouchableOpacity>
+          {guide?.userID !== user._id ? (
+            <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => { reportGuide(); refRBSheet5?.current.close() }}>
+              <Text className="text-center text-white text-lg font-semibold">
+                Report Guide
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+
+          {guide?.userID === user._id ? (
+            <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => { handleDeleteGuide(); refRBSheet5?.current.close()}}>
+              <Text className="text-center text-white text-lg font-semibold">
+                Delete Guide
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+
         </View>
       </RBSheet>
 
@@ -1143,6 +1196,37 @@ function Guide() {
               ))}
           </View>
         )}
+        <Modal
+          visible={isDeleting} // control this with your loading state
+          transparent={true}
+          animationType="fade"
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            // prevent all touch interactions underneath
+            pointerEvents="auto"
+          >
+            <View
+              style={{
+                padding: 24,
+                borderRadius: 16,
+                backgroundColor: '#fff',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ActivityIndicator size="large" color="#000" />
+              <Text style={{ marginTop: 12, fontSize: 18, fontWeight: 'bold' }}>
+                Deleting guide...
+              </Text>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
