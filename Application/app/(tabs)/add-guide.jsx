@@ -493,7 +493,7 @@ const AddGuide = () => {
 
                 {/* Post Button */}
                 <TouchableOpacity className='w-full items-center justify-center px-4 py-2  bg-primary rounded-lg  dark:bg-secondary mt-2' onPress={() => handlePostGuide()}>
-                    <Text className='text-lg font-bold text-text dark:text-text-dark'>Post Guide</Text>
+                    <Text className='text-lg font-bold text-text-dark'>Post Guide</Text>
                 </TouchableOpacity>
 
 
