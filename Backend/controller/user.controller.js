@@ -1,24 +1,44 @@
 import User from "../models/user.model.js";
 import UserPreference from "../models/preference.model.js";
-import { sendConcern, sendReportEmail } from '../nodemailer/email.js';
+import { sendConcern, sendReportEmail } from "../nodemailer/email.js";
+import OpenAI from "openai";
+
+const token = "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";
+
+const client = new OpenAI({
+  baseURL: "https://models.github.ai/inference",
+  apiKey: token,
+});
 
 export const getUserData = async (req, res) => {
+  const { _id } = req.params;
 
-    const {_id} = req.params;
+  try {
+    const user = await User.findOne({ _id: _id });
 
-    try {
-        const user = await User.findOne({_id: _id});
-
-        if (!user) {
-            return res.status(400).json({success: false, message: "User does not exist."})
-        }
-
-        return res.status(200).json({success: true, message: "User data fethced successfully", data: user})
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({success: false, message: "Cant get user data.", error: error.message})
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User does not exist." });
     }
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "User data fethced successfully",
+        data: user,
+      });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Cant get user data.",
+        error: error.message,
+      });
+  }
 };
 
 export const getAllUsers = async (req, res) => {
@@ -134,5 +154,28 @@ export const sendUserReport = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({success: false, message: "Cant send user email.", error: error.message})
     }
+};
+
+export const callAi = async (req, res) => {
+  try {
+    const { messages } = req.body;
+
+    const response = await client.chat.completions.create({
+      messages: messages,
+      model: "openai/gpt-4o-mini",
+      temperature: 1,
+      max_tokens: 4096,
+      top_p: 1,
+    });
+
+    return res.status(200).json({ success: true, message: response });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      success: false,
+      message: "AI response failed.",
+      error: error.message,
+    });
+  }
 };
 

@@ -1,8 +1,9 @@
 import { Router } from "express";
-import {  getUserData, getAllUsers, editUserData, getAllUsersData, sendUserConcern, sendUserReport } from "../controller/user.controller.js";
+import {  getUserData, getAllUsers, editUserData, getAllUsersData, sendUserConcern, sendUserReport, callAi } from "../controller/user.controller.js";
 
 const userRouter = Router();
 
+userRouter.post('/call-ai', callAi)
 userRouter.post('/concern', sendUserConcern)
 userRouter.post('/report', sendUserReport)
 userRouter.get('/all', getAllUsersData)
