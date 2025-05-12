@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, FlatList, Alert } from 'react-native'
+import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, FlatList, Alert, ActivityIndicator } from 'react-native'
 import { Modal } from 'react-native';
 import React, { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker';
@@ -11,7 +11,14 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import { Video } from 'expo-av';
 
+import guideStore from '@/store/guide.store';
+import userStore from '@/store/user.store';
+
 const AddGuide = () => {
+
+    const createGuide = guideStore((state) => state.createGuide);
+    const isPosting = guideStore((state) => state.isPosting);
+    const user = userStore((state) => state.user);
 
     const [type, setType] = useState('repair');
     const [title, setTitle] = useState();
@@ -209,9 +216,31 @@ const AddGuide = () => {
             return;
         }
 
-        // If all validations pass, proceed
-        // Your submission logic goes here
+        console.log(coverImage, stepMedia);
+        
+
+        const guideData = {
+            userID: user._id,
+            type: type,
+            title: title,
+            description: description,
+            toolsNeeded: tools,
+            materialsNeeded: materialsNeeded,
+            stepTitles: stepTitles,
+            stepDescriptions: stepDescriptions,
+            closingMessage: closingMessage,
+            additionalLink: additionalLinks,
+        };
+
+        const res = await createGuide(guideData, coverImage, stepMedia);
+        if (res) {
+            clearAll();
+        }
     };
+
+    const postGuide = async () => {
+        
+    }
 
 
     return (
@@ -595,6 +624,38 @@ const AddGuide = () => {
                 </View>
             </Modal>
 
+            {/* Modal for the Posting */}
+            <Modal
+                visible={isPosting} // control this with your loading state
+                transparent={true}
+                animationType="fade"
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    // prevent all touch interactions underneath
+                    pointerEvents="auto"
+                >
+                    <View
+                        style={{
+                            padding: 24,
+                            borderRadius: 16,
+                            backgroundColor: '#fff',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <ActivityIndicator size="large" color="#000" />
+                        <Text style={{ marginTop: 12, fontSize: 18, fontWeight: 'bold' }}>
+                            Posting guide...
+                        </Text>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }
