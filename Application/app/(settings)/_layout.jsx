@@ -89,7 +89,16 @@ export default function RootLayout() {
             <Stack.Screen name="contact-us" options={{
             headerShown: true,
             headerTransparent: true,
-            headerTitle: 'Dark Mode',
+            headerTitle: 'Contact Us',
+            headerTitleAlign: 'center',
+            headerBlurEffect: 'regular',
+            headerStyle,
+            headerTintColor,
+            }}/>
+            <Stack.Screen name="help-center" options={{
+            headerShown: true,
+            headerTransparent: true,
+            headerTitle: `FAQ'S`,
             headerTitleAlign: 'center',
             headerBlurEffect: 'regular',
             headerStyle,

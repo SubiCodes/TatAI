@@ -110,7 +110,7 @@ const SettingsMainPage = () => {
                             <Text className='text-text dark:text-text-dark'><MaterialCommunityIcons name="headphones-box" size={24}/></Text>
                             <Text className='text-lg text-text dark:text-text-dark'>Contact Us</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center'>
+                        <TouchableOpacity className='w-full h-auto flex-row gap-4 items-center' onPress={() => router.push('/(settings)/help-center')}>
                             <Text className='text-text dark:text-text-dark'><Ionicons name="help-circle" size={24}/></Text>
                             <Text className='text-lg text-text dark:text-text-dark '>Help Center</Text>
                         </TouchableOpacity>
