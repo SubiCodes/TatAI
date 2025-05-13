@@ -151,20 +151,27 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
               <h2 className="text-4xl font-bold mb-4">{guide?.title}</h2>
             </div>
 
-            <div className="w-full h-auto flex flex-row gap-4 items-center justify-start mb-4 mt-4">
-              <div className="avatar">
-                <div className="w-10 rounded-full">
-                  <img
-                    src={profileIcons[guide?.posterInfo?.profileIcon]}
-                    alt="Poster profile"
-                  />
+            <div className="w-full h-auto flex flex-row gap-4 items-center justify-between mb-4 mt-4">
+              {/* Left section: Avatar + Info */}
+              <div className="flex flex-row gap-4 items-center">
+                <div className="avatar">
+                  <div className="w-10 rounded-full">
+                    <img
+                      src={profileIcons[guide?.posterInfo?.profileIcon]}
+                      alt="Poster profile"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <h1 className="text-base font-bold text-gray-700">{guide?.posterInfo?.name}</h1>
+                  <p className="text-sm text-gray-500">{guide?.uploader}</p>
                 </div>
               </div>
-              <h1 className="text-xl font-bold text-gray-600">{guide?.posterInfo?.name}</h1>
-              <div className='flex-1' />
+
+              {/* Right section: Edit button if admin */}
               {adminID === guide.userID && (
                 <Link to={`/edit-guide/${guide._id}`}>
-                  <button className='bg-transparent text-black p-2 border-[1px] rounded-lg cursor-pointer hover:bg-primary hover:text-white hover:border-0 duration-300'>
+                  <button className="bg-transparent text-black p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-primary hover:text-white hover:border-transparent duration-300">
                     Edit Guide
                   </button>
                 </Link>
@@ -365,37 +372,37 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
               </span>
               <span className="text-sm text-gray-400 flex flex-row gap-2">
                 Total Rating:  <span className='font-bold'>{guide?.feedbackInfo?.ratingCount}</span>
-                  </span>
-                  {!feedback || feedback.length === 0 ? (
-                    <p className="text-gray-500">No ratings yet.</p>
-                  ) : (
-                    feedback
-                      .filter(comment => comment && comment.rating) // Only items with a rating
-                      .map(comment => (
-                        <div key={comment._id} className="flex flex-col mb-6 w-full">
-                          <div className="flex flex-row gap-4 mb-4">
-                            <div className="flex h-full">
-                              <img
-                                src={profileIcons[comment?.userInfo?.profileIcon || 'empty_profile']}
-                                alt="User Icon"
-                                className="w-16 h-16 rounded-full"
-                              />
-                            </div>
-                            <div className="flex flex-col">
-                              <h3 className="text-md font-semibold">{comment?.userInfo?.name || 'Anonymous'}</h3>
-                              <p className="text-sm text-gray-500">{comment?.userInfo?.email || ''}</p>
-                              <h3 className="text-sm text-black font-medium">
-                              Rating: {comment.rating} ⭐
-                            </h3>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-row gap-4">
-                            
-                          </div>
+              </span>
+              {!feedback || feedback.length === 0 ? (
+                <p className="text-gray-500">No ratings yet.</p>
+              ) : (
+                feedback
+                  .filter(comment => comment && comment.rating) // Only items with a rating
+                  .map(comment => (
+                    <div key={comment._id} className="flex flex-col mb-6 w-full">
+                      <div className="flex flex-row gap-4 mb-4">
+                        <div className="flex h-full">
+                          <img
+                            src={profileIcons[comment?.userInfo?.profileIcon || 'empty_profile']}
+                            alt="User Icon"
+                            className="w-16 h-16 rounded-full"
+                          />
                         </div>
-                      ))
-                  )}
+                        <div className="flex flex-col">
+                          <h3 className="text-md font-semibold">{comment?.userInfo?.name || 'Anonymous'}</h3>
+                          <p className="text-sm text-gray-500">{comment?.userInfo?.email || ''}</p>
+                          <h3 className="text-sm text-black font-medium">
+                            Rating: {comment.rating} ⭐
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-row gap-4">
+
+                      </div>
+                    </div>
+                  ))
+              )}
             </div>
 
             <div className="w-full h-16 flex flex-col items-center justify-center mb-12">

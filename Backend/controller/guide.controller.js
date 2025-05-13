@@ -8,6 +8,8 @@ import Guide from '../models/guide.model.js';
 import Feedback from '../models/feedback.model.js';
 import Bookmark from '../models/bookmark.model.js'
 
+import {sendGuideStatusUpdate} from '../nodemailer/email.js'
+
 cloudinary.config({
     cloud_name: CLOUDINARY_CLOUD_NAME,
     api_key: CLOUDINARY_API_KEY,
@@ -533,6 +535,7 @@ export const updateGuideStatus = async (req, res) => {
         if (!guide) {
             return res.status(404).json({success: false, error: "Guide not found"});
         }
+        await sendGuideStatusUpdate(guide.title, status, guide.uploader);
         guide.status = status;
         await guide.save();
         res.status(200).json({success: true, data: guide});
