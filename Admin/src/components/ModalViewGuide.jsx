@@ -104,6 +104,7 @@ const ModalViewGuide = forwardRef(({ guideID }, ref) => {
       const res = await axios.get(`${import.meta.env.VITE_URI}admin/admin-data`, {
         withCredentials: true,
       });
+      console.log(res.data.data)
       setAdminID(res.data.data._id);
     } catch (error) {
       console.log(error);
