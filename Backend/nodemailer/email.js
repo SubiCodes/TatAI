@@ -147,3 +147,47 @@ export const sendReportEmail = ({ from, type, guideTitle, comment, posterName })
     }
   );
 };
+
+export const sendGuideStatusUpdate = (guideTitle, status, recipientEmail) => {
+  const statusCapitalized = status.charAt(0).toUpperCase() + status.slice(1);
+  
+  const extraMessage = (status === 'pending' || status === 'rejected') 
+    ? `<p style="margin-top: 20px; font-size: 14px; color: #888;">
+         For more information, contact <a href="mailto:tataihomeassistant@gmail.com">tataihomeassistant@gmail.com</a>.
+       </p>`
+    : '';
+
+  const htmlTemplate = `
+    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+      <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+        <h2 style="color: #333333; text-align: center;">Guide Status Updated</h2>
+        <p style="font-size: 16px; color: #555;">The status of your submitted guide has been updated.</p>
+
+        <div style="margin-top: 20px;">
+          <p><strong>Guide Title:</strong> ${guideTitle}</p>
+          <p><strong>New Status:</strong> <span style="color: ${status === 'accepted' ? '#28a745' : status === 'pending' ? '#ffc107' : '#dc3545'};">${statusCapitalized}</span></p>
+        </div>
+
+        ${extraMessage}
+
+        <p style="margin-top: 30px; font-size: 14px; color: #aaa;">Thank you for contributing to TatAi.</p>
+      </div>
+    </div>
+  `;
+
+  transporter.sendMail(
+    {
+      from: "tataihomeassistant@gmail.com",
+      to: recipientEmail,
+      subject: `Guide Status Update: ${guideTitle}`,
+      html: htmlTemplate,
+    },
+    (err, info) => {
+      if (err) {
+        console.error("Error sending status update email:", err);
+      } else {
+        console.log("Status update email sent:", info.response);
+      }
+    }
+  );
+};
