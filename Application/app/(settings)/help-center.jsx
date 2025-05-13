@@ -104,11 +104,7 @@ const SECTIONS5 = [
     {
     title: `Who do I contact for technical support?`,
     content: 'Reach out via TatAI’s support center in the app or email “tataihomeassistant@gmail.com”.',
-  },
-    {
-    title: `Can I provide feedback or request new features for TatAI?`,
-    content: 'Yes! Submit feedback through the TatAI app under "Help & Feedback" or email us directly.',
-  },
+  }
 ];
 
 const HelpCenter = () => {
