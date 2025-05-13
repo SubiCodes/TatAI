@@ -36,6 +36,7 @@ const Profile = () => {
     const checkUserLoggedIn = userStore((state) => state.checkUserLoggedIn);
     const getUserInfo = userStore((state) => state.getUserInfo);
     const logoutUser = userStore((state) => state.logoutUser);
+    const getUserInfoBG = userStore((state) => state.getUserInfoBG);
 
     const profileIcons = {
           empty_profile: empty_profile,
@@ -65,7 +66,7 @@ const Profile = () => {
 
     useFocusEffect(
         useCallback(() => {
-            getUserData();
+            getUserInfoBG();
         }, [])
     )
 
@@ -79,7 +80,7 @@ const Profile = () => {
                     <View className='w-screen h-screen items-center justify-center gap-4 bg-background dark:bg-background-dark'>
                          <Text className='text-3xl font-extrabold text-red-500'>Network Error</Text>
                                   <Text>Please connect to a stable internet.</Text>
-                        <TouchableOpacity className='w-44 h-8 items-center justify-center bg-primary rounded-xl'>
+                        <TouchableOpacity className='w-44 h-8 items-center justify-center bg-primary rounded-xl' onPress={() => {checkLoggedIn(); getUserData()}}>
                             <Text className='font-bold text-white text-lg'>Retry</Text>
                         </TouchableOpacity>
                     </View>

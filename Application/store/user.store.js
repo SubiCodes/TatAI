@@ -121,6 +121,21 @@ getUserInfo: async () => {
         set({isLoading: false});
     }    
 },
+getUserInfoBG: async () => {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        const decryptedToken = await jwtDecode(token);
+        if (!token) {
+            router.dismissAll();
+            router.replace('/(auth-screens)/signin');
+        }
+        const res = await axios.get(`${API_URL}user/${decryptedToken.userID}`);
+        set({user: res.data.data});
+    } catch (error) {
+        set({error: error.message});
+        console.log(error.message);
+    }  
+},
 editUserInfo: async (firstName, lastName, birthDate, gender, activeProfileIcon, userID) => {
   set({ error: null, isLoading: true });
   try {

@@ -341,6 +341,17 @@ const guideStore = create((set) => ({
     try {
       set({ isPosting: true });
 
+      const user = await axios.get(`${API_URL}user/${guideData.userID}`);
+      console.log("User Posting: ", user.data.data);
+      if (!user) {
+        Alert.alert("Oops", "Unable to get necessary information.");
+        return;
+      }
+
+      if (user.data.data.status !== 'Verified') {
+        Alert.alert("Oops", "You do not have the permission to post guides as of now. Check your account status or contact tataihomeassistant@gmail.com");
+        return;
+      }
       // Format the cover image properly if it exists
       let coverPhotoData = null;
       if (coverImageUri) {
