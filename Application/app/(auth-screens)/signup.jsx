@@ -437,7 +437,7 @@ const SignUp = () => {
               className="transform scale-125"
             />
             <Text className="text-sm max-w-64 md:text-lg">
-              I've read and agree with the <Link href={'/terms-conditions'} className="font-bold">Terms and Conditions</Link> and the <Link  className="font-bold" href={'/terms-conditions'}>Privacy Policy</Link>
+              I've read and agree with the <Link href={'/legals/terms-conditions'} className="font-bold">Terms and Conditions</Link> and the <Link  className="font-bold" href={'/legals/privacy-policy'}>Privacy Policy</Link>
               </Text>
           </View>
 

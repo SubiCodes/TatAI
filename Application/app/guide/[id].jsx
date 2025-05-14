@@ -821,6 +821,7 @@ function Guide() {
             );
 
             if (userHasCommented) return null; // Don't render comment box if already commented
+            
 
             return (
               <View className="w-full flex flex-col gap-2 px-6 mb-8">
@@ -1139,9 +1140,16 @@ function Guide() {
           <View className="w-full flex flex-col gap-2 px-6 mb-4">
             {feedbacks
               ?.filter(
-                (feedback) =>
-                  feedback?.comment?.trim() !== "" &&
-                  feedback.userId !== user._id // Exclude current user's feedback
+                (feedback) =>{
+                  const comment = feedback?.comment;
+                  return (
+                    typeof comment === "string" &&
+                    comment.trim() !== "" &&
+                    comment !== "null" &&
+                    comment !== "undefined" &&
+                    feedback.userId !== user._id
+                  );
+                }
               )
               .map((comment) => (
                 <View key={comment._id} className="flex flex-col mb-6 w-full">
