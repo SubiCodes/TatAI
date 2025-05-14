@@ -11,6 +11,8 @@ const searchStore = create((set) => ({
     results: [],
     isFetching: false,
     errors: null,
+    tools: [],
+    isFetchingTools: null,
     getUsers: async () => {
         try {
             set({isFetching: true});
@@ -60,7 +62,25 @@ const searchStore = create((set) => ({
         } finally {
           set({ isFetching: false });
         }
-    } 
+    },
+    getTools: async (tool) => {
+        try {
+            set({ isFetchingTools: true, error: false, tools: [] });
+            const res = await axios.post(`${API_URL}guide/search-tools`, { tool: tool });
+            set({ tools: res.data.data });
+        } catch (error) {
+            console.log("Error getting results:", error);
+            Alert.alert(
+                "Fetch Error",
+                "There was a problem fetching the tools. Please try again later.",
+                [{ text: "OK" }]
+            );
+            set({ errors: "Something went wrong." });
+            return error.message;
+        } finally {
+            set({ isFetchingTools: false });
+        }
+    }
 }));
 
 const shuffleArray = (array) => {

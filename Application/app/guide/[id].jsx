@@ -1,5 +1,5 @@
 import { useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking, RefreshControl, Alert } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Image, TouchableOpacity, TextInput, Linking, RefreshControl, Alert, FlatList } from 'react-native';
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useRouter } from 'expo-router';
 import { Rating } from '@kolking/react-native-rating';
@@ -12,6 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import guideStore from '@/store/guide.store';
 import userStore from '@/store/user.store';
+import searchStore from '@/store/search.store';
 import empty_profile from '@/assets/images/profile-icons/empty_profile.png'
 import boy_1 from '@/assets/images/profile-icons/boy_1.png'
 import boy_2 from '@/assets/images/profile-icons/boy_2.png'
@@ -44,6 +45,7 @@ function Guide() {
   const refRBSheet4 = useRef(); //ref for confirmng delete
   const refRBSheet5 = useRef(); //ref for reporting guide
   const refRBSheet6 = useRef(); //ref for confirming rating
+  const refRBSheetSearch = useRef(); //ref for confirming rating
   const refRBSheetRatings = useRef(); //ref for confirming rating
   const user = userStore((state) => state.user);
   const getUserInfo = userStore((state) => state.getUserInfo);
@@ -71,9 +73,18 @@ function Guide() {
   const { colorScheme, toggleColorScheme } = useColorScheme();
   const [refreshing, setRefreshing] = useState(false);
 
+  const getTools = searchStore((state) => state.getTools);
+  const tools = searchStore((state) => state.tools);
+  const isFetchingTools = searchStore((state) => state.isFetchingTools);
+  const errors = searchStore((state) => state.errors);
+
   // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
+
+  const handleSearchTool = async (tool) => {
+    router.push(`/searched-tool/${tool}`)
+  }
 
   const handleDeleteGuide = async () => {
     try {
@@ -232,12 +243,14 @@ function Guide() {
 
   const navigation = useNavigation();
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     getGuide(id, navigation, user._id);
     getFeedbacks(id);
     getUserInfo();
     checkVerified();
-  }, []);
+  }
+  , []))
+;;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -390,6 +403,8 @@ function Guide() {
         </Text>
       </View>
 
+  
+
       <RBSheet
         ref={refRBSheet5}
         closeOnDragDown={true}
@@ -422,7 +437,7 @@ function Guide() {
           ) : null}
 
           {guide?.userID === user._id ? (
-            <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => { handleDeleteGuide(); refRBSheet5?.current.close()}}>
+            <TouchableOpacity className="w-full bg-red-500 dark:bg-red-600 py-3 rounded-xl shadow-sm active:opacity-80" onPress={() => { handleDeleteGuide(); refRBSheet5?.current.close() }}>
               <Text className="text-center text-white text-lg font-semibold">
                 Delete Guide
               </Text>
@@ -476,15 +491,15 @@ function Guide() {
                   month: "short",
                   day: "numeric",
                 })}
-                </Text>
-                {guide?.userID === user._id ? (
-                  <Text className="text-justify text-text text-lg dark:text-text-dark">
-                    Guide Status: {" "}
-                    <Text className="font-black">
-                      {guide?.status?.charAt(0).toUpperCase() + guide?.status?.slice(1)}
-                    </Text>
+              </Text>
+              {guide?.userID === user._id ? (
+                <Text className="text-justify text-text text-lg dark:text-text-dark">
+                  Guide Status: {" "}
+                  <Text className="font-black">
+                    {guide?.status?.charAt(0).toUpperCase() + guide?.status?.slice(1)}
                   </Text>
-                ) : null}
+                </Text>
+              ) : null}
 
             </View>
             <View className="w-full flex flex-row gap-6">
@@ -538,6 +553,7 @@ function Guide() {
                   <Text
                     key={index}
                     className="mb-2 text-lg text-text dark:text-text-dark"
+                    onPress={() => { handleSearchTool(tool) }}
                   >{`${index + 1}. ${tool}`}</Text>
                 ))}
               </View>
@@ -701,32 +717,32 @@ function Guide() {
           </View>
         </RBSheet>
 
-      <RBSheet
-        ref={refRBSheetRatings}
-        closeOnDragDown={true}
-        closeOnPressMask={true}
-        customStyles={{
-          wrapper: {
-            backgroundColor: "rgba(0,0,0,0.5)",
-          },
-          container: {
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            paddingHorizontal: 16,
-            backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
-            maxHeight: 450,
-            minHeight: 450,
-          },
-          draggableIcon: {
-            backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
-            width: 60,
-          },
-        }}
-        customModalProps={{
-          animationType: "slide",
-          statusBarTranslucent: true,
-        }}
-      >
+        <RBSheet
+          ref={refRBSheetRatings}
+          closeOnDragDown={true}
+          closeOnPressMask={true}
+          customStyles={{
+            wrapper: {
+              backgroundColor: "rgba(0,0,0,0.5)",
+            },
+            container: {
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              paddingHorizontal: 16,
+              backgroundColor: colorScheme === "dark" ? "#2A2A2A" : "#FFFFFF",
+              maxHeight: 450,
+              minHeight: 450,
+            },
+            draggableIcon: {
+              backgroundColor: colorScheme === "dark" ? "#A0A0A0" : "#000",
+              width: 60,
+            },
+          }}
+          customModalProps={{
+            animationType: "slide",
+            statusBarTranslucent: true,
+          }}
+        >
           <ScrollView
             className="flex-1 z-50"
             showsVerticalScrollIndicator={false}
@@ -821,7 +837,7 @@ function Guide() {
             );
 
             if (userHasCommented) return null; // Don't render comment box if already commented
-            
+
 
             return (
               <View className="w-full flex flex-col gap-2 px-6 mb-8">
@@ -931,8 +947,8 @@ function Guide() {
                   <View className="flex-row gap-4">
                     <Text
                       className={`text-lg ${comment.hidden
-                          ? "text-gray-400"
-                          : "text-black dark:text-white"
+                        ? "text-gray-400"
+                        : "text-black dark:text-white"
                         }`}
                     >
                       {comment.comment}
@@ -1140,7 +1156,7 @@ function Guide() {
           <View className="w-full flex flex-col gap-2 px-6 mb-4">
             {feedbacks
               ?.filter(
-                (feedback) =>{
+                (feedback) => {
                   const comment = feedback?.comment;
                   return (
                     typeof comment === "string" &&
@@ -1176,8 +1192,8 @@ function Guide() {
                   <View className="flex-row gap-4">
                     <Text
                       className={`text-lg ${comment.hidden
-                          ? "text-gray-400"
-                          : "text-black dark:text-white"
+                        ? "text-gray-400"
+                        : "text-black dark:text-white"
                         }`}
                     >
                       {comment?.hidden

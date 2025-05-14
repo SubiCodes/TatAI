@@ -1195,3 +1195,89 @@ export const getMonthlyGuideCountsByYear = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const searchedTools = async (req, res) => {
+  try {
+    const { tool } = req.body;
+
+    // Find guides matching the search term
+    const guides = await Guide.find({
+      title: { $regex: tool, $options: 'i' },
+      status: "accepted" // Adding status filter to match getLatestGuides behavior
+    });
+    
+    // Extract the userIDs and guideIDs
+    const userIds = guides.map(guide => guide.userID);
+    const guideIds = guides.map(guide => guide._id);
+    
+    // Find all users whose IDs match those in the guides
+    const posters = await UserInfo.find({ _id: { $in: userIds } }, 'firstName lastName profileIcon');
+    
+    // Fetch all feedback data for the guides
+    const allFeedback = await Feedback.find({ 
+      guideId: { $in: guideIds },
+    });
+    
+    // Process feedback data manually
+    const feedbackMap = {};
+    
+    guideIds.forEach(guideId => {
+      const guideFeedback = allFeedback.filter(fb => fb.guideId.toString() === guideId.toString());
+      
+      // Count comments (feedback entries with non-empty comments)
+      const commentCount = guideFeedback.filter(fb => fb.comment && fb.comment.trim() !== '').length;
+      
+      // Calculate average rating (only for feedback entries with ratings)
+      const ratingsOnly = guideFeedback.filter(fb => typeof fb.rating === 'number');
+      const averageRating = ratingsOnly.length > 0 
+        ? ratingsOnly.reduce((sum, fb) => sum + fb.rating, 0) / ratingsOnly.length
+        : 0;
+      
+      feedbackMap[guideId.toString()] = {
+        averageRating: parseFloat(averageRating.toFixed(1)), // Round to 1 decimal place
+        commentCount,
+        ratingCount: ratingsOnly.length
+      };
+    });
+    
+    // Create user map for easy lookup
+    const posterMap = {};
+    posters.forEach(poster => {
+      posterMap[poster._id.toString()] = {
+        name: `${poster.firstName} ${poster.lastName}`,
+        profileIcon: poster.profileIcon
+      };
+    });
+    
+    // Add the poster and feedback info to each guide
+    const guidesWithData = guides.map(guide => {
+      const guideObj = guide.toObject();
+      const userIdStr = guide.userID.toString();
+      const guideIdStr = guide._id.toString();
+      
+      return {
+        ...guideObj,
+        posterInfo: posterMap[userIdStr] || null,
+        feedbackInfo: feedbackMap[guideIdStr] || { averageRating: 0, commentCount: 0, ratingCount: 0 }
+      };
+    });
+    
+    // Sort guides by average rating (highest first)
+    guidesWithData.sort((a, b) => {
+      // First by rating
+      const ratingDiff = b.feedbackInfo.averageRating - a.feedbackInfo.averageRating;
+      
+      // If ratings are equal, prioritize guides with more ratings
+      if (ratingDiff === 0) {
+        return b.feedbackInfo.ratingCount - a.feedbackInfo.ratingCount;
+      }
+      
+      return ratingDiff;
+    });
+
+    return res.status(200).json({ success: true, data: guidesWithData });
+  } catch (error) {
+    console.error('Error fetching searched tools:', error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
