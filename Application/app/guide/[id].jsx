@@ -78,6 +78,9 @@ function Guide() {
   const isFetchingTools = searchStore((state) => state.isFetchingTools);
   const errors = searchStore((state) => state.errors);
 
+  const [displayImage, setDisplayImage] = useState();
+  const [isOpen, setIsOpen] = useState(false);
+
   // const userFeedback =  feedbacks?.filter((feedback) => typeof feedback.comment === "string" && feedback.comment.trim() !== "" && feedback.userId === user._id);
   // const [userComment, setUserComment] = useState(userComment?.comment);
   const router = useRouter();
@@ -249,8 +252,8 @@ function Guide() {
     getUserInfo();
     checkVerified();
   }
-  , []))
-;;
+    , []))
+    ;;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -403,7 +406,7 @@ function Guide() {
         </Text>
       </View>
 
-  
+
 
       <RBSheet
         ref={refRBSheet5}
@@ -525,16 +528,23 @@ function Guide() {
             </View>
             {/* Cover Image */}
             <View className="w-full h-[250px] items-start justify-start mb-2 py-0">
-              <Image
-                className="w-full h-full"
-                source={{
-                  uri:
-                    guide?.coverImg?.url ||
-                    "https://via.placeholder.com/400x250",
+              <TouchableOpacity
+                onPress={() => {
+                  setDisplayImage(guide?.coverImg?.url);
+                  setIsOpen(true);
                 }}
-                resizeMode="contain"
-              />
+                className="w-full h-full"
+              >
+                <Image
+                  source={{
+                    uri: guide?.coverImg?.url || "https://via.placeholder.com/400x250",
+                  }}
+                  resizeMode="contain"
+                  className="w-full h-full"
+                />
+              </TouchableOpacity>
             </View>
+
             {/* Description */}
             <View className="w-full items-center justify-center mb-8">
               <Text className="text-justify text-text text-lg dark:text-text-dark">
@@ -609,17 +619,26 @@ function Guide() {
                         style={{ width: '100%', height: '100%' }}
                       />
                     ) : (
-                      <Image
-                        className="w-full h-full"
-                        source={{
-                          uri: mediaUrl || "https://via.placeholder.com/400x250",
+                      <TouchableOpacity
+                        onPress={() => {
+                          setDisplayImage(mediaUrl);
+                          setIsOpen(true);
                         }}
-                        resizeMode="contain"
-                      />
+                        className="w-full h-full"
+                      >
+                        <Image
+                          className="w-full h-full"
+                          source={{
+                            uri: mediaUrl || "https://via.placeholder.com/400x250",
+                          }}
+                          resizeMode="contain"
+                        />
+                      </TouchableOpacity>
+
                     )}
                   </View>
 
-                  {/* Step Descriptions */}
+                  { }
                   <View className="w-auto flex items-start justify-start mb-6">
                     <Text className="text-justify text-text text-lg dark:text-text-dark">
                       {guide?.description}
@@ -1252,6 +1271,55 @@ function Guide() {
           </View>
         </Modal>
       </ScrollView>
+      <Modal
+        visible={isOpen}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.9)',
+          }}
+        >
+          {/* Close Button */}
+          <TouchableOpacity
+            onPress={() => setIsOpen(false)}
+            style={{
+              position: 'absolute',
+              top: 50,
+              right: 20,
+              zIndex: 10,
+              borderRadius: 20,
+            }}
+
+            className='bg-gray-300 w-12 h-12 rounded-full items-center justify-center'
+          >
+            <MaterialCommunityIcons name="close-thick" size={24} color="black" />
+          </TouchableOpacity>
+
+          {/* Fullscreen Image */}
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={() => setIsOpen(false)}
+            activeOpacity={1}
+          >
+            <Image
+              source={{ uri: displayImage }}
+              style={{
+                width: '100%',
+                height: '100%',
+                resizeMode: 'contain',
+              }}
+            />
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
