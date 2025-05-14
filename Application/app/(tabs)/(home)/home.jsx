@@ -218,7 +218,7 @@ const Home = () => {
         </Text>
         <Text className="text-text dark:text-text-dark">Please connect to a stable internet.</Text>
         <TouchableOpacity className="px-4 py-2 items-center justify-center bg-primary dark:bg-secondary mt-4 rounded-lg" onPress={retry}>
-          <Text>Retry</Text>
+          <Text className="text-white">Retry</Text>
         </TouchableOpacity>
       </View>
     );
