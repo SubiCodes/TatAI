@@ -289,7 +289,7 @@ const Home = () => {
                   <View key={title} className="mb-6">
                     <View className="flex-row justify-between items-center mb-2">
                       <Text className="text-4xl font-bold dark:text-text-dark">
-                        {title}
+                        {title === "Recent" ? ("All") : title}
                       </Text>
                       <TouchableOpacity
                         onPress={() => openGuideList(title.toLowerCase())}
