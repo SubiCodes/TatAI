@@ -393,7 +393,7 @@ const Personalization = () => {
         <SafeAreaView style={{ flex: 1}}>
             <Indicator/>
             <FlatList 
-                //scrollEnabled={false}
+                scrollEnabled={false}
                 keyboardShouldPersistTaps="handled"
                 //removeClippedSubviews={false}
                 ref={ref}

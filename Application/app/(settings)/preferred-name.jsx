@@ -92,7 +92,7 @@ const PreferredName = () => {
           <Modal visible={loading} transparent={true}>
             <View className='w-screen h-screen items-center justify-center' style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
               <View className='w-4/5 h-auto bg-white items-center gap-8 py-12 justify-center rounded-xl'>
-                <Text className='text-2xl font-bold text-text'>Changing Repair Expertise</Text>
+                <Text className='text-2xl font-bold text-text'>Changing Preferred Name</Text>
                 <ActivityIndicator color={'#0818A8'} size={32}/>
                 <Text className='text-base font-light text-text'>This may take a while...</Text>
               </View>

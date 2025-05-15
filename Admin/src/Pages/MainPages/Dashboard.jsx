@@ -230,7 +230,6 @@ function Dashboard() {
         data: [
           { value: liveGuideCount?.diy, name: 'DIY', itemStyle: { color: '#41b8d5' }},
           { value: liveGuideCount?.repair, name: 'Repair', itemStyle: { color: '#2d8bba' } },
-          { value: liveGuideCount?.cooking, name: 'Cooking', itemStyle: { color: '#6ce5e8' }},
           { value: liveGuideCount?.tool, name: 'Tools', itemStyle: { color: '#506e9a' }}
         ]
       }

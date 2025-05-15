@@ -130,7 +130,7 @@ const ResetPassword = () => {
         <View className='w-80 items-center justify-center gap-4 md:w-screen md:gap-12'>
             <View className='w-screen items-center md:w-3/5'>
                 <Text className='text-4xl font-extrabold mb-6 md:text-5xl'>Reset Password</Text>
-                <Text className='text-base mb-6 md:text-xl md:mb-2'>At least 6 characters with alphanumeric values.</Text>
+                <Text className='text-base mb-6 md:text-xl md:mb-2'>At least 8 characters with alphanumeric values.</Text>
             </View>
             <View className='w-80 items-start gap-2 md:w-3/5'>
               <Text className='text-base font-bold md:text-2xl'>New Password</Text>
