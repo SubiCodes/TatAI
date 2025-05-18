@@ -40,7 +40,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "API_URL": "http://192.168.197.64:5500/api/v1/",
+      "API_URL": "http://192.168.254.107:5500/api/v1/",
       "OPENAI_KEY": "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"
     }
   }

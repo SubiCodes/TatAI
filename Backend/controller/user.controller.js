@@ -3,11 +3,11 @@ import UserPreference from "../models/preference.model.js";
 import { sendConcern, sendReportEmail } from "../nodemailer/email.js";
 import OpenAI from "openai";
 
-const token = "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";
+import { CHATGPT_API } from '../config/env.js';
 
 const client = new OpenAI({
   baseURL: "https://models.github.ai/inference",
-  apiKey: token,
+  apiKey: CHATGPT_API,
 });
 
 export const getUserData = async (req, res) => {
